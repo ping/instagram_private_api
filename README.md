@@ -23,7 +23,7 @@ Tested on Python 2.7 and 3.5.
 ## Usage
 The [app API client](instagram_private_api/) emulates the official app and has a larger variety of functions. The [web API client](instagram_web_api/) has a smaller set of function but can be used without logging in.
 
-Your choice will do depend on your use case.
+Your choice will depend on your use case.
 
 The [``examples/``](examples/) and [``tests/``](tests/) are a good source of detailed sample code on how to use the clients, including a simple way to save the auth cookie for reuse.
 
