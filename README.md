@@ -4,6 +4,10 @@ I wrote this to access Instagram's API when they clamped down on developer acces
 
 Problems? Please check the [FAQ](FAQ.md) first.
 
+## Documentation
+
+Documentation is available at http://instagram-private-api.readthedocs.io/en/latest/
+
 ## Install
 
 No 3rd-party libraries required. Just drop one of or both folders [``instagram_private_api/``](instagram_private_api/) and [``instagram_web_api/``](instagram_web_api/) into your project path or pip install with:
@@ -76,30 +80,6 @@ for user in following:
 You are advised to persist/cache the auth cookie details to avoid logging in every time you make an api call. Excessive logins is a surefire way to get your account flagged for removal. It's also advisable to cache the client details such as user agent, etc together with the auth details.
 
 The saved auth cookie can be reused for up to **90 days**.
-
-### Miscellaneous Notes
-Cookies can be shared between both the web and private (app) client, as long as you modify the cookie domain values accordingly.
-
-Example: Web client using app cookie
-
-```python
-from instagram_web_api import Client
-
-cached_app_cookie = '...'
-webclient = Client(
-    cookie=cached_app_cookie.replace('i.instagram.com', 'www.instagram.com'))
-```
-
-Example: App client using web cookie
-
-```python
-from instagram_private_api import Client
-
-cached_web_cookie = '...'
-appclient = Client(
-    user_name, password,
-    cookie=cached_web_cookie.replace('www.instagram.com', 'i.instagram.com'))
-```
 
 ## Legal
 
