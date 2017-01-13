@@ -40,6 +40,20 @@ class Client(object):
 
     def __init__(self, username, password, **kwargs):
         """
+
+        :param username: Login usernam
+        :param password: Login password
+        :param kwargs:
+            - auto_patch: Patch the api objects to match the public API. Default: False
+            - drop_incompat_key: Remove api object keys that is not in the public API. Default: False
+            - timeout: Timeout interval in seconds. Default: 15
+            - api_url:
+            - cookie: Saved cookie string from a previous session
+            - settings: A dict of settings from a previous session
+            - on_login: Callback after successful login
+        :return:
+        """
+        """
         Key arguments:
         auto_patch -- whether to automatically patch entities for compatibility
         drop_incompat_keys -- whether to remove incompatible entity keys
@@ -122,7 +136,7 @@ class Client(object):
 
     @property
     def settings(self):
-        """Helper method that extracts the settings that you should cache
+        """Helper property that extracts the settings that you should cache
         in addition to username and password."""
         return {
             'uuid': self.uuid,
@@ -145,6 +159,7 @@ class Client(object):
 
     @property
     def user_agent(self):
+        """Returns the useragent string that the client is currently using."""
         return Constants.USER_AGENT_FORMAT % {
             'app_version': self.app_version,
             'android_version': self.android_version,
@@ -158,6 +173,7 @@ class Client(object):
 
     @user_agent.setter
     def user_agent(self, value):
+        """Override the useragent string with your own"""
         mobj = re.search(Constants.USER_AGENT_EXPRESSION, value)
         if not mobj:
             raise ValueError('User-agent specified does not fit format required: %s' %
@@ -176,8 +192,18 @@ class Client(object):
     def generate_useragent(cls, **kwargs):
         """
         Helper method to generate a useragent string based on device parameters
+
         :param kwargs:
-        :return:
+            - app_version
+            - android_version
+            - android_release
+            - brand
+            - device
+            - model
+            - dpi
+            - resolution
+            - chipset
+        :return: A compatible user agent string
         """
         return Constants.USER_AGENT_FORMAT % {
             'app_version': kwargs.pop('app_version', None) or Constants.APP_VERSION,
@@ -194,6 +220,7 @@ class Client(object):
     def validate_useragent(cls, value):
         """
         Helper method to validate a useragent string for format correctness
+
         :param value:
         :return:
         """
@@ -219,6 +246,7 @@ class Client(object):
 
     @property
     def csrftoken(self):
+        """The client's current csrf token"""
         for cookie in self.cookie_jar:
             if cookie.name.lower() == 'csrftoken':
                 return cookie.value
@@ -226,11 +254,12 @@ class Client(object):
 
     @property
     def token(self):
-        """For compatibility"""
+        """For compatibility. Equivalent to csrftoken"""
         return self.csrftoken
 
     @property
     def authenticated_user_id(self):
+        """The current authenticated user id"""
         for cookie in self.cookie_jar:
             if cookie.name.lower() == 'ds_user_id':
                 return cookie.value
@@ -238,6 +267,7 @@ class Client(object):
 
     @property
     def authenticated_user_name(self):
+        """The current authenticated user name"""
         for cookie in self.cookie_jar:
             if cookie.name.lower() == 'ds_user':
                 return cookie.value
@@ -259,6 +289,7 @@ class Client(object):
 
     @property
     def cookie_jar(self):
+        """The client's cookiejar instance."""
         return self.opener.cookie_jar
 
     @property
@@ -280,6 +311,13 @@ class Client(object):
 
     @classmethod
     def generate_uuid(cls, return_hex=False, seed=None):
+        """
+        Generate uuid
+
+        :param return_hex: Return in hex format
+        :param seed: Seed value to generate a consistent uuid
+        :return:
+        """
         if seed:
             m = hashlib.md5()
             m.update(seed)
@@ -292,6 +330,12 @@ class Client(object):
 
     @classmethod
     def generate_deviceid(cls, seed=None):
+        """
+        Generate an android device ID
+
+        :param seed: Seed value to generate a consistent device ID
+        :return:
+        """
         return 'android-%s' % cls.generate_uuid(True, seed)[:16]
 
     def _read_response(self, response):
@@ -361,6 +405,7 @@ class Client(object):
         return json_response
 
     def login(self):
+        """Login."""
         challenge_response = self._call_api(
             'si/fetch_headers/?' + urlencode({'challenge_type': 'signup', 'guid': self.generate_uuid(True)}),
             params='', return_response=True)
@@ -412,6 +457,7 @@ class Client(object):
         # self.explore()
 
     def sync(self, prelogin=False):
+        """Synchronise experiments."""
         endpoint = 'qe/sync/'
         if prelogin:
             params = {
@@ -427,6 +473,7 @@ class Client(object):
         return self._call_api(endpoint, params=params)
 
     def current_user(self):
+        """Get current user info"""
         endpoint = 'accounts/current_user/?edit=true'
         params = self.authenticated_params
         res = self._call_api(endpoint, params=params)
@@ -435,6 +482,7 @@ class Client(object):
         return res
 
     def autocomplete_user_list(self):
+        """User list for autocomplete"""
         endpoint = 'friendships/autocomplete_user_list/?' + urlencode({'followinfo': 'True', 'version': '2'})
         res = self._call_api(endpoint)
         if self.auto_patch:
@@ -443,6 +491,7 @@ class Client(object):
         return res
 
     def explore(self, **kwargs):
+        """Get explore items"""
         query = {'is_prefetch': 'false', 'is_from_promote': 'false'}
         if kwargs:
             query.update(kwargs)
@@ -453,23 +502,29 @@ class Client(object):
         return res
 
     def ranked_recipients(self):
+        """Get ranked recipients"""
         res = self._call_api('direct_v2/ranked_recipients/?' + urlencode({'show_threads': 'true'}))
         return res
 
     def recent_recipients(self):
+        """Get recent recipients"""
         res = self._call_api('direct_share/recent_recipients/')
         return res
 
     def news(self):
+        """Get news"""
         return self._call_api('news/')
 
     def news_inbox(self):
+        """Get news inbox"""
         return self._call_api('news/inbox/?' + urlencode({'limited_activity': 'true', 'show_su': 'true'}))
 
     def direct_v2_inbox(self):
+        """Get v2 inbox"""
         return self._call_api('direct_v2/inbox/')
 
     def feed_liked(self):
+        """Get liked feed"""
         res = self._call_api('feed/liked/')
         if self.auto_patch and res.get('items'):
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -477,21 +532,38 @@ class Client(object):
         return res
 
     def user_info(self, user_id):
+        """
+        Get user info for a specified user id
+
+        :param user_id:
+        :return:
+        """
         res = self._call_api('users/%(user_id)s/info/' % {'user_id': user_id})
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
     def username_info(self, user_name):
+        """
+        Get user info for a specified user name
+        :param user_name:
+        :return:
+        """
         res = self._call_api('users/%(user_name)s/usernameinfo/' % {'user_name': user_name})
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
     def user_detail_info(self, user_id, **kwargs):
-        """ EXPERIMENTAL ENDPOINT, INADVISABLE TO USE
-        Supports max_id, min_timestamp in kwargs for pagination
-        - Pagination seems to have no effect on reels
+        """
+        EXPERIMENTAL ENDPOINT, INADVISABLE TO USE.
+        Get user detailed info
+
+        :param user_id:
+        :param kwargs:
+            - max_id: For pagination
+            - min_timestamp: For pagination
+        :return:
         """
         endpoint = 'users/%(user_id)s/full_detail_info/' % {'user_id': user_id}
         if kwargs:
@@ -508,6 +580,7 @@ class Client(object):
         return res
 
     def feed_timeline(self):
+        """Get timeline feed"""
         res = self._call_api('feed/timeline/')
         if self.auto_patch:
             [ClientCompatPatch.media(m['media_or_ad'], drop_incompat_keys=self.drop_incompat_keys)
@@ -516,6 +589,7 @@ class Client(object):
         return res
 
     def media_info(self, media_id):
+        """Get media info"""
         endpoint = 'media/%(media_id)s/info/' % {'media_id': media_id}
         res = self._call_api(endpoint)
         if self.auto_patch:
@@ -524,6 +598,12 @@ class Client(object):
         return res
 
     def medias_info(self, media_ids):
+        """
+        Get multiple media infos
+
+        :param media_ids: list of media ids
+        :return:
+        """
         if isinstance(media_ids, str):
             media_ids = [media_ids]
 
@@ -541,12 +621,19 @@ class Client(object):
         return res
 
     def media_permalink(self, media_id):
+        """Get media permalink"""
         endpoint = 'media/%(media_id)s/permalink/' % {'media_id': media_id}
         res = self._call_api(endpoint)
         return res
 
     def media_comments(self, media_id, **kwargs):
-        """Supports max_id in kwargs for pagination
+        """
+        Get media comments. Fixed at 20 comments returned per page.
+
+        :param media_id: Media id
+        :param kwargs:
+            max_id: For pagination
+        :return:
         """
         endpoint = 'media/%(media_id)s/comments/?' % {'media_id': media_id}
         if kwargs:
@@ -559,8 +646,16 @@ class Client(object):
         return res
 
     def media_n_comments(self, media_id, n=150, reverse=False, **kwargs):
-        """Retrieves n number of comments for specified media_id because Instagram returns a fix 20 comments per page
         """
+        Helper method to retrieve n number of comments for a media id
+
+        :param media_id: Media id
+        :param n: Minimum number of comments to fetch
+        :param reverse: Reverse list of comments (ordered by created_time)
+        :param kwargs:
+        :return:
+        """
+
         endpoint = 'media/%(media_id)s/comments/?' % {'media_id': media_id}
 
         comments = []
@@ -584,6 +679,13 @@ class Client(object):
         return sorted(comments, key=lambda k: k['created_time'], reverse=reverse)
 
     def edit_media(self, media_id, caption):
+        """
+        Edit a media's caption
+
+        :param media_id: Media id
+        :param caption: Caption text
+        :return:
+        """
         endpoint = 'media/%(media_id)s/edit_media/' % {'media_id': media_id}
         params = {'caption_text': caption}
         params.update(self.authenticated_params)
@@ -593,11 +695,14 @@ class Client(object):
         return res
 
     def delete_media(self, media_id):
-        """Returns:
-        {
-          "status": "ok",
-          "did_delete": true
-        }
+        """
+        Delete a media
+
+        :param media_id: Media id
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok", "did_delete": true}
         """
         endpoint = 'media/%(media_id)s/delete/' % {'media_id': media_id}
         params = {'media_id': media_id}
@@ -606,32 +711,38 @@ class Client(object):
 
     def post_comment(self, media_id, comment_text):
         """
-        Response:
-        {
-          "comment": {
-            "status": "Active",
-            "media_id": 123456789,
-            "text": ":)",
-            "created_at": 1479453671.0,
-            "user": {
-              "username": "x",
-              "has_anonymous_profile_picture": false,
-              "profile_pic_url": "http://scontent-sit4-1.cdninstagram.com/abc.jpg",
-              "full_name": "x",
-              "pk": 123456789,
-              "is_verified": false,
-              "is_private": false
-            },
-            "content_type": "comment",
-            "created_at_utc": 1479482471,
-            "pk": 17865505612040669,
-            "type": 0
-          },
-          "status": "ok"
-        }
+        Post a comment.
+        Comment text validation according to https://www.instagram.com/developer/endpoints/comments/#post_media_comments
+
+        :param media_id: Media id
+        :param comment_text: Comment text
+        :return:
+            .. code-block:: javascript
+
+                {
+                  "comment": {
+                    "status": "Active",
+                    "media_id": 123456789,
+                    "text": ":)",
+                    "created_at": 1479453671.0,
+                    "user": {
+                      "username": "x",
+                      "has_anonymous_profile_picture": false,
+                      "profile_pic_url": "http://scontent-sit4-1.cdninstagram.com/abc.jpg",
+                      "full_name": "x",
+                      "pk": 123456789,
+                      "is_verified": false,
+                      "is_private": false
+                    },
+                    "content_type": "comment",
+                    "created_at_utc": 1479482471,
+                    "pk": 17865505612040669,
+                    "type": 0
+                  },
+                  "status": "ok"
+                }
         """
-        # Comment text validation according to
-        # https://www.instagram.com/developer/endpoints/comments/#post_media_comments
+
         if len(comment_text) > 300:
             raise ValueError('The total length of the comment cannot exceed 300 characters.')
         if re.search(r'[a-z]+', comment_text, re.IGNORECASE) and comment_text == comment_text.upper():
@@ -656,10 +767,14 @@ class Client(object):
 
     def delete_comment(self, media_id, comment_id):
         """
-        Response:
-        {
-          "status": "ok"
-        }
+        Delete a comment
+
+        :param media_id: Media id
+        :param comment_id: Comment id
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/comment/%(comment_id)s/delete/' % {
             'media_id': media_id, 'comment_id': comment_id}
@@ -677,10 +792,13 @@ class Client(object):
 
     def post_like(self, media_id):
         """
-        Response:
-        {
-          "status": "ok"
-        }
+        Like a post
+
+        :param media_id: Media id
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/like/' % {'media_id': media_id}
         params = {'media_id': media_id}
@@ -690,10 +808,13 @@ class Client(object):
 
     def delete_like(self, media_id):
         """
-        Response:
-        {
-          "status": "ok"
-        }
+        Unlike a post
+
+        :param media_id:
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/unlike/' % {'media_id': media_id}
         params = {'media_id': media_id}
@@ -702,7 +823,14 @@ class Client(object):
         return res
 
     def user_feed(self, user_id, **kwargs):
-        """Supports max_id, min_timestamp in kwargs for pagination
+        """
+        Get the feed for the specified user id
+
+        :param user_id:
+        :param kwargs:
+            - max_id: For pagination
+            - min_timestamp: For pagination
+        :return:
         """
         endpoint = 'feed/user/%(user_id)s/?' % {'user_id': user_id}
         default_params = {'rank_token': self.rank_token, 'ranked_content': 'true'}
@@ -718,7 +846,14 @@ class Client(object):
         return res
 
     def username_feed(self, user_name, **kwargs):
-        """Supports max_id, min_timestamp in kwargs for pagination
+        """
+        Get the feed for the specified user name
+
+        :param user_name:
+        :param kwargs:
+            - max_id: For pagination
+            - min_timestamp: For pagination
+        :return:
         """
         endpoint = 'feed/user/%(user_name)s/username/' % {'user_name': user_name}
         res = self._call_api(endpoint)
@@ -728,8 +863,13 @@ class Client(object):
         return res
 
     def user_following(self, user_id, **kwargs):
-        """Supports max_id in kwargs for pagination
-            * Often returns 1 less than actual number of users -___-
+        """
+        Get user followings
+
+        :param user_id:
+        :param kwargs:
+            - max_id: For pagination
+        :return:
         """
         endpoint = 'friendships/%(user_id)s/following/?' % {'user_id': user_id}
         default_params = {
@@ -746,7 +886,13 @@ class Client(object):
         return res
 
     def user_followers(self, user_id, **kwargs):
-        """Supports max_id in kwargs for pagination
+        """
+        Get user followers
+
+        :param user_id:
+        :param kwargs:
+            - max_id: For pagination
+        :return:
         """
         endpoint = 'friendships/%(user_id)s/followers/?' % {'user_id': user_id}
         default_params = {
@@ -763,6 +909,7 @@ class Client(object):
         return res
 
     def friendships_pending(self):
+        """Get pending follow requests"""
         res = self._call_api('friendships/pending/')
         if self.auto_patch and res.get('users'):
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
@@ -770,7 +917,13 @@ class Client(object):
         return res
 
     def search_users(self, query, **kwargs):
-        """Supports max_id in kwargs for pagination
+        """
+        Search users
+
+        :param query: Search string
+        :param kwargs:
+            - max_id: For pagination
+        :return:
         """
         endpoint = 'users/search/?'
         default_params = {
@@ -790,6 +943,7 @@ class Client(object):
         return res
 
     def oembed(self, url, **kwargs):
+        """Get oembed info"""
         endpoint = 'oembed?'
         params = {'url': url}
         if kwargs:
@@ -799,6 +953,7 @@ class Client(object):
         return res
 
     def reels_tray(self, **kwargs):
+        """Get story reels tray"""
         endpoint = 'feed/reels_tray/'
         params = {}
         if kwargs or params:
@@ -813,6 +968,13 @@ class Client(object):
         return res
 
     def user_reel_media(self, user_id, **kwargs):
+        """
+        Get user story/reel media
+
+        :param user_id:
+        :param kwargs:
+        :return:
+        """
         endpoint = 'feed/user/%(user_id)s/reel_media/' % {'user_id': user_id}
         params = {}
         if kwargs or params:
@@ -826,6 +988,13 @@ class Client(object):
         return res
 
     def reels_media(self, user_ids, **kwargs):
+        """
+        Get multiple users' reel/story media
+
+        :param user_ids: list of user IDs
+        :param kwargs:
+        :return:
+        """
         endpoint = 'feed/reels_media/'
         params = {'user_ids': user_ids}
         if kwargs:
@@ -842,6 +1011,12 @@ class Client(object):
         return res
 
     def user_story_feed(self, user_id):
+        """
+        Get a user's story feed
+
+        :param user_id:
+        :return:
+        """
         endpoint = 'feed/user/%(user_id)s/story/' % {'user_id': user_id}
         res = self._call_api(endpoint)
         if self.auto_patch and res.get('reel'):
@@ -851,17 +1026,25 @@ class Client(object):
 
     def media_seen(self, reels):
         """
-        Example, reels =
-        {
-            "1309763051087626108_124317": "1470355944_1470372029",
-            "1309764045355643149_124317": "1470356063_1470372039",
-            "1309818450243415912_124317": "1470362548_1470372060",
-            "1309764653429046112_124317": "1470356135_1470372049",
-            "1309209597843679372_124317": "1470289967_1470372013"
-        }
-        where
-            1309763051087626108_124317 = <media_id>
-            1470355944_1470372029 is <media_created_time>_<view_time>
+        Mark multiple stories as seen
+
+        :param reels: A dict of media_ids and timings
+
+            .. code-block:: javascript
+
+                {
+                    "1309763051087626108_124317": "1470355944_1470372029",
+                    "1309764045355643149_124317": "1470356063_1470372039",
+                    "1309818450243415912_124317": "1470362548_1470372060",
+                    "1309764653429046112_124317": "1470356135_1470372049",
+                    "1309209597843679372_124317": "1470289967_1470372013"
+                }
+
+                where
+                    1309763051087626108_124317 = <media_id>,
+                    1470355944_1470372029 is <media_created_time>_<view_time>
+
+        :return:
         """
         endpoint = 'media/seen/'
         params = {'nuxes': {}, 'reels': reels}
@@ -870,36 +1053,48 @@ class Client(object):
         return res
 
     def friendships_show(self, user_id):
-        """Returns example:
-        {
-            "status": "ok",
-            "incoming_request": false,
-            "is_blocking_reel": false,
-            "followed_by": false,
-            "is_muting_reel": false,
-            "outgoing_request": false,
-            "following": false,
-            "blocking": false,
-            "is_private": false
-        }
+        """
+        Get friendship status with user id
+
+        :param user_id:
+        :return:
+            .. code-block:: javascript
+
+                {
+                    "status": "ok",
+                    "incoming_request": false,
+                    "is_blocking_reel": false,
+                    "followed_by": false,
+                    "is_muting_reel": false,
+                    "outgoing_request": false,
+                    "following": false,
+                    "blocking": false,
+                    "is_private": false
+                }
         """
         endpoint = 'friendships/show/%(user_id)s/' % {'user_id': user_id}
         res = self._call_api(endpoint)
         return res
 
     def friendships_show_many(self, user_ids):
-        """Returns example
-        {
-            "status": "ok",
-            "friendship_statuses": {
-                "123456789": {
-                    "following": false,
-                    "incoming_request": true,
-                    "outgoing_request": false,
-                    "is_private": false
+        """
+        Get friendship status with mulitple user ids
+
+        :param user_ids: list of user ids
+        :return:
+            .. code-block:: javascript
+
+                {
+                    "status": "ok",
+                    "friendship_statuses": {
+                        "123456789": {
+                            "following": false,
+                            "incoming_request": true,
+                            "outgoing_request": false,
+                            "is_private": false
+                        }
+                    }
                 }
-            }
-        }
         """
         if isinstance(user_ids, str):
             user_ids = [user_ids]
@@ -914,18 +1109,24 @@ class Client(object):
         return res
 
     def friendships_create(self, user_id):
-        """Returns example:
-        {
-        "status": "ok",
-        "friendship_status": {
-                "incoming_request": false,
-                "followed_by": false,
-                "outgoing_request": false,
-                "following": true,
-                "blocking": false,
-                "is_private": false
-            }
-        }
+        """
+        Follow a user
+
+        :param user_id:
+        :return:
+            .. code-block:: javascript
+
+                {
+                    "status": "ok",
+                    "friendship_status": {
+                        "incoming_request": false,
+                        "followed_by": false,
+                        "outgoing_request": false,
+                        "following": true,
+                        "blocking": false,
+                        "is_private": false
+                    }
+                }
         """
         endpoint = 'friendships/create/%(user_id)s/' % {'user_id': user_id}
         params = {'user_id': user_id}
@@ -934,18 +1135,25 @@ class Client(object):
         return res
 
     def friendships_destroy(self, user_id, **kwargs):
-        """Returns example:
-        {
-            "status": "ok",
-            "incoming_request": false,
-            "is_blocking_reel": false,
-            "followed_by": false,
-            "is_muting_reel": false,
-            "outgoing_request": false,
-            "following": false,
-            "blocking": false,
-            "is_private": false
-        }
+        """
+        Unfollow a user
+
+        :param user_id:
+        :param kwargs:
+        :return:
+            .. code-block:: javascript
+
+                {
+                    "status": "ok",
+                    "incoming_request": false,
+                    "is_blocking_reel": false,
+                    "followed_by": false,
+                    "is_muting_reel": false,
+                    "outgoing_request": false,
+                    "following": false,
+                    "blocking": false,
+                    "is_private": false
+                }
         """
         endpoint = 'friendships/destroy/%(user_id)s/' % {'user_id': user_id}
         params = {'user_id': user_id}
@@ -966,7 +1174,11 @@ class Client(object):
         return res
 
     def bulk_translate(self, comment_ids):
-        """comment_ids is a csv list of comment/caption IDs
+        """
+        Get translations of comments
+
+        :param comment_ids: csv list of comment/caption IDs
+        :return:
         """
         endpoint = 'language/bulk_translate/'
         params = {'comment_ids': comment_ids}
@@ -975,6 +1187,12 @@ class Client(object):
         return res
 
     def feed_tag(self, tag):
+        """
+        Get tag feed
+
+        :param tag:
+        :return:
+        """
         endpoint = 'feed/tag/%(tag)s/' % {'tag': tag}
         res = self._call_api(endpoint)
         if self.auto_patch:
@@ -987,11 +1205,23 @@ class Client(object):
         return res
 
     def tag_info(self, tag):
+        """
+        Get tag info
+
+        :param tag:
+        :return:
+        """
         endpoint = 'tags/%(tag)s/info/' % {'tag': tag}
         res = self._call_api(endpoint)
         return res
 
     def tag_related(self, tag):
+        """
+        Get related tags
+
+        :param tag:
+        :return:
+        """
         endpoint = 'tags/%(tag)s/related/' % {'tag': tag}
         params = {
             'visited': json.dumps([{'id': tag, 'type': 'hashtag'}], separators=(',', ':')),
@@ -1001,6 +1231,13 @@ class Client(object):
         return res
 
     def tag_search(self, text, **kwargs):
+        """
+        Search tag
+
+        :param text:
+        :param kwargs:
+        :return:
+        """
         endpoint = 'tags/search/'
         query = {
             'is_typeahead': True,
@@ -1014,6 +1251,13 @@ class Client(object):
         return res
 
     def usertag_feed(self, user_id, **kwargs):
+        """
+        Get a usertag feed
+
+        :param user_id:
+        :param kwargs:
+        :return:
+        """
         endpoint = 'usertags/%(user_id)s/feed/' % {'user_id': user_id}
         query = {'rank_token': self.rank_token, 'ranked_content': 'true'}
         if kwargs:
@@ -1026,6 +1270,12 @@ class Client(object):
         return res
 
     def feed_location(self, location_id):
+        """
+        Get a location feed
+
+        :param location_id:
+        :return:
+        """
         endpoint = 'feed/location/%(location_id)s/' % {'location_id': location_id}
         res = self._call_api(endpoint)
         if self.auto_patch:
@@ -1038,25 +1288,37 @@ class Client(object):
         return res
 
     def location_info(self, location_id):
-        """Returns example:
-        {
-          "status": "ok",
-          "location": {
-            "external_source": "facebook_places",
-            "city": "",
-            "name": "Berlin Brandenburger Tor",
-            "facebook_places_id": 114849465334163,
-            "address": "Pariser Platz",
-            "lat": 52.51588,
-            "pk": 229573811,
-            "lng": 13.37892
-          }
-        }
+        """
+        Get a location info
+
+        :param location_id:
+        :return:
+            .. code-block:: javascript
+
+                {
+                  "status": "ok",
+                  "location": {
+                    "external_source": "facebook_places",
+                    "city": "",
+                    "name": "Berlin Brandenburger Tor",
+                    "facebook_places_id": 114849465334163,
+                    "address": "Pariser Platz",
+                    "lat": 52.51588,
+                    "pk": 229573811,
+                    "lng": 13.37892
+                  }
+                }
         """
         endpoint = 'locations/%(location_id)s/info/' % {'location_id': location_id}
         return self._call_api(endpoint)
 
     def location_related(self, location_id):
+        """
+        Get related locations
+
+        :param location_id:
+        :return:
+        """
         endpoint = 'locations/%(location_id)s/related/' % {'location_id': location_id}
         params = {
             'visited': json.dumps([{'id': location_id, 'type': 'location'}], separators=(',', ':')),
@@ -1065,6 +1327,14 @@ class Client(object):
         return self._call_api(endpoint)
 
     def location_search(self, latitude, longitude, query=None):
+        """
+        Location search
+
+        :param latitude:
+        :param longitude:
+        :param query:
+        :return:
+        """
         endpoint = 'location_search/'
         params = {
             'rank_token': self.rank_token,
@@ -1106,30 +1376,43 @@ class Client(object):
         return res
 
     def comment_like(self, comment_id):
-        """Returns:
-        {
-            status: "ok"
-        }
+        """
+        Like a comment
+
+        :param comment_id:
+
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'media/%(comment_id)s/comment_like/' % {'comment_id': comment_id}
         params = self.authenticated_params
         return self._call_api(endpoint, params=params)
 
     def comment_unlike(self, comment_id):
-        """Returns:
-        {
-            status: "ok"
-        }
+        """
+        Unlike a comment
+
+        :param comment_id:
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'media/%(comment_id)s/comment_unlike/' % {'comment_id': comment_id}
         params = self.authenticated_params
         return self._call_api(endpoint, params=params)
 
     def save_photo(self, media_id):
-        """Returns:
-        {
-            status: "ok"
-        }
+        """
+        Save a photo
+
+        :param media_id: Media id
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/save/' % {'media_id': media_id}
         params = {'radio_type': 'WIFI'}
@@ -1137,10 +1420,14 @@ class Client(object):
         return self._call_api(endpoint, params=params)
 
     def unsave_photo(self, media_id):
-        """Returns:
-        {
-            status: "ok"
-        }
+        """
+        Unsave a photo
+
+        :param media_id:
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/unsave/' % {'media_id': media_id}
         params = {'radio_type': 'WIFI'}
@@ -1148,6 +1435,11 @@ class Client(object):
         return self._call_api(endpoint, params=params)
 
     def saved_feed(self):
+        """
+        Get saved photo feed
+
+        :return:
+        """
         endpoint = 'feed/saved/'
         res = self._call_api(endpoint)
         if self.auto_patch:
@@ -1156,6 +1448,7 @@ class Client(object):
         return res
 
     def remove_profile_picture(self):
+        """Remove profile picture"""
         endpoint = 'accounts/remove_profile_picture/'
         res = self._call_api(endpoint, params=self.authenticated_params)
         if self.auto_patch:
@@ -1163,6 +1456,12 @@ class Client(object):
         return res
 
     def change_profile_picture(self, photo_data):
+        """
+        Change profile picture
+
+        :param photo_data: byte array of image
+        :return:
+        """
         endpoint = 'accounts/change_profile_picture/'
         json_params = json.dumps(self.authenticated_params)
         hash_sig = self._generate_signature(json_params)
@@ -1203,6 +1502,7 @@ class Client(object):
         return json_response
 
     def set_account_private(self):
+        """Make account private"""
         endpoint = 'accounts/set_private/'
         res = self._call_api(endpoint, params=self.authenticated_params)
         if self.auto_patch:
@@ -1210,6 +1510,7 @@ class Client(object):
         return res
 
     def set_account_public(self):
+        """Make account public"""""
         endpoint = 'accounts/set_public/'
         res = self._call_api(endpoint, params=self.authenticated_params)
         if self.auto_patch:
@@ -1217,10 +1518,14 @@ class Client(object):
         return res
 
     def disable_comments(self, media_id):
-        """Returns:
-        {
-            status: "ok"
-        }
+        """
+        Disable comments for a media
+
+        :param media_id:
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/disable_comments/' % {'media_id': media_id}
         params = {
@@ -1231,11 +1536,16 @@ class Client(object):
         return res
 
     def enable_comments(self, media_id):
-        """Returns:
-        {
-            status: "ok"
-        }
         """
+        Enable comments for a media
+
+        :param media_id:
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
+        """
+
         endpoint = 'media/%(media_id)s/enable_comments/' % {'media_id': media_id}
         params = {
             '_csrftoken': self.csrftoken,
@@ -1246,6 +1556,11 @@ class Client(object):
 
     @classmethod
     def standard_ratios(cls):
+        """
+        Acceptable min, max values of with/height ratios for an standard media upload
+
+        :return: tuple of (min. ratio, max. ratio)
+        """
         # Based on IG sampling
         # differs from https://help.instagram.com/1469029763400082
         # return 4.0/5.0, 1.19.0/1.0
@@ -1253,6 +1568,11 @@ class Client(object):
 
     @classmethod
     def reel_ratios(cls):
+        """
+        Acceptable min, max values of with/height ratios for an story upload
+
+        :return: tuple of (min. ratio, max. ratio)
+        """
         # min_ratio = 9.0/16.0
         # max_ratio = 3.0/4.0 if is_video else 9.0/16.0
         device_ratios = [(3, 4), (2, 3), (5, 8), (3, 5), (9, 16), (10, 16), (40, 71)]
@@ -1261,6 +1581,12 @@ class Client(object):
 
     @classmethod
     def compatible_aspect_ratio(cls, size):
+        """
+        Helper method to check aspect ratio for standard uploads
+
+        :param size: tuple of (width, height)
+        :return: True/False
+        """
         min_ratio, max_ratio = cls.standard_ratios()
         width, height = size
         this_ratio = 1.0 * width / height
@@ -1268,6 +1594,13 @@ class Client(object):
 
     @classmethod
     def reel_compatible_aspect_ratio(cls, size, is_video=False):
+        """
+        Helper method to check aspect ratio for story uploads
+
+        :param size: tuple of (width, height)
+        :param is_video: True/False
+        :return: True/False
+        """
         min_ratio, max_ratio = cls.reel_ratios()
         width, height = size
         this_ratio = 1.0 * width / height
@@ -1275,6 +1608,8 @@ class Client(object):
 
     def configure(self, upload_id, size, caption=''):
         """
+        Finalises a photo upload. This should not be called directly.
+
         :param upload_id:
         :param size: tuple of (width, height)
         :param caption:
@@ -1314,6 +1649,8 @@ class Client(object):
 
     def configure_video(self, upload_id, size, duration, thumbnail_data, caption=''):
         """
+        Finalises a video upload. This should not be called directly.
+
         :param upload_id:
         :param size: tuple of (width, height)
         :param duration: in seconds
@@ -1361,6 +1698,8 @@ class Client(object):
 
     def configure_to_reel(self, upload_id, size):
         """
+        Finalises a photo story upload. This should not be called directly.
+
         :param upload_id:
         :param size: tuple of (width, height)
         :return:
@@ -1397,6 +1736,8 @@ class Client(object):
 
     def configure_video_to_reel(self, upload_id, size, duration, thumbnail_data):
         """
+        Finalises a video story upload. This should not be called directly.
+
         :param upload_id:
         :param size: tuple of (width, height)
         :return:
@@ -1441,7 +1782,10 @@ class Client(object):
 
     def post_photo(self, photo_data, size, caption='', upload_id=None, to_reel=False):
         """
+        Upload a photo.
+
         [TODO] FLAKY, IG is very finicky about sizes, etc, needs testing.
+
         :param photo_data: byte array of the image
         :param size: tuple of (width, height)
         :param caption:
@@ -1513,7 +1857,10 @@ class Client(object):
 
     def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False):
         """
+        Upload a video
+        
         [TODO] FLAKY, IG is very picky about sizes, etc, needs testing.
+
         :param video_data: byte array of the video content
         :param size: tuple of (width, height)
         :param duration: in seconds

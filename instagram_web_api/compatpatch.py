@@ -3,6 +3,10 @@ import re
 
 
 class ClientCompatPatch():
+    """Utility to make entities from the private api similar to the ones
+    from the public one by adding the necessary properties, and if required,
+    remove any incompatible properties (to save storage space for example).
+    """
 
     IG_IMAGE_URL_EXPR = r'/((?P<crop>[a-z])[0-9]{3}x[0-9]{3}/)'
 
@@ -24,6 +28,7 @@ class ClientCompatPatch():
 
     @classmethod
     def media(cls, media, drop_incompat_keys=False):
+        """Patch a media object"""
         media['link'] = 'https://www.instagram.com/p/%s/' % media['code']
         caption = media.get('caption')
         if not caption:
@@ -112,6 +117,7 @@ class ClientCompatPatch():
 
     @classmethod
     def comment(cls, comment, drop_incompat_keys=False):
+        """Patch a comment object"""
         comment['created_time'] = str(int(comment['created_at']))
         from_user = {
             'id': comment['user']['id'],
@@ -126,6 +132,7 @@ class ClientCompatPatch():
 
     @classmethod
     def user(cls, user, drop_incompat_keys=False):
+        """Patch a user object"""
         user['bio'] = user['biography']
         user['profile_picture'] = user['profile_pic_url']
         user['website'] = user['external_url']
@@ -152,6 +159,7 @@ class ClientCompatPatch():
 
     @classmethod
     def list_user(cls, user, drop_incompat_keys=False):
+        """Patch a user list object"""
         user['profile_picture'] = user['profile_pic_url']
         if drop_incompat_keys:
             cls._drop_keys(

@@ -47,6 +47,21 @@ class Client(object):
                  'Version/9.1.1 Safari/601.6.17'
 
     def __init__(self, user_agent=None, **kwargs):
+        """
+
+        :param user_agent: Override the default useragent string with your own
+        :param kwargs:
+            - auto_patch: Patch the api objects to match the public API. Default: False
+            - drop_incompat_key: Remove api object keys that is not in the public API. Default: False
+            - timeout: Timeout interval in seconds. Default: 10
+            - username: Login username
+            - password: Login password
+            - authenticate: Do login on init
+            - cookie: Saved cookie string from a previous session
+            - settings: A dict of settings from a previous session
+            - on_login: Callback after successful login
+        :return:
+        """
         self.auto_patch = kwargs.pop('auto_patch', False)
         self.drop_incompat_keys = kwargs.pop('drop_incompat_keys', False)
         self.timeout = kwargs.pop('timeout', 10)
@@ -54,8 +69,6 @@ class Client(object):
         self.password = kwargs.pop('password', None)
         self.authenticate = kwargs.pop('authenticate', False)
         self.on_login = kwargs.pop('on_login', None)
-        self.proxy_handler = None
-
         user_settings = kwargs.pop('settings', None) or {}
         self.user_agent = user_agent or user_settings.get('user_agent') or self.USER_AGENT
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
@@ -111,7 +124,7 @@ class Client(object):
 
     @property
     def settings(self):
-        """Helper method that extracts the settings that you should cache
+        """Helper property that extracts the settings that you should cache
         in addition to username and password."""
         return {
             'user_agent': self.user_agent,
@@ -193,6 +206,13 @@ class Client(object):
         return login_res
 
     def user_info(self, user_id, **kwargs):
+        """
+        Get user info
+
+        :param user_id: User id
+        :param kwargs:
+        :return:
+        """
         params = {
             'q': 'ig_user(%(user_id)s) {id, username, full_name, profile_pic_url, biography, external_url, '
                  'media {count}, followed_by {count}, follows {count} }' % {'user_id': user_id},
@@ -207,7 +227,16 @@ class Client(object):
         return user
         
     def user_feed(self, user_id, **kwargs):
-        """Supports pagination via end_cursor"""
+        """
+        Get user feed
+
+        :param user_id:
+        :param kwargs:
+            - count: Number of items to return. Default: 16
+            - min_media_id / end_curosr: For pagination
+        :return:
+        """
+
         count = kwargs.pop('count', 16)
         min_media_id = kwargs.pop('min_media_id', None) or kwargs.pop('end_cursor', None)
         if not min_media_id:
@@ -238,6 +267,13 @@ class Client(object):
         return info
 
     def media_info(self, short_code, **kwargs):
+        """
+        Get media info
+
+        :param short_code: A media's shortcode
+        :param kwargs:
+        :return:
+        """
         params = {
             'q': 'ig_shortcode(%(media_code)s) { caption, code, comments {count}, date, '
                  'dimensions {height, width}, comments_disabled, '
@@ -255,6 +291,15 @@ class Client(object):
         return media
 
     def media_comments(self, short_code, **kwargs):
+        """
+        Get media comments
+
+        :param short_code:
+        :param kwargs:
+            - count: Number of comments to return. Default: 16. Maximum: 1000
+            - before_comment_id: For pagination
+        :return:
+        """
         count = kwargs.pop('count', 16)
         before_comment_id = kwargs.pop('before_comment_id', '0')
 
@@ -280,7 +325,15 @@ class Client(object):
 
     @login_required
     def user_following(self, user_id, **kwargs):
-        """Supports pagination via end_cursor. Login required."""
+        """
+        Get user's followings. Login required.
+
+        :param user_id: User id of account
+        :param kwargs:
+            - count: Number of followings. Default: 10
+            - end_cursor: For pagination
+        :return:
+        """
         count = kwargs.pop('count', 10)
         end_cursor = kwargs.pop('end_cursor', None)
         if end_cursor:
@@ -307,7 +360,15 @@ class Client(object):
 
     @login_required
     def user_followers(self, user_id, **kwargs):
-        """Supports pagination via end_cursor. Login required."""
+        """
+        Get a user's followers. Login required.
+
+        :param user_id: User id of account
+        :param kwargs:
+            - count: Number of followers. Default: 10
+            - end_cursor: For pagination
+        :return:
+        """
         count = kwargs.pop('count', 10)
         end_cursor = kwargs.pop('end_cursor', None)
         if end_cursor:
@@ -334,10 +395,14 @@ class Client(object):
 
     @login_required
     def post_like(self, media_id):
-        """Returns
-        {
-            "status": "ok"
-        }
+        """
+        Like an update
+
+        :param media_id: Media id
+        :return:
+        .. code-block:: javascript
+
+            {"status": "ok"}
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/likes/%(media_id)s/like/' % {'media_id': media_id}
@@ -346,10 +411,14 @@ class Client(object):
 
     @login_required
     def delete_like(self, media_id):
-        """Returns
-        {
-            "status": "ok"
-        }
+        """
+        Unlike an update
+
+        :param media_id: Media id
+        :return:
+        .. code-block:: javascript
+
+            {"status": "ok"}
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/likes/%(media_id)s/unlike/' % {'media_id': media_id}
@@ -357,40 +426,48 @@ class Client(object):
 
     @login_required
     def friendships_create(self, user_id):
-        """Returns
-        {
-            "status": "ok",
-            "result": "following"
-        }
+        """
+        Follow a user
+
+        :param user_id: User id
+        :return: {"status": "ok", "result": "following"}
         """
         endpoint = 'https://www.instagram.com/web/friendships/%(user_id)s/follow/' % {'user_id': user_id}
         return self._make_request(endpoint, params='')
 
     @login_required
     def friendships_destroy(self, user_id):
-        """Returns
-        {
-            "status": "ok"
-        }
+        """
+        Unfollow a user
+
+        :param user_id:
+        :return: {"status": "ok"}
         """
         endpoint = 'https://www.instagram.com/web/friendships/%(user_id)s/unfollow/' % {'user_id': user_id}
         return self._make_request(endpoint, params='')
 
     @login_required
     def post_comment(self, media_id, comment):
-        """Returns a standard comment
-        {
-            "created_time": 1483096000,
-            "text": "This is a comment",
-            "status": "ok",
-            "from": {
-                "username": "somebody",
-                "profile_picture": "https://igcdn-photos-b-a.akamaihd.net/hphotos-ak-xfa1/t51.2885-19/s150x150/something.jpg",
-                "id": "1234567890",
-                "full_name": "Somebody"
-            },
-            "id": "1785811280000000"
-        }
+        """
+        Post a new comment
+
+        :param media_id: Media id (all numeric format, without _userid)
+        :param comment: Comment text
+        :return:
+        .. code-block:: javascript
+
+            {
+                "created_time": 1483096000,
+                "text": "This is a comment",
+                "status": "ok",
+                "from": {
+                    "username": "somebody",
+                    "profile_picture": "https://igcdn-photos-b-a.akamaihd.net/hphotos-ak-xfa1/t51.2885-19/s150x150/something.jpg",
+                    "id": "1234567890",
+                    "full_name": "Somebody"
+                },
+                "id": "1785811280000000"
+            }
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/comments/%(media_id)s/add/' % {'media_id': media_id}
@@ -398,10 +475,15 @@ class Client(object):
         return self._make_request(endpoint, params=params)
 
     def delete_comment(self, media_id, comment_id):
-        """Returns
-        {
-            "status": "ok"
-        }
+        """
+        Delete a comment
+
+        :param media_id: Media id
+        :param comment_id: Comment id
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/comments/%(media_id)s/delete/%(comment_id)s/' % {
@@ -409,6 +491,12 @@ class Client(object):
         return self._make_request(endpoint, params='')
 
     def search(self, query_text):
+        """
+        General search
+
+        :param query_text: Search text
+        :return:
+        """
         endpoint = 'https://www.instagram.com/web/search/topsearch/?' + urlencode({'query': query_text})
         res = self._make_request(endpoint)
         if self.auto_patch:

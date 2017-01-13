@@ -54,6 +54,14 @@ class ClientCompatPatch():
 
     @classmethod
     def _get_closest_size(cls, medias, width, height=0):
+        """
+        Try to extract a image/video object that will most match the resolution returned by the public API
+
+        :param medias: list of images/videos
+        :param width: desired width
+        :param height: desired height
+        :return:
+        """
         current = None
         for media in medias:
             if not current:
@@ -67,11 +75,19 @@ class ClientCompatPatch():
 
     @classmethod
     def _drop_keys(cls, obj, keys):
+        """
+        Drop unwanted dict keys
+
+        :param obj:
+        :param keys:
+        :return:
+        """
         for k in keys:
             obj.pop(k, None)
 
     @classmethod
     def comment(cls, comment, drop_incompat_keys=False):
+        """Patch a comment object"""
         comment['created_time'] = str(int(comment.get('created_at')))
         from_user = {
             'username': comment['user']['username'],
@@ -101,6 +117,7 @@ class ClientCompatPatch():
 
     @classmethod
     def media(cls, media, drop_incompat_keys=False):
+        """Patch a media object"""
         media['link'] = 'https://www.instagram.com/p/%s/' % media['code']
         media['created_time'] = str(int(media.get('taken_at') or media.get('device_timestamp')))
 
@@ -278,8 +295,7 @@ class ClientCompatPatch():
 
     @classmethod
     def user(cls, user, drop_incompat_keys=False):
-        """For Client.user_info()
-        """
+        """Patch a user object """
         user['id'] = str(user['pk'])
         user['bio'] = user['biography']
         user['profile_picture'] = user['profile_pic_url']
@@ -324,7 +340,8 @@ class ClientCompatPatch():
 
     @classmethod
     def list_user(cls, user, drop_incompat_keys=False):
-        """For Client.user_following(), Client.user_followers(), Client.search_users()
+        """
+        Patch a list user object, example in Client.user_following(), Client.user_followers(), Client.search_users()
         """
         user['id'] = str(user['pk'])
         user['profile_picture'] = user['profile_pic_url']
