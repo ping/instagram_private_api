@@ -1858,7 +1858,7 @@ class Client(object):
     def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False):
         """
         Upload a video
-        
+
         [TODO] FLAKY, IG is very picky about sizes, etc, needs testing.
 
         :param video_data: byte array of the video content

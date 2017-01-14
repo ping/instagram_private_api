@@ -8,19 +8,19 @@ Install via pip
 
 .. code-block:: bash
 
-    $ pip install git+ssh://git@github/ping/instagram_private_api.git
+    $ pip install git+ssh://git@github.com/ping/instagram_private_api.git
 
 Update your install with the latest release
 
 .. code-block:: bash
 
-    $ pip install git+ssh://git@github/ping/instagram_private_api.git --upgrade
+    $ pip install git+ssh://git@github.com/ping/instagram_private_api.git --upgrade
 
 Force an update from source
 
 .. code-block:: bash
 
-    $ pip install git+ssh://git@github/ping/instagram_private_api.git --upgrade --force-reinstall
+    $ pip install git+ssh://git@github.com/ping/instagram_private_api.git --upgrade --force-reinstall
 
 
 Source Code
@@ -41,7 +41,7 @@ The web API client has a smaller set but can be used without logging in.
 
 Your choice will depend on your use case.
 
-Private API
+App API
 -----------
 
 .. code-block:: python
