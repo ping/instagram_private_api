@@ -1,4 +1,13 @@
-# Overview
+# Instagram Private API
+
+A Python wrapper for the Instagram private API with no 3rd party dependencies. Supports both the app and web APIs.
+
+![](https://img.shields.io/badge/Python-2.7-green.svg)
+![](https://img.shields.io/badge/Python-3.5-green.svg)
+![License](https://img.shields.io/github/license/ping/instagram_private_api.svg)
+![Release](https://img.shields.io/github/release/ping/instagram_private_api.svg)
+
+## Overview
 
 I wrote this to access Instagram's API when they clamped down on developer access. Because this is meant to achieve [parity](COMPAT.md) with the [official public API](https://www.instagram.com/developer/endpoints/), methods not available in the public API will generally have lower priority.
 
