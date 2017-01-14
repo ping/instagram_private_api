@@ -7,6 +7,7 @@ import gzip
 from io import BytesIO
 import time
 import warnings
+from functools import wraps
 try:
     # python 2.x
     import cookielib
@@ -33,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 def login_required(fn):
+    @wraps(fn)
     def wrapper(*args, **kwargs):
         if not args[0].is_authenticated:
             raise ClientError('Method requires authentication', 403)
@@ -396,13 +398,13 @@ class Client(object):
     @login_required
     def post_like(self, media_id):
         """
-        Like an update
+        Like an update. Login required.
 
         :param media_id: Media id
         :return:
-        .. code-block:: javascript
+            .. code-block:: javascript
 
-            {"status": "ok"}
+                {"status": "ok"}
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/likes/%(media_id)s/like/' % {'media_id': media_id}
@@ -412,13 +414,13 @@ class Client(object):
     @login_required
     def delete_like(self, media_id):
         """
-        Unlike an update
+        Unlike an update. Login required.
 
         :param media_id: Media id
         :return:
-        .. code-block:: javascript
+            .. code-block:: javascript
 
-            {"status": "ok"}
+                {"status": "ok"}
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/likes/%(media_id)s/unlike/' % {'media_id': media_id}
@@ -427,10 +429,13 @@ class Client(object):
     @login_required
     def friendships_create(self, user_id):
         """
-        Follow a user
+        Follow a user. Login required.
 
         :param user_id: User id
-        :return: {"status": "ok", "result": "following"}
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok", "result": "following"}
         """
         endpoint = 'https://www.instagram.com/web/friendships/%(user_id)s/follow/' % {'user_id': user_id}
         return self._make_request(endpoint, params='')
@@ -438,10 +443,13 @@ class Client(object):
     @login_required
     def friendships_destroy(self, user_id):
         """
-        Unfollow a user
+        Unfollow a user. Login required.
 
         :param user_id:
-        :return: {"status": "ok"}
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
         """
         endpoint = 'https://www.instagram.com/web/friendships/%(user_id)s/unfollow/' % {'user_id': user_id}
         return self._make_request(endpoint, params='')
@@ -449,34 +457,35 @@ class Client(object):
     @login_required
     def post_comment(self, media_id, comment):
         """
-        Post a new comment
+        Post a new comment. Login required.
 
         :param media_id: Media id (all numeric format, without _userid)
         :param comment: Comment text
         :return:
-        .. code-block:: javascript
+            .. code-block:: javascript
 
-            {
-                "created_time": 1483096000,
-                "text": "This is a comment",
-                "status": "ok",
-                "from": {
-                    "username": "somebody",
-                    "profile_picture": "https://igcdn-photos-b-a.akamaihd.net/hphotos-ak-xfa1/t51.2885-19/s150x150/something.jpg",
-                    "id": "1234567890",
-                    "full_name": "Somebody"
-                },
-                "id": "1785811280000000"
-            }
+                {
+                    "created_time": 1483096000,
+                    "text": "This is a comment",
+                    "status": "ok",
+                    "from": {
+                        "username": "somebody",
+                        "profile_picture": "https://igcdn-photos-b-a.akamaihd.net/something.jpg",
+                        "id": "1234567890",
+                        "full_name": "Somebody"
+                    },
+                    "id": "1785811280000000"
+                }
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/comments/%(media_id)s/add/' % {'media_id': media_id}
         params = {'comment_text': comment}
         return self._make_request(endpoint, params=params)
 
+    @login_required
     def delete_comment(self, media_id, comment_id):
         """
-        Delete a comment
+        Delete a comment. Login required.
 
         :param media_id: Media id
         :param comment_id: Comment id

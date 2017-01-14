@@ -1348,7 +1348,12 @@ class Client(object):
         return self._call_api(endpoint)
 
     def location_fb_search(self, query):
-        """Search for locations by query text"""
+        """
+        Search for locations by query text
+
+        :param query: search terms
+        :return:
+        """
         endpoint = 'fbsearch/places/?' + urlencode({'ranked_token': self.rank_token, 'query': query})
         res = self._call_api(endpoint)
         return res
