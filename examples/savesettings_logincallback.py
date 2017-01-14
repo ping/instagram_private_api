@@ -48,7 +48,6 @@ if __name__ == '__main__':
             # login new
             api = app_api.Client(
                 args.username, args.password,
-                auto_patch=True, drop_incompat_keys=False,
                 on_login=lambda x: onlogin_callback(x, args.settings_file_path))
         else:
             with open(settings_file) as file_data:
@@ -58,7 +57,6 @@ if __name__ == '__main__':
             # reuse auth settings
             api = app_api.Client(
                 args.username, args.password,
-                auto_patch=True, drop_incompat_keys=False,
                 settings=cached_settings)
 
     except app_api.ClientCookieExpiredError as e:
@@ -68,7 +66,6 @@ if __name__ == '__main__':
         # Do relogin but use default ua, keys and such
         api = app_api.Client(
             args.username, args.password,
-            auto_patch=True, drop_incompat_keys=False,
             on_login=lambda x: onlogin_callback(x, args.settings_file_path))
 
     except app_api.ClientLoginError as e:
