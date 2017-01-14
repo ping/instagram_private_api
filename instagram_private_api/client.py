@@ -1347,6 +1347,12 @@ class Client(object):
         endpoint += '?' + urlencode(params)
         return self._call_api(endpoint)
 
+    def location_fb_search(self, query):
+        """Search for locations by query text"""
+        endpoint = 'fbsearch/places/?' + urlencode({'ranked_token': self.rank_token, 'query': query})
+        res = self._call_api(endpoint)
+        return res
+
     def discover_top_live(self):
         warnings.warn('This endpoint is not activated.', UserWarning)
         """Not enabled, returns 404"""

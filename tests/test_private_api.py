@@ -282,6 +282,11 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('venues', [])), 0, 'No venues returned.')
 
+    def test_location_fb_search(self):
+        results = self.api.location_fb_search('Paris, France')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
+
     @unittest.skip('Not available.')
     def test_discover_top_live(self):
         results = self.api.discover_top_live()
@@ -667,6 +672,10 @@ if __name__ == '__main__':
         {
             'name': 'test_location_search',
             'test': TestPrivateApi('test_location_search', api)
+        },
+        {
+            'name': 'test_location_fb_search',
+            'test': TestPrivateApi('test_location_fb_search', api)
         },
         {
             'name': 'test_discover_top_live',
