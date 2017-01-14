@@ -37,7 +37,7 @@ Usage
 =====
 
 The private app API client emulates the official app and has a larger number of functions. 
-The web API client has a smaller set of function but can be used without logging in.
+The web API client has a smaller set but can be used without logging in.
 
 Your choice will depend on your use case.
 

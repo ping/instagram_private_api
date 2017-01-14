@@ -6,26 +6,26 @@ Problems? Please check the [FAQ](FAQ.md) first.
 
 ## Documentation
 
-Documentation is available at http://instagram-private-api.readthedocs.io/en/latest/
+Documentation is available at https://instagram-private-api.readthedocs.io/en/latest/
 
 ## Install
 
 No 3rd-party libraries required. Just drop one of or both folders [``instagram_private_api/``](instagram_private_api/) and [``instagram_web_api/``](instagram_web_api/) into your project path or pip install with:
 
-``pip install git+ssh://git@github/ping/instagram_private_api.git``
+``pip install git+ssh://git@github.com/ping/instagram_private_api.git``
 
 To update:
 
-``pip install git+ssh://git@github/ping/instagram_private_api.git --upgrade``
+``pip install git+ssh://git@github.com/ping/instagram_private_api.git --upgrade``
 
 To update with latest repo code:
 
-``pip install git+ssh://git@github/ping/instagram_private_api.git --upgrade --force-reinstall``
+``pip install git+ssh://git@github.com/ping/instagram_private_api.git --upgrade --force-reinstall``
 
 Tested on Python 2.7 and 3.5.
 
 ## Usage
-The [app API client](instagram_private_api/) emulates the official app and has a larger variety of functions. The [web API client](instagram_web_api/) has a smaller set of function but can be used without logging in.
+The [app API client](instagram_private_api/) emulates the official app and has a larger set of functions. The [web API client](instagram_web_api/) has a smaller set but can be used without logging in.
 
 Your choice will depend on your use case.
 
