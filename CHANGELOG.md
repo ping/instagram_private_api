@@ -1,7 +1,8 @@
 # Change Log
 
-## 1.0.5 (pending)
+## 1.0.5
 - New disable/enable media comments endpoints
+- New FB location search endpoint
 
 ## 1.0.4
 - Add new settings property to help extract settings for saving
