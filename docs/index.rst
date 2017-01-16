@@ -21,6 +21,7 @@ Features
    :caption: Usage
 
    usage
+   faq
 
 .. toctree::
    :maxdepth: 2
@@ -33,6 +34,6 @@ Features
 
    Repository <https://github.com/ping/instagram_private_api>
    Bug Tracker <https://github.com/ping/instagram_private_api/issues>
-   FAQ <https://github.com/ping/instagram_private_api/blob/master/FAQ.md>
    Examples <https://github.com/ping/instagram_private_api/tree/master/examples>
    Tests <https://github.com/ping/instagram_private_api/tree/master/tests>
+   Public API Compatibility <https://github.com/ping/instagram_private_api/blob/master/COMPAT.md>
