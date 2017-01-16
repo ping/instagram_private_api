@@ -37,6 +37,11 @@ class Client(object):
     IG_SIG_KEY = Constants.IG_SIG_KEY
     IG_CAPABILITIES = Constants.IG_CAPABILITIES
     SIG_KEY_VERSION = Constants.SIG_KEY_VERSION
+    EXTERNAL_LOC_SOURCES = {
+        'foursquare': 'foursquare_v2_id',
+        'facebook_places': 'facebook_places_id',
+        'facebook_events': 'facebook_events_id'
+    }
 
     def __init__(self, username, password, **kwargs):
         """
@@ -403,6 +408,31 @@ class Client(object):
                 error_response=json.dumps(json_response))
 
         return json_response
+
+    def _validate_location(self, location):
+        location_keys = ['external_source', 'name', 'address']
+        if type(location) != dict:
+            raise ValueError('Location must be a dict')
+        for k in location_keys:
+            if not location.get(k):
+                raise ValueError('Location dict must contain "%s"' % k)
+        for k, val in self.EXTERNAL_LOC_SOURCES.items():
+            if location['external_source'] == k and not location.get(val):
+                raise ValueError('Location dict must contain "%s"' % val)
+
+        media_loc = {
+            'name': location['name'],
+            'address': location['lat'],
+            'external_source': location['external_source'],
+        }
+        if 'lat' in location and 'lng' in location:
+            media_loc['lat'] = location['lat']
+            media_loc['lng'] = location['lng']
+        for k, val in self.EXTERNAL_LOC_SOURCES.items():
+            if location['external_source'] == k:
+                media_loc['external_source'] = k
+                media_loc[val] = location[val]
+        return media_loc
 
     def login(self):
         """Login."""
@@ -1617,13 +1647,14 @@ class Client(object):
         this_ratio = 1.0 * width / height
         return min_ratio <= this_ratio <= max_ratio
 
-    def configure(self, upload_id, size, caption=''):
+    def configure(self, upload_id, size, caption='', location=None):
         """
         Finalises a photo upload. This should not be called directly.
 
         :param upload_id:
         :param size: tuple of (width, height)
         :param caption:
+        :param location: a dict of location information
         :return:
         """
         if not self.compatible_aspect_ratio(size):
@@ -1652,6 +1683,9 @@ class Client(object):
                 'source_height': height,
             }
         }
+        if location:
+            media_loc = self._validate_location(location)
+            params['location'] = json.dumps(media_loc)
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
         if self.auto_patch and res.get('media'):
@@ -1791,7 +1825,7 @@ class Client(object):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def post_photo(self, photo_data, size, caption='', upload_id=None, to_reel=False):
+    def post_photo(self, photo_data, size, caption='', upload_id=None, location=None, to_reel=False):
         """
         Upload a photo.
 
@@ -1801,6 +1835,7 @@ class Client(object):
         :param size: tuple of (width, height)
         :param caption:
         :param upload_id:
+        :param location: a dict of location information
         :param to_reel: a Story photo
         :return:
         """
@@ -1815,8 +1850,12 @@ class Client(object):
             if to_reel and not self.reel_compatible_aspect_ratio(size, is_video=True):
                 raise ClientError('Incompatible reel aspect ratio.')
 
+        if location:
+            self._validate_location(location)
+
         if not upload_id:
             upload_id = str(int(time.time() * 1000))
+
 
         endpoint = 'upload/photo/'
         fields = [
@@ -1864,7 +1903,7 @@ class Client(object):
         if to_reel:
             return self.configure_to_reel(upload_id, size)
         else:
-            return self.configure(upload_id, size, caption)
+            return self.configure(upload_id, size, caption=caption, location=location)
 
     def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False):
         """
@@ -1887,6 +1926,9 @@ class Client(object):
 
         if to_reel and not self.reel_compatible_aspect_ratio(size, is_video=True):
             raise ClientError('Incompatible reel aspect ratio.')
+
+        if location:
+            self._validate_location(location)
 
         endpoint = 'upload/video/'
         upload_id = str(int(time.time() * 1000))
@@ -1948,6 +1990,7 @@ class Client(object):
                 raise ClientError(error_msg, e.code, error_response)
 
         if not to_reel:
-            return self.configure_video(upload_id, size, duration, thumbnail_data, caption)
+            return self.configure_video(
+                upload_id, size, duration, thumbnail_data, caption=caption)
         else:
             return self.configure_video_to_reel(upload_id, size, duration, thumbnail_data)
