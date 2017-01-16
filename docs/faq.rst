@@ -48,3 +48,7 @@ With the new sig key and app version, you can modify the client like so
 How to direct message/share?
 ----------------------------
 There are no plans to implement direct messaging/sharing functions.
+
+What does ``sentry_block`` error mean?
+--------------------------------------
+This is the response for detected spam/bot behavior. Stop using the api in whatever way that triggered this reponse.
