@@ -1825,7 +1825,7 @@ class Client(object):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def post_photo(self, photo_data, size, caption='', upload_id=None, location=None, to_reel=False):
+    def post_photo(self, photo_data, size, caption='', upload_id=None, to_reel=False, **kwargs):
         """
         Upload a photo.
 
@@ -1850,12 +1850,12 @@ class Client(object):
             if to_reel and not self.reel_compatible_aspect_ratio(size, is_video=True):
                 raise ClientError('Incompatible reel aspect ratio.')
 
+        location = kwargs.pop('location', None)
         if location:
             self._validate_location(location)
 
         if not upload_id:
             upload_id = str(int(time.time() * 1000))
-
 
         endpoint = 'upload/photo/'
         fields = [
@@ -1926,9 +1926,6 @@ class Client(object):
 
         if to_reel and not self.reel_compatible_aspect_ratio(size, is_video=True):
             raise ClientError('Incompatible reel aspect ratio.')
-
-        if location:
-            self._validate_location(location)
 
         endpoint = 'upload/video/'
         upload_id = str(int(time.time() * 1000))
