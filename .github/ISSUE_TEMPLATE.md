@@ -8,11 +8,9 @@
 ---
 
 ### Before submitting an issue, make sure you have:
-- [ ] [Read the README](https://github.com/ping/instagram_private_api/blob/master/README.md)
-- [ ] Updated to the latest version
+- [ ] Read the [README](https://github.com/ping/instagram_private_api/blob/master/README.md) and [docs](https://instagram-private-api.readthedocs.io/en/latest/)
 - [ ] [Searched](https://github.com/ping/instagram_private_api/search?type=Issues) the bugtracker for similar issues including **closed** ones
 - [ ] Reviewed the sample code in [tests](https://github.com/ping/instagram_private_api/tree/master/tests) and [examples](https://github.com/ping/instagram_private_api/tree/master/examples)
-- [ ] [Read the FAQ](https://github.com/ping/instagram_private_api/blob/master/FAQ.md)
 
 ### Which client are you using?
 - [ ] app (``instagram_private_api/``)
