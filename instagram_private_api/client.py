@@ -413,6 +413,14 @@ class Client(object):
         location_keys = ['external_source', 'name', 'address']
         if type(location) != dict:
             raise ValueError('Location must be a dict')
+
+        # patch location object returned from location_search
+        if 'external_source' not in location and 'external_id_source' in location and 'external_id' in location:
+            external_source = location['external_id_source']
+            location['external_source'] = external_source
+            if external_source in self.EXTERNAL_LOC_SOURCES:
+                location[self.EXTERNAL_LOC_SOURCES[external_source]] = location['external_id']
+            location['external_source'] = location['external_id_source']
         for k in location_keys:
             if not location.get(k):
                 raise ValueError('Location dict must contain "%s"' % k)
@@ -1692,7 +1700,7 @@ class Client(object):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def configure_video(self, upload_id, size, duration, thumbnail_data, caption=''):
+    def configure_video(self, upload_id, size, duration, thumbnail_data, caption='', location=None):
         """
         Finalises a video upload. This should not be called directly.
 
@@ -1706,7 +1714,7 @@ class Client(object):
         if not self.compatible_aspect_ratio(size):
             raise ClientError('Incompatible aspect ratio.')
 
-        self.post_photo(thumbnail_data, size, caption, upload_id)
+        self.post_photo(thumbnail_data, size, caption, upload_id, location=location)
 
         width, height = size
         endpoint = 'media/configure/?' + urlencode({'video': 1})
@@ -1735,6 +1743,18 @@ class Client(object):
                 'source_height': height
             }
         }
+        if location:
+            media_loc = self._validate_location(location)
+            params['location'] = json.dumps(media_loc)
+            if 'lat' in location and 'lng' in location:
+                params['geotag_enabled'] = '1'
+                params['av_latitude'] = '0.0'
+                params['av_longitude'] = '0.0'
+                params['posting_latitude'] = str(location['lat'])
+                params['posting_longitude'] = str(location['lng'])
+                params['media_latitude'] = str(location['lat'])
+                params['media_latitude'] = str(location['lng'])
+
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
         if res.get('media') and self.auto_patch:
@@ -1835,8 +1855,9 @@ class Client(object):
         :param size: tuple of (width, height)
         :param caption:
         :param upload_id:
-        :param location: a dict of location information
         :param to_reel: a Story photo
+        :param kwargs:
+            - location: a dict of location information
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
@@ -1905,7 +1926,7 @@ class Client(object):
         else:
             return self.configure(upload_id, size, caption=caption, location=location)
 
-    def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False):
+    def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False, **kwargs):
         """
         Upload a video
 
@@ -1917,6 +1938,8 @@ class Client(object):
         :param thumbnail_data:
         :param caption:
         :param to_reel: post to reel as Story
+        :param kwargs:
+            - location: a dict of location information
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
@@ -1926,6 +1949,10 @@ class Client(object):
 
         if to_reel and not self.reel_compatible_aspect_ratio(size, is_video=True):
             raise ClientError('Incompatible reel aspect ratio.')
+
+        location = kwargs.pop('location', None)
+        if location:
+            self._validate_location(location)
 
         endpoint = 'upload/video/'
         upload_id = str(int(time.time() * 1000))
@@ -1988,6 +2015,6 @@ class Client(object):
 
         if not to_reel:
             return self.configure_video(
-                upload_id, size, duration, thumbnail_data, caption=caption)
+                upload_id, size, duration, thumbnail_data, caption=caption, location=location)
         else:
             return self.configure_video_to_reel(upload_id, size, duration, thumbnail_data)

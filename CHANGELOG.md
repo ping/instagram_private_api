@@ -1,7 +1,7 @@
 # Change Log
 
 ## 1.0.6 (pending)
-- Support specification of location to post_photo
+- Support specification of location to post_photo, post_video
 
 ## 1.0.5
 - New disable/enable media comments endpoints
