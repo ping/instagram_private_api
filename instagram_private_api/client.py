@@ -12,13 +12,14 @@ from io import BytesIO
 import warnings
 try:
     # python 2.x
-    from urllib2 import urlopen, build_opener, HTTPCookieProcessor, HTTPHandler, HTTPSHandler, Request, HTTPError
+    from urllib2 import urlopen, build_opener, HTTPCookieProcessor, HTTPHandler, HTTPSHandler, ProxyHandler, Request, HTTPError
     from urllib import urlencode
+    from urlparse import urlparse
 except ImportError:
     # python 3.x
-    from urllib.request import urlopen, build_opener, HTTPCookieProcessor, HTTPHandler, HTTPSHandler, Request
+    from urllib.request import urlopen, build_opener, HTTPCookieProcessor, HTTPHandler, HTTPSHandler, ProxyHandler, Request
     from urllib.error import HTTPError
-    from urllib.parse import urlencode
+    from urllib.parse import urlencode, urlparse
 
 from .compatpatch import ClientCompatPatch
 from .errors import ClientError, ClientLoginError, ClientLoginRequiredError, ClientCookieExpiredError
@@ -126,12 +127,26 @@ class Client(object):
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
         if cookie_string and cookie_jar.expires_earliest and int(time.time()) >= cookie_jar.expires_earliest:
             raise ClientCookieExpiredError('Oldest cookie expired at %s' % cookie_jar.expires_earliest)
-
         cookie_handler = HTTPCookieProcessor(cookie_jar)
-        handlers = [
+
+        custom_ssl_context = kwargs.pop('custom_ssl_context', None)
+        proxy_handler = None
+        proxy = kwargs.pop('proxy', None)
+        if proxy:
+            warnings.warn('Proxy support is alpha.', UserWarning)
+            parsed_url = urlparse(proxy)
+            if parsed_url.netloc and parsed_url.scheme:
+                proxy_address = '%s://%s' % (parsed_url.scheme, parsed_url.netloc)
+                proxy_handler = ProxyHandler({'https': proxy_address})
+            else:
+                raise ClientError('Invalid proxy argument: %s' % proxy)
+        handlers = []
+        if proxy_handler:
+            handlers.append(proxy_handler)
+        handlers.extend([
             HTTPHandler(),
-            HTTPSHandler(),
-            cookie_handler]
+            HTTPSHandler(context=custom_ssl_context),
+            cookie_handler])
         opener = build_opener(*handlers)
         opener.cookie_jar = cookie_jar
         self.opener = opener
@@ -325,7 +340,7 @@ class Client(object):
         """
         if seed:
             m = hashlib.md5()
-            m.update(seed)
+            m.update(seed.encode('utf-8'))
             new_uuid = uuid.UUID(m.hexdigest())
         else:
             new_uuid = uuid.uuid1()
@@ -1857,7 +1872,7 @@ class Client(object):
         :param upload_id:
         :param to_reel: a Story photo
         :param kwargs:
-            - location: a dict of location information
+            - location: a dict of venue/location information, from location_search() or location_fb_search()
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
@@ -1939,7 +1954,7 @@ class Client(object):
         :param caption:
         :param to_reel: post to reel as Story
         :param kwargs:
-            - location: a dict of location information
+             - location: a dict of venue/location information, from location_search() or location_fb_search()
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)

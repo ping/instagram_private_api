@@ -12,14 +12,14 @@ try:
     # python 2.x
     import cookielib
     from urllib2 import urlopen, build_opener, HTTPCookieProcessor, \
-        HTTPHandler, HTTPSHandler, Request, HTTPError, URLError
+        ProxyHandler, HTTPHandler, HTTPSHandler, Request, HTTPError, URLError
     from urllib import urlencode
     from urlparse import urlparse
 except ImportError:
     # python 3.x
     import http.cookiejar as cookielib
     from urllib.request import urlopen, build_opener, HTTPCookieProcessor, \
-        HTTPHandler, HTTPSHandler, Request
+        ProxyHandler, HTTPHandler, HTTPSHandler, Request
     from urllib.error import HTTPError, URLError
     from urllib.parse import urlencode, urlparse
 try:
@@ -73,16 +73,31 @@ class Client(object):
         self.on_login = kwargs.pop('on_login', None)
         user_settings = kwargs.pop('settings', None) or {}
         self.user_agent = user_agent or user_settings.get('user_agent') or self.USER_AGENT
+
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
         if cookie_string and cookie_jar.expires_earliest and int(time.time()) >= cookie_jar.expires_earliest:
             raise ClientCookieExpiredError('Oldest cookie expired at %s' % cookie_jar.expires_earliest)
 
+        custom_ssl_context = kwargs.pop('custom_ssl_context', None)
+        proxy_handler = None
+        proxy = kwargs.pop('proxy', None)
+        if proxy:
+            warnings.warn('Proxy support is alpha.', UserWarning)
+            parsed_url = urlparse(proxy)
+            if parsed_url.netloc and parsed_url.scheme:
+                proxy_address = '%s://%s' % (parsed_url.scheme, parsed_url.netloc)
+                proxy_handler = ProxyHandler({'https': proxy_address})
+            else:
+                raise ClientError('Invalid proxy argument: %s' % proxy)
+        handlers = []
+        if proxy_handler:
+            handlers.append(proxy_handler)
         cookie_handler = HTTPCookieProcessor(cookie_jar)
-        handlers = [
+        handlers.extend([
             HTTPHandler(),
-            HTTPSHandler(),
-            cookie_handler]
+            HTTPSHandler(context=custom_ssl_context),
+            cookie_handler])
         opener = build_opener(*handlers)
         opener.cookie_jar = cookie_jar
         self.opener = opener
