@@ -1530,7 +1530,7 @@ class Client(object):
         """
         Change profile picture
 
-        :param photo_data: byte array of image
+        :param photo_data: byte string of image
         :return:
         """
         endpoint = 'accounts/change_profile_picture/'
@@ -1729,7 +1729,7 @@ class Client(object):
         :param upload_id:
         :param size: tuple of (width, height)
         :param duration: in seconds
-        :param thumbnail_data: byte array of thumbnail photo
+        :param thumbnail_data: byte string of thumbnail photo
         :param caption:
         :return:
         """
@@ -1873,7 +1873,7 @@ class Client(object):
 
         [TODO] FLAKY, IG is very finicky about sizes, etc, needs testing.
 
-        :param photo_data: byte array of the image
+        :param photo_data: byte string of the image
         :param size: tuple of (width, height)
         :param caption:
         :param upload_id:
@@ -1954,10 +1954,10 @@ class Client(object):
 
         [TODO] FLAKY, IG is very picky about sizes, etc, needs testing.
 
-        :param video_data: byte array of the video content
+        :param video_data: byte string of the video content
         :param size: tuple of (width, height)
         :param duration: in seconds
-        :param thumbnail_data:
+        :param thumbnail_data: byte string of the video thumbnail content
         :param caption:
         :param to_reel: post to reel as Story
         :param kwargs:
