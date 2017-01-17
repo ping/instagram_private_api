@@ -138,7 +138,7 @@ class ClientCompatPatch():
             media['caption']['from'] = caption_from
             if drop_incompat_keys:
                 cls._drop_keys(
-                    media['caption'], 
+                    media['caption'],
                     [
                         'bit_flags',
                         'content_type',

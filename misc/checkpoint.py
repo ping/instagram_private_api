@@ -30,7 +30,7 @@ class Checkpoint:
 
     def trigger_checkpoint(self):
         headers = {
-            'User-Agent': self.USER_AGENT, 
+            'User-Agent': self.USER_AGENT,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-US',
             'Accept-Encoding': 'gzip',
@@ -38,7 +38,7 @@ class Checkpoint:
         }
         req = Request(self.endpoint, headers=headers)
         res = urlopen(req, timeout=15)
-        
+
         csrf_mobj = re.search(r'csrftoken=(?P<csrf>[^;]+?);', res.info().get('set-cookie') or '')
         if not csrf_mobj:
             raise Exception('Unable to retrieve csrf token.')
@@ -60,7 +60,7 @@ class Checkpoint:
         headers['Origin'] = 'https://i.instagram.com'
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
         headers['Cookie'] = self.cookie
-        
+
         req = Request(self.endpoint, headers=headers)
         res = urlopen(req, data=urlencode(data).encode('ascii'), timeout=self.timeout)
 
@@ -77,7 +77,7 @@ class Checkpoint:
 
     def respond_to_checkpoint(self, response_code):
         headers = {
-            'User-Agent': self.USER_AGENT, 
+            'User-Agent': self.USER_AGENT,
             'Origin': 'https://i.instagram.com',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-US',
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
         if not successful:
             print('Unable to trigger checkpoint challenge.')
-        
+
         response_code = None
         while not response_code:
             response_code = input('Response Code (6-digit numeric code): ')
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
         if status_code != 200 or 'has been verified' not in final_response:
             print(final_response)
-            print('-------------------------------\n[!] Unable to verify checkpoint.')            
+            print('-------------------------------\n[!] Unable to verify checkpoint.')
         else:
             print('[i] Checkpoint successfully verified.')
 

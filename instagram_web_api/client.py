@@ -137,7 +137,7 @@ class Client(object):
     def _make_request(self, url, params=None, headers=None, return_response=False, get_method=None):
         if not headers:
             headers = {
-                'User-Agent': self.user_agent, 
+                'User-Agent': self.user_agent,
                 'Accept': '*/*',
                 'Accept-Language': 'en-US',
                 'Accept-Encoding': 'gzip, deflate',
@@ -227,7 +227,7 @@ class Client(object):
         if self.auto_patch:
             user = ClientCompatPatch.user(user, drop_incompat_keys=self.drop_incompat_keys)
         return user
-        
+
     def user_feed(self, user_id, **kwargs):
         """
         Get user feed
@@ -307,8 +307,8 @@ class Client(object):
 
         params = {
             'q': 'ig_shortcode(%(media_code)s) {comments.before(%(before_comment_id)s, %(count)d) {count, nodes {'
-                 'id, created_at, text, user {id, profile_pic_url, username, full_name}}, page_info}}' % {
-                 'media_code': short_code, 'before_comment_id': before_comment_id, 'count': count},
+                 'id, created_at, text, user {id, profile_pic_url, username, full_name}}, page_info}}' %
+                 {'media_code': short_code, 'before_comment_id': before_comment_id, 'count': count},
             'ref': 'media::show'
         }
         info = self._make_request(self.API_URL, params=params)
