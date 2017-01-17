@@ -49,14 +49,17 @@ class Client(object):
 
         :param username: Login usernam
         :param password: Login password
-        :param kwargs:
-            - auto_patch: Patch the api objects to match the public API. Default: False
-            - drop_incompat_key: Remove api object keys that is not in the public API. Default: False
-            - timeout: Timeout interval in seconds. Default: 15
-            - api_url:
-            - cookie: Saved cookie string from a previous session
-            - settings: A dict of settings from a previous session
-            - on_login: Callback after successful login
+        :param kwargs: See below
+
+        :Keyword Arguments:
+            - **auto_patch**: Patch the api objects to match the public API. Default: False
+            - **drop_incompat_key**: Remove api object keys that is not in the public API. Default: False
+            - **timeout**: Timeout interval in seconds. Default: 15
+            - **api_url**: Override the default api url base
+            - **cookie**: Saved cookie string from a previous session
+            - **settings**: A dict of settings from a previous session
+            - **on_login**: Callback after successful login
+            - **proxy**: Specify a proxy ex: 'http://127.0.0.1:8888' (ALPHA)
         :return:
         """
         """
@@ -214,15 +217,15 @@ class Client(object):
         Helper method to generate a useragent string based on device parameters
 
         :param kwargs:
-            - app_version
-            - android_version
-            - android_release
-            - brand
-            - device
-            - model
-            - dpi
-            - resolution
-            - chipset
+            - **app_version**
+            - **android_version**
+            - **android_release**
+            - **brand**
+            - **device**
+            - **model**
+            - **dpi**
+            - **resolution**
+            - **chipset**
         :return: A compatible user agent string
         """
         return Constants.USER_AGENT_FORMAT % {
@@ -614,8 +617,8 @@ class Client(object):
 
         :param user_id:
         :param kwargs:
-            - max_id: For pagination
-            - min_timestamp: For pagination
+            - **max_id**: For pagination
+            - **min_timestamp**: For pagination
         :return:
         """
         endpoint = 'users/%(user_id)s/full_detail_info/' % {'user_id': user_id}
@@ -685,7 +688,7 @@ class Client(object):
 
         :param media_id: Media id
         :param kwargs:
-            max_id: For pagination
+            **max_id**: For pagination
         :return:
         """
         endpoint = 'media/%(media_id)s/comments/?' % {'media_id': media_id}
@@ -881,8 +884,8 @@ class Client(object):
 
         :param user_id:
         :param kwargs:
-            - max_id: For pagination
-            - min_timestamp: For pagination
+            - **max_id**: For pagination
+            - **min_timestamp**: For pagination
         :return:
         """
         endpoint = 'feed/user/%(user_id)s/?' % {'user_id': user_id}
@@ -904,8 +907,8 @@ class Client(object):
 
         :param user_name:
         :param kwargs:
-            - max_id: For pagination
-            - min_timestamp: For pagination
+            - **max_id**: For pagination
+            - **min_timestamp**: For pagination
         :return:
         """
         endpoint = 'feed/user/%(user_name)s/username/' % {'user_name': user_name}
@@ -921,7 +924,7 @@ class Client(object):
 
         :param user_id:
         :param kwargs:
-            - max_id: For pagination
+            - **max_id**: For pagination
         :return:
         """
         endpoint = 'friendships/%(user_id)s/following/?' % {'user_id': user_id}
@@ -944,7 +947,7 @@ class Client(object):
 
         :param user_id:
         :param kwargs:
-            - max_id: For pagination
+            - **max_id**: For pagination
         :return:
         """
         endpoint = 'friendships/%(user_id)s/followers/?' % {'user_id': user_id}
@@ -975,7 +978,7 @@ class Client(object):
 
         :param query: Search string
         :param kwargs:
-            - max_id: For pagination
+            - **max_id**: For pagination
         :return:
         """
         endpoint = 'users/search/?'
@@ -1872,7 +1875,7 @@ class Client(object):
         :param upload_id:
         :param to_reel: a Story photo
         :param kwargs:
-            - location: a dict of venue/location information, from location_search() or location_fb_search()
+            - **location**: a dict of venue/location information, from location_search() or location_fb_search()
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
@@ -1954,7 +1957,7 @@ class Client(object):
         :param caption:
         :param to_reel: post to reel as Story
         :param kwargs:
-             - location: a dict of venue/location information, from location_search() or location_fb_search()
+             - **location**: a dict of venue/location information, from location_search() or location_fb_search()
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)

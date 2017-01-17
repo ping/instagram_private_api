@@ -52,16 +52,19 @@ class Client(object):
         """
 
         :param user_agent: Override the default useragent string with your own
-        :param kwargs:
-            - auto_patch: Patch the api objects to match the public API. Default: False
-            - drop_incompat_key: Remove api object keys that is not in the public API. Default: False
-            - timeout: Timeout interval in seconds. Default: 10
-            - username: Login username
-            - password: Login password
-            - authenticate: Do login on init
-            - cookie: Saved cookie string from a previous session
-            - settings: A dict of settings from a previous session
-            - on_login: Callback after successful login
+        :param kwargs: See below
+
+        :Keyword Arguments:
+            - **auto_patch**: Patch the api objects to match the public API. Default: False
+            - **drop_incompat_key**: Remove api object keys that is not in the public API. Default: False
+            - **timeout**: Timeout interval in seconds. Default: 10
+            - **username**: Login username
+            - **password**: Login password
+            - **authenticate**: Do login on init
+            - **cookie**: Saved cookie string from a previous session
+            - **settings**: A dict of settings from a previous session
+            - **on_login**: Callback after successful login
+            - **proxy**: Specify a proxy ex: 'http://127.0.0.1:8888' (ALPHA)
         :return:
         """
         self.auto_patch = kwargs.pop('auto_patch', False)
@@ -249,8 +252,8 @@ class Client(object):
 
         :param user_id:
         :param kwargs:
-            - count: Number of items to return. Default: 16
-            - min_media_id / end_curosr: For pagination
+            - **count**: Number of items to return. Default: 16
+            - **min_media_id** / **end_curosr**: For pagination
         :return:
         """
 
@@ -313,8 +316,8 @@ class Client(object):
 
         :param short_code:
         :param kwargs:
-            - count: Number of comments to return. Default: 16. Maximum: 1000
-            - before_comment_id: For pagination
+            - **count**: Number of comments to return. Default: 16. Maximum: 1000
+            - **before_comment_id**: For pagination
         :return:
         """
         count = kwargs.pop('count', 16)
@@ -347,8 +350,8 @@ class Client(object):
 
         :param user_id: User id of account
         :param kwargs:
-            - count: Number of followings. Default: 10
-            - end_cursor: For pagination
+            - **count**: Number of followings. Default: 10
+            - **end_cursor**: For pagination
         :return:
         """
         count = kwargs.pop('count', 10)
@@ -382,8 +385,8 @@ class Client(object):
 
         :param user_id: User id of account
         :param kwargs:
-            - count: Number of followers. Default: 10
-            - end_cursor: For pagination
+            - **count**: Number of followers. Default: 10
+            - **end_cursor**: For pagination
         :return:
         """
         count = kwargs.pop('count', 10)
