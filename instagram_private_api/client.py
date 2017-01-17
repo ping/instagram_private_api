@@ -1052,6 +1052,7 @@ class Client(object):
         :return:
         """
         endpoint = 'feed/reels_media/'
+        user_ids = map(lambda x: str(x), user_ids)
         params = {'user_ids': user_ids}
         if kwargs:
             params.update(kwargs)
@@ -1233,11 +1234,14 @@ class Client(object):
         """
         Get translations of comments
 
-        :param comment_ids: csv list of comment/caption IDs
+        :param comment_ids: list of comment/caption IDs
         :return:
         """
+        if isinstance(comment_ids, str):
+            comment_ids = [comment_ids]
+
         endpoint = 'language/bulk_translate/'
-        params = {'comment_ids': comment_ids}
+        params = {'comment_ids': ','.join(comment_ids)}
         endpoint += '?' + urlencode(params)
         res = self._call_api(endpoint)
         return res
