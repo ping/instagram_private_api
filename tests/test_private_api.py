@@ -382,6 +382,72 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
 
+    @unittest.skip('Modifies data. Needs info setup.')
+    def test_usertag_self_remove(self):
+        results = self.api.usertag_self_remove(self.test_media_id)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('media'))
+
+    def test_user_map(self):
+        results = self.api.user_map(self.test_user_id)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('geo_media'))
+
+    @unittest.skip('Modifies data.')
+    def test_friendships_block(self):
+        results = self.api.friendships_block(self.test_user_id)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertTrue(results.get('blocking'))
+
+    def test_feed_popular(self):
+        results = self.api.feed_popular()
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
+
+    def test_discover_channels_home(self):
+        results = self.api.discover_channels_home()
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
+
+    def test_discover_chaining(self):
+        results = self.api.discover_chaining(self.test_user_id)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('users', [])), 0, 'No users returned.')
+
+    def test_megaphone_log(self):
+        results = self.api.megaphone_log()
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertTrue(results.get('success'))
+
+    def test_expose(self):
+        results = self.api.expose()
+        self.assertEqual(results.get('status'), 'ok')
+
+    @unittest.skip('Modifies data.')
+    def test_edit_profile(self):
+        user = self.api.current_user()['user']
+        results = self.api.edit_profile(
+            first_name=user['full_name'],
+            biography=user['biography'] + ' <3',
+            external_url=user['external_url'],
+            email=user['email'],
+            phone_number=user['phone_number'],
+            gender=user['gender']
+        )
+        self.assertEqual(results.get('status'), 'ok')
+        returned_user = results['user']
+        self.assertEqual(returned_user['full_name'], user['full_name'])
+        self.assertEqual(returned_user['biography'], user['biography'] + ' <3')
+        self.assertEqual(returned_user['external_url'], user['external_url'])
+        self.assertEqual(returned_user['email'], user['email'])
+        self.assertEqual(returned_user['phone_number'], user['phone_number'])
+        self.assertEqual(returned_user['gender'], user['gender'])
+
+    @unittest.skip('Modifies data.')
+    def test_logout(self):
+        results = self.api.logout()
+        self.assertEqual(results.get('status'), 'ok')
+
 
 if __name__ == '__main__':
 
@@ -725,6 +791,46 @@ if __name__ == '__main__':
             'name': 'test_post_video',
             'test': TestPrivateApi('test_post_video', api)
         },
+        {
+            'name': 'test_usertag_self_remove',
+            'test': TestPrivateApi('test_usertag_self_remove', api, media_id='???')
+        },
+        {
+            'name': 'test_user_map',
+            'test': TestPrivateApi('test_user_map', api, user_id='2958144170')
+        },
+        {
+            'name': 'test_friendships_block',
+            'test': TestPrivateApi('test_friendships_block', api, user_id='2958144170')
+        },
+        {
+            'name': 'test_feed_popular',
+            'test': TestPrivateApi('test_feed_popular', api)
+        },
+        {
+            'name': 'test_discover_channels_home',
+            'test': TestPrivateApi('test_discover_channels_home', api)
+        },
+        {
+            'name': 'test_discover_chaining',
+            'test': TestPrivateApi('test_discover_chaining', api, user_id='329452045')
+        },
+        {
+            'name': 'test_megaphone_log',
+            'test': TestPrivateApi('test_megaphone_log', api)
+        },
+        {
+            'name': 'test_expose',
+            'test': TestPrivateApi('test_expose', api)
+        },
+        {
+            'name': 'test_edit_profile',
+            'test': TestPrivateApi('test_edit_profile', api)
+        },
+        {
+            'name': 'test_logout',
+            'test': TestPrivateApi('test_logout', api)
+        }
     ]
 
     if args.tests:

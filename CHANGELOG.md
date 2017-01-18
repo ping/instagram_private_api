@@ -1,8 +1,20 @@
 # Change Log
 
 ## 1.0.6 (pending)
-- Support specification of location to post_photo, post_video
+- Support specification of location to ``post_photo()``, ``post_video()``
 - Proxy support (alpha)
+- Support usertags in ``edit_media()`` (app client)
+- New endpoint functions for app client
+    * ``expose()``
+    * ``megaphone_log()``
+    * ``discover_channels_home()``
+    * ``discover_chaining()``
+    * ``user_map()``
+    * ``feed_popular()``
+    * ``friendships_block()``
+    * ``usertag_self_remove()``
+    * ``edit_profile()``
+    * ``logout()``
 
 ## 1.0.5
 - New disable/enable media comments endpoints

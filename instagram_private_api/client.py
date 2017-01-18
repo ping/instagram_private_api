@@ -474,7 +474,7 @@ class Client(object):
         login_params = {
             'device_id': self.device_id,
             'guid': self.uuid,
-            'phone_id': self.generate_uuid(False),
+            'phone_id': self.generate_uuid(return_hex=False, seed=self.device_id),
             '_csrftoken': csrf,
             'username': self.username,
             'password': self.password,
@@ -512,6 +512,18 @@ class Client(object):
         # self.news_inbox()
         # self.explore()
 
+    def logout(self):
+        """Logout user"""
+        endpoint = 'accounts/logout/'
+        params = {
+            'phone_id': self.generate_uuid(return_hex=False, seed=self.device_id),
+            '_csrftoken': self.csrftoken,
+            'guid': self.uuid,
+            'device_id': self.device_id,
+            '_uuid': self.uuid
+        }
+        return self._call_api(endpoint, params=params, unsigned=True)
+
     def sync(self, prelogin=False):
         """Synchronise experiments."""
         endpoint = 'qe/sync/'
@@ -527,6 +539,39 @@ class Client(object):
             }
             params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
+
+    def expose(self, experiment='ig_android_profile_contextual_feed'):
+        endpoint = 'qe/expose/'
+        params = {
+            'id': self.authenticated_user_id,
+            'experiment': experiment
+        }
+        params.update(self.authenticated_params)
+        return self._call_api(endpoint, params=params)
+
+    def megaphone_log(self, log_type='feed_aysf', action='seen', reason='', **kwargs):
+        """
+        A tracking endpoint of sorts
+
+        :param log_type:
+        :param action:
+        :param reason:
+        :param kwargs:
+        :return:
+        """
+        endpoint = 'megaphone/log/'
+        params = {
+            'type': log_type,
+            'action': action,
+            'reason': reason,
+            '_uuid': self.uuid,
+            'device_id': self.device_id,
+            '_csrftoken': self.csrftoken,
+            'uuid': self.generate_uuid(return_hex=True)
+        }
+        if kwargs:
+            params.update(kwargs)
+        return self._call_api(endpoint, params=params, unsigned=True)
 
     def current_user(self):
         """Get current user info"""
@@ -555,6 +600,30 @@ class Client(object):
         if self.auto_patch:
             [ClientCompatPatch.media(item['media'], drop_incompat_keys=self.drop_incompat_keys)
              if item.get('media') else item for item in res['items']]
+        return res
+
+    def discover_channels_home(self):
+        """Discover channels home"""
+        endpoint = 'discover/channels_home/'
+        res = self._call_api(endpoint)
+        if self.auto_patch:
+            for item in res.get('items', []):
+                for row_item in item.get('row_items', []):
+                    if row_item.get('media'):
+                        ClientCompatPatch.media(row_item['media'])
+        return res
+
+    def discover_chaining(self, user_id):
+        """
+        Get suggested users
+
+        :param user_id:
+        :return:
+        """
+        endpoint = 'discover/chaining/?' + urlencode({'target_id': user_id})
+        res = self._call_api(endpoint)
+        if self.auto_patch:
+            [ClientCompatPatch.list_user(user) for user in res.get('users', [])]
         return res
 
     def ranked_recipients(self):
@@ -635,6 +704,16 @@ class Client(object):
              for m in res.get('user_story', {}).get('reel', {}).get('items', [])]
         return res
 
+    def user_map(self, user_id):
+        """
+        Get a list of geo-tagged media from a user
+
+        :param user_id: User id
+        :return:
+        """
+        endpoint = 'maps/user/%(user_id)s/' % {'user_id': user_id}
+        return self._call_api(endpoint)
+
     def feed_timeline(self):
         """Get timeline feed"""
         res = self._call_api('feed/timeline/')
@@ -642,6 +721,16 @@ class Client(object):
             [ClientCompatPatch.media(m['media_or_ad'], drop_incompat_keys=self.drop_incompat_keys)
              if m.get('media_or_ad') else m
              for m in res.get('feed_items', [])]
+        return res
+
+    def feed_popular(self):
+        """Get popular feed"""
+        endpoint = 'feed/popular/?' + urlencode({
+            'people_teaser_supported': '1', 'rank_token': self.rank_token, 'ranked_content': 'true'})
+        res = self._call_api(endpoint)
+        if self.auto_patch:
+            [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
+             for m in res.get('items', [])]
         return res
 
     def media_info(self, media_id):
@@ -734,17 +823,27 @@ class Client(object):
 
         return sorted(comments, key=lambda k: k['created_time'], reverse=reverse)
 
-    def edit_media(self, media_id, caption):
+    def edit_media(self, media_id, caption, usertags=[]):
         """
         Edit a media's caption
 
         :param media_id: Media id
         :param caption: Caption text
+        :param usertags: array of user_ids and positions in the format below:
+
+            .. code-block:: javascript
+
+                usertags = [
+                    {"user_id":4292127751, "position":[0.625347,0.4384531]}
+                ]
         :return:
         """
         endpoint = 'media/%(media_id)s/edit_media/' % {'media_id': media_id}
         params = {'caption_text': caption}
         params.update(self.authenticated_params)
+        if usertags:
+            utags = {'in': [{'user_id': u['user_id'], 'position': u['position']} for u in usertags]}
+            params['usertags'] = json.dumps(utags)
         res = self._call_api(endpoint, params=params)
         if self.auto_patch:
             ClientCompatPatch.media(res.get('media'))
@@ -964,14 +1063,6 @@ class Client(object):
              for u in res.get('users', [])]
         return res
 
-    def friendships_pending(self):
-        """Get pending follow requests"""
-        res = self._call_api('friendships/pending/')
-        if self.auto_patch and res.get('users'):
-            [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
-             for u in res.get('users', [])]
-        return res
-
     def search_users(self, query, **kwargs):
         """
         Search users
@@ -1109,6 +1200,14 @@ class Client(object):
         res = self._call_api(endpoint, params=params)
         return res
 
+    def friendships_pending(self):
+        """Get pending follow requests"""
+        res = self._call_api('friendships/pending/')
+        if self.auto_patch and res.get('users'):
+            [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
+             for u in res.get('users', [])]
+        return res
+
     def friendships_show(self, user_id):
         """
         Get friendship status with user id
@@ -1169,7 +1268,7 @@ class Client(object):
         """
         Follow a user
 
-        :param user_id:
+        :param user_id: User id
         :return:
             .. code-block:: javascript
 
@@ -1195,7 +1294,7 @@ class Client(object):
         """
         Unfollow a user
 
-        :param user_id:
+        :param user_id: User id
         :param kwargs:
         :return:
             .. code-block:: javascript
@@ -1213,6 +1312,32 @@ class Client(object):
                 }
         """
         endpoint = 'friendships/destroy/%(user_id)s/' % {'user_id': user_id}
+        params = {'user_id': user_id}
+        params.update(self.authenticated_params)
+        res = self._call_api(endpoint, params=params)
+        return res
+
+    def friendships_block(self, user_id):
+        """
+        Block a user
+
+        :param user_id: User id
+        :return:
+            .. code-block:: javascript
+
+                {
+                    "status": "ok",
+                    "incoming_request": false,
+                    "is_blocking_reel": false,
+                    "followed_by": false,
+                    "is_muting_reel": false,
+                    "outgoing_request": false,
+                    "following": false,
+                    "blocking": true,
+                    "is_private": false
+                }
+        """
+        endpoint = 'friendships/block/%(user_id)s/' % {'user_id': user_id}
         params = {'user_id': user_id}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -1327,6 +1452,19 @@ class Client(object):
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
+        return res
+
+    def usertag_self_remove(self, media_id):
+        """
+        Remove your own user tag from a media post
+
+        :param media_id: Media id
+        :return:
+        """
+        endpoint = 'usertags/%(media_id)s/remove/' % {'media_id': media_id}
+        res = self._call_api(endpoint, params=self.authenticated_params)
+        if self.auto_patch:
+            ClientCompatPatch.media(res.get('media'))
         return res
 
     def feed_location(self, location_id):
@@ -1516,6 +1654,39 @@ class Client(object):
         if self.auto_patch:
             [ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', []) if m.get('media')]
+        return res
+
+    def edit_profile(self, first_name, biography, external_url, email, phone_number, gender):
+        """
+        Edit profile
+
+        :param first_name:
+        :param biography:
+        :param external_url:
+        :param email: Required.
+        :param phone_number:
+        :param gender: male: 1, female: 2, unspecified: 3
+        :return:
+        """
+        if int(gender) not in [1, 2, 3]:
+            raise ValueError('Invalid gender: %d' % int(gender))
+        if not email:
+            raise ValueError('Email is required.')
+
+        endpoint = 'accounts/edit_profile/'
+        params = {
+            'username': self.authenticated_user_name,
+            'gender': int(gender),
+            'phone_number': phone_number or '',
+            'first_name': first_name or '',
+            'biography': biography or '',
+            'external_url': external_url or '',
+            'email': email,
+        }
+        params.update(self.authenticated_params)
+        res = self._call_api(endpoint, params=params)
+        if self.auto_patch:
+            ClientCompatPatch.user(res.get('user'))
         return res
 
     def remove_profile_picture(self):
