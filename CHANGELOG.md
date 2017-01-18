@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.0.6 (pending)
+## 1.0.6
 - Support specification of location to ``post_photo()``, ``post_video()``
 - Proxy support (alpha)
 - Support usertags in ``edit_media()`` (app client)
