@@ -444,7 +444,6 @@ class Client(object):
             location['external_source'] = external_source
             if external_source in self.EXTERNAL_LOC_SOURCES:
                 location[self.EXTERNAL_LOC_SOURCES[external_source]] = location['external_id']
-            location['external_source'] = location['external_id_source']
         for k in location_keys:
             if not location.get(k):
                 raise ValueError('Location dict must contain "%s"' % k)
