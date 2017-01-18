@@ -406,7 +406,11 @@ class Client(object):
             self.logger.debug('RESPONSE: %s' % error_response)
             try:
                 error_obj = json.loads(error_response)
-                if error_obj.get('message'):
+                if error_obj.get('message') == 'login_required':
+                    raise ClientLoginRequiredError(
+                        error_obj.get('message'), code=e.code,
+                        error_response=json.dumps(error_obj))
+                elif error_obj.get('message'):
                     error_msg = '%s: %s' % (e.reason, error_obj['message'])
             except:
                 # do nothing, prob can't parse json

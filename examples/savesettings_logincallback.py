@@ -59,8 +59,8 @@ if __name__ == '__main__':
                 args.username, args.password,
                 settings=cached_settings)
 
-    except app_api.ClientCookieExpiredError as e:
-        print('ClientCookieExpiredError: %s' % e)
+    except (app_api.ClientCookieExpiredError, app_api.ClientLoginRequiredError) as e:
+        print('ClientCookieExpiredError/ClientLoginRequiredError: %s' % e)
 
         # Login expired
         # Do relogin but use default ua, keys and such
