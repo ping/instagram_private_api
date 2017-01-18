@@ -97,9 +97,15 @@ class Client(object):
         if proxy_handler:
             handlers.append(proxy_handler)
         cookie_handler = HTTPCookieProcessor(cookie_jar)
+        try:
+            httpshandler = HTTPSHandler(context=custom_ssl_context)
+        except TypeError as e:
+            # py version < 2.7.9
+            httpshandler = HTTPSHandler()
+
         handlers.extend([
             HTTPHandler(),
-            HTTPSHandler(context=custom_ssl_context),
+            httpshandler,
             cookie_handler])
         opener = build_opener(*handlers)
         opener.cookie_jar = cookie_jar
