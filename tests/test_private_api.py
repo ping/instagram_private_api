@@ -7,10 +7,10 @@ import sys
 import logging
 try:
     # python 2.x
-    from urllib2 import urlopen, Request
+    from urllib2 import urlopen
 except ImportError:
     # python 3.x
-    from urllib.request import urlopen, Request     # noqa
+    from urllib.request import urlopen
 try:
     from instagram_private_api import __version__, Client, ClientError, ClientLoginError, ClientCookieExpiredError
 except ImportError:
