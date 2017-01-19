@@ -4,8 +4,8 @@ A Python wrapper for the Instagram private API with no 3rd party dependencies. S
 
 ![](https://img.shields.io/badge/Python-2.7-green.svg)
 ![](https://img.shields.io/badge/Python-3.5-green.svg)
-![License](https://img.shields.io/github/license/ping/instagram_private_api.svg)
-[![Release](https://img.shields.io/github/release/ping/instagram_private_api.svg)](https://github.com/ping/instagram_private_api/releases)
+![License](https://img.shields.io/badge/license-MIT_License-blue.svg)
+[![Release](https://img.shields.io/badge/release-v1.0.6-orange.svg)](https://github.com/ping/instagram_private_api/releases)
 [![Docs](https://img.shields.io/badge/docs-readthedocs.io-ff4980.svg)](https://instagram-private-api.readthedocs.io/en/latest/)
 
 ## Overview
