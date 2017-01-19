@@ -2238,3 +2238,28 @@ class Client(object):
                 upload_id, size, duration, thumbnail_data, caption=caption, location=location)
         else:
             return self.configure_video_to_reel(upload_id, size, duration, thumbnail_data)
+
+    def post_photo_story(self, photo_data, size):
+        """
+        Upload a photo story
+
+        :param photo_data: byte string of the image
+        :param size: tuple of (width, height)
+        :return:
+        """
+        return self.post_photo(
+            photo_data=photo_data, size=size, to_reel=True)
+
+    def post_video_story(self, video_data, size, duration, thumbnail_data):
+        """
+        Upload a video story
+
+        :param video_data: byte string of the video content
+        :param size: tuple of (width, height)
+        :param duration: in seconds
+        :param thumbnail_data: byte string of the video thumbnail content
+        :return:
+        """
+        return self.post_video(
+            video_data=video_data, size=size, duration=duration,
+            thumbnail_data=thumbnail_data, to_reel=True)
