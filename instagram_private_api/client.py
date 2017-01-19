@@ -952,6 +952,12 @@ class Client(object):
         return res
 
     def media_likers(self, media_id):
+        """
+        Get users who have liked a post
+
+        :param media_id:
+        :return:
+        """
         res = self._call_api('media/%(media_id)s/likers/' % {'media_id': media_id})
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
