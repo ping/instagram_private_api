@@ -343,7 +343,8 @@ class ClientCompatPatch():
     @classmethod
     def list_user(cls, user, drop_incompat_keys=False):
         """
-        Patch a list user object, example in Client.user_following(), Client.user_followers(), Client.search_users()
+        Patch a list user object, example in
+        :meth:`Client.user_following`, :meth:`Client.user_followers`, :meth:`Client.search_users`
         """
         user['id'] = str(user['pk'])
         user['profile_picture'] = user['profile_pic_url']

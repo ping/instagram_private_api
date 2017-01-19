@@ -1876,6 +1876,7 @@ class Client(object):
     def configure(self, upload_id, size, caption='', location=None):
         """
         Finalises a photo upload. This should not be called directly.
+        Use :meth:`post_photo` instead.
 
         :param upload_id:
         :param size: tuple of (width, height)
@@ -1929,6 +1930,7 @@ class Client(object):
     def configure_video(self, upload_id, size, duration, thumbnail_data, caption='', location=None):
         """
         Finalises a video upload. This should not be called directly.
+        Use :meth:`post_video` instead.
 
         :param upload_id:
         :param size: tuple of (width, height)
@@ -1990,6 +1992,7 @@ class Client(object):
     def configure_to_reel(self, upload_id, size):
         """
         Finalises a photo story upload. This should not be called directly.
+        Use :meth:`post_photo_story` instead.
 
         :param upload_id:
         :param size: tuple of (width, height)
@@ -2028,6 +2031,7 @@ class Client(object):
     def configure_video_to_reel(self, upload_id, size, duration, thumbnail_data):
         """
         Finalises a video story upload. This should not be called directly.
+        Use :meth:`post_video_story` instead.
 
         :param upload_id:
         :param size: tuple of (width, height)
@@ -2083,7 +2087,8 @@ class Client(object):
         :param upload_id:
         :param to_reel: a Story photo
         :param kwargs:
-            - **location**: a dict of venue/location information, from location_search() or location_fb_search()
+            - **location**: a dict of venue/location information,
+                from :meth:`location_search` or :meth:`location_fb_search`
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
@@ -2165,7 +2170,8 @@ class Client(object):
         :param caption:
         :param to_reel: post to reel as Story
         :param kwargs:
-             - **location**: a dict of venue/location information, from location_search() or location_fb_search()
+             - **location**: a dict of venue/location information,
+                from :meth:`location_search` or :meth:`location_fb_search`
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
