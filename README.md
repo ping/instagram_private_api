@@ -14,6 +14,22 @@ I wrote this to access Instagram's API when they clamped down on developer acces
 
 Problems? Please check the [docs](https://instagram-private-api.readthedocs.io/en/latest/) before submitting an issue.
 
+## Features
+
+- Supports many functions that are only available through the official app, such as:
+    * Multiple feeds, such as [user feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.user_feed), [location feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.feed_location), [tag feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.feed_tag), [popular feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.feed_popular)
+    * Post a [photo](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.friendships_destroy) or [video](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.post_video) to your feed or stories
+    * [Like](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_like)/[unlike](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_unlike) posts
+    * Get [post comments](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.media_comments)
+    * [Post](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.post_comment)/[delete](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.delete_comment) comments
+    * [Like](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_like)/[unlike](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_unlike) comments
+    * [Follow](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.friendships_create)/[unfollow](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.friendships_destroy) users
+- The web api client supports a subset of functions that do not require login, such as:
+    * Get user [info](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.user_info) and [feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.user_feed)
+    * Get [post comments](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.media_comments)
+- Compatible with functions available through the public API using the ClientCompatPatch ([app](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.ClientCompatPatch)/[web](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.ClientCompatPatch)) utility class
+- Beta Python 3 support
+
 ## Documentation
 
 Documentation is available at https://instagram-private-api.readthedocs.io/en/latest/
