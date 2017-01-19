@@ -1019,6 +1019,10 @@ class Client(object):
              for m in res.get('items', [])]
         return res
 
+    def self_feed(self):
+        """Get authenticated user's own feed"""
+        return self.user_feed(self.authenticated_user_id)
+
     def username_feed(self, user_name, **kwargs):
         """
         Get the feed for the specified user name
