@@ -11,15 +11,17 @@ from functools import wraps
 try:
     # python 2.x
     import cookielib
-    from urllib2 import urlopen, build_opener, HTTPCookieProcessor, \
-        ProxyHandler, HTTPHandler, HTTPSHandler, Request, HTTPError, URLError
+    from urllib2 import (
+        build_opener, Request, HTTPError, URLError, HTTPCookieProcessor,
+        ProxyHandler, HTTPHandler, HTTPSHandler)
     from urllib import urlencode
     from urlparse import urlparse
 except ImportError:
     # python 3.x
     import http.cookiejar as cookielib
-    from urllib.request import urlopen, build_opener, HTTPCookieProcessor, \
-        ProxyHandler, HTTPHandler, HTTPSHandler, Request
+    from urllib.request import (
+        build_opener, Request, HTTPCookieProcessor,
+        ProxyHandler, HTTPHandler, HTTPSHandler)
     from urllib.error import HTTPError, URLError
     from urllib.parse import urlencode, urlparse
 try:
@@ -214,7 +216,7 @@ class Client(object):
         return media_id
 
     def init(self):
-        init_response = self._make_request(
+        self._make_request(
             'https://www.instagram.com/', return_response=True, get_method=lambda: 'HEAD')
         if not self.csrftoken:
             raise ClientError('Unable to get csrf from init request.')

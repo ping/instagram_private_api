@@ -1,4 +1,3 @@
-import json
 import re
 import gzip
 from io import BytesIO
@@ -24,8 +23,12 @@ class Checkpoint:
         self.user_id = user_id
         self.csrftoken = ''
         self.cookie = ''
-        self.endpoint = 'https://i.instagram.com/integrity/checkpoint/checkpoint_logged_out_main/%(user_id)s/?%(params)s' % \
-                        {'user_id': self.user_id, 'params': urlencode({'next': 'instagram://checkpoint/dismiss'})}
+        self.endpoint = 'https://i.instagram.com/integrity/checkpoint/' \
+                        'checkpoint_logged_out_main/%(user_id)s/?%(params)s' % \
+                        {
+                            'user_id': self.user_id,
+                            'params': urlencode({'next': 'instagram://checkpoint/dismiss'})
+                        }
         self.timeout = kwargs.pop('timeout', 15)
 
     def trigger_checkpoint(self):

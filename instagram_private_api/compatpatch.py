@@ -67,8 +67,10 @@ class ClientCompatPatch():
             if not current:
                 current = media
             if abs(media['width'] - width) < abs(current['width'] - width) or \
-                    (media['width'] == current['width'] and not height and not media['height'] == current['width']) or \
-                    (media['width'] == current['width'] and height and abs(media['height'] - height) < abs(current['height'] - height)):
+                    (media['width'] == current['width'] and not height and
+                     not media['height'] == current['width']) or \
+                    (media['width'] == current['width'] and height and
+                     abs(media['height'] - height) < abs(current['height'] - height)):
                 current = media
 
         return current
@@ -193,7 +195,7 @@ class ClientCompatPatch():
             ]
 
         media['attribution'] = None
-        if media.get('filter_type') != None and media.get('filter_type') in cls.FILTERS:
+        if media.get('filter_type') is not None and media.get('filter_type') in cls.FILTERS:
             media['filter'] = cls.FILTERS[media.get('filter_type')]
         else:
             media['filter'] = ''

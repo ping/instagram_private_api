@@ -1,5 +1,4 @@
 import json
-import datetime
 import os.path
 import logging
 import argparse
@@ -69,10 +68,10 @@ if __name__ == '__main__':
             on_login=lambda x: onlogin_callback(x, args.settings_file_path))
 
     except app_api.ClientLoginError as e:
-        print ('ClientLoginError %s' % e)
+        print('ClientLoginError %s' % e)
         exit(9)
     except app_api.ClientError as e:
-        print ('ClientError %s (Code: %d, Response: %s)' % (e.msg, e.code, e.error_response))
+        print('ClientError %s (Code: %d, Response: %s)' % (e.msg, e.code, e.error_response))
         exit(9)
     except Exception as e:
         print('Unexpected Exception: %s' % e)

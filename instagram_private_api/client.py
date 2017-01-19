@@ -12,12 +12,16 @@ from io import BytesIO
 import warnings
 try:
     # python 2.x
-    from urllib2 import urlopen, build_opener, HTTPCookieProcessor, HTTPHandler, HTTPSHandler, ProxyHandler, Request, HTTPError
+    from urllib2 import (
+        build_opener, Request, HTTPError, HTTPCookieProcessor,
+        HTTPHandler, HTTPSHandler, ProxyHandler)
     from urllib import urlencode
     from urlparse import urlparse
 except ImportError:
     # python 3.x
-    from urllib.request import urlopen, build_opener, HTTPCookieProcessor, HTTPHandler, HTTPSHandler, ProxyHandler, Request
+    from urllib.request import (
+        build_opener, Request, HTTPCookieProcessor,
+        HTTPHandler, HTTPSHandler, ProxyHandler)
     from urllib.error import HTTPError
     from urllib.parse import urlencode, urlparse
 
@@ -1896,6 +1900,14 @@ class Client(object):
         if location:
             media_loc = self._validate_location(location)
             params['location'] = json.dumps(media_loc)
+            if 'lat' in location and 'lng' in location:
+                params['geotag_enabled'] = '1'
+                params['exif_latitude'] = '0.0'
+                params['exif_longitude'] = '0.0'
+                params['posting_latitude'] = str(location['lat'])
+                params['posting_longitude'] = str(location['lng'])
+                params['media_latitude'] = str(location['lat'])
+                params['media_latitude'] = str(location['lng'])
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
         if self.auto_patch and res.get('media'):
