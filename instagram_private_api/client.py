@@ -703,6 +703,8 @@ class Client(object):
             - **min_timestamp**: For pagination
         :return:
         """
+        warnings.warn('This endpoint is experimental. Do not use.', UserWarning)
+
         endpoint = 'users/%(user_id)s/full_detail_info/' % {'user_id': user_id}
         if kwargs:
             endpoint += '?' + urlencode(kwargs)
