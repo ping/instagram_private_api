@@ -30,6 +30,8 @@ Problems? Please check the [docs](https://instagram-private-api.readthedocs.io/e
 - Compatible with functions available through the public API using the ClientCompatPatch ([app](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.ClientCompatPatch)/[web](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.ClientCompatPatch)) utility class
 - Beta Python 3 support
 
+An [extension module](https://github.com/ping/instagram_private_api_extensions) is available to help with common tasks like posting photos or videos.
+
 ## Documentation
 
 Documentation is available at https://instagram-private-api.readthedocs.io/en/latest/
