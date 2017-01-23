@@ -3,13 +3,19 @@ import argparse
 import os
 import time
 import json
+import copy
 import sys
 import logging
+import re
 try:
-    from instagram_web_api import __version__, Client, ClientError, ClientLoginError, ClientCookieExpiredError
+    from instagram_web_api import (
+        __version__, Client, ClientError, ClientLoginError,
+        ClientCookieExpiredError, ClientCompatPatch)
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from instagram_web_api import __version__, Client, ClientError, ClientLoginError, ClientCookieExpiredError
+    from instagram_web_api import (
+        __version__, Client, ClientError, ClientLoginError,
+        ClientCookieExpiredError, ClientCompatPatch)
 
 
 class TestWebApi(unittest.TestCase):
@@ -76,6 +82,60 @@ class TestWebApi(unittest.TestCase):
         results = self.api.search('maru')
         self.assertGreaterEqual(len(results['users']), 0)
         self.assertGreaterEqual(len(results['hashtags']), 0)
+
+    # Compat Patch Tests
+    def test_compat_media(self):
+        self.api.auto_patch = False
+        media = self.api.media_info(self.test_media_shortcode)
+        media_patched = copy.deepcopy(media)
+        ClientCompatPatch.media(media_patched)
+        self.api.auto_patch = True
+        self.assertIsNone(media.get('link'))
+        self.assertIsNotNone(media_patched.get('link'))
+        self.assertIsNone(media.get('user'))
+        self.assertIsNotNone(media_patched.get('user'))
+        self.assertIsNone(media.get('type'))
+        self.assertIsNotNone(media_patched.get('type'))
+        self.assertIsNone(media.get('images'))
+        self.assertIsNotNone(media_patched.get('images'))
+        self.assertIsNone(media.get('created_time'))
+        self.assertIsNotNone(media_patched.get('created_time'))
+        self.assertIsNotNone(re.match(r'\d+_\d+', media_patched['id']))
+
+    def test_compat_comment(self):
+        self.api.auto_patch = False
+        comment = self.api.media_comments(self.test_media_shortcode, count=1)[0]
+        comment_patched = copy.deepcopy(comment)
+        self.api.auto_patch = True
+        ClientCompatPatch.comment(comment_patched)
+        self.assertIsNone(comment.get('created_time'))
+        self.assertIsNotNone(comment_patched.get('created_time'))
+        self.assertIsNone(comment.get('from'))
+        self.assertIsNotNone(comment_patched.get('from'))
+
+    def test_compat_user(self):
+        self.api.auto_patch = False
+        user = self.api.user_info(self.test_user_id)
+        user_patched = copy.deepcopy(user)
+        ClientCompatPatch.user(user_patched)
+        self.api.auto_patch = True
+        self.assertIsNone(user.get('bio'))
+        self.assertIsNotNone(user_patched.get('bio'))
+        self.assertIsNone(user.get('profile_picture'))
+        self.assertIsNotNone(user_patched.get('profile_picture'))
+        self.assertIsNone(user.get('website'))
+        self.assertIsNotNone(user_patched.get('website'))
+        self.assertIsNone(user.get('counts'))
+        self.assertIsNotNone(user_patched.get('counts'))
+
+    def test_compat_user_list(self):
+        self.api.auto_patch = False
+        user = self.api.user_followers(self.test_user_id)[0]
+        user_patched = copy.deepcopy(user)
+        ClientCompatPatch.list_user(user_patched)
+        self.api.auto_patch = True
+        self.assertIsNone(user.get('profile_picture'))
+        self.assertIsNotNone(user_patched.get('profile_picture'))
 
 
 if __name__ == '__main__':
@@ -185,12 +245,36 @@ if __name__ == '__main__':
             'test': TestWebApi('test_user_followers', api),
             'require_auth': True,
         },
+        {
+            'name': 'test_compat_media',
+            'test': TestWebApi('test_compat_media', api),
+        },
+        {
+            'name': 'test_compat_comment',
+            'test': TestWebApi('test_compat_comment', api),
+        },
+        {
+            'name': 'test_compat_user',
+            'test': TestWebApi('test_compat_user', api),
+        },
+        {
+            'name': 'test_compat_user_list',
+            'test': TestWebApi('test_compat_user_list', api),
+            'require_auth': True,
+        }
     ]
 
     suite = unittest.TestSuite()
 
+    def match_regex(test_name):
+        for test_re in args.tests:
+            test_re = r'%s' % test_re
+            if re.match(test_re, test_name):
+                return True
+        return False
+
     if args.tests:
-        tests = filter(lambda x: x['name'] in args.tests, tests)
+        tests = filter(lambda x: match_regex(x['name']), tests)
 
     if not api.is_authenticated:
         tests = filter(lambda x: not x.get('require_auth', False), tests)

@@ -261,7 +261,7 @@ class Client(object):
         :param user_id:
         :param kwargs:
             - **count**: Number of items to return. Default: 16
-            - **min_media_id** / **end_curosr**: For pagination
+            - **min_media_id** / **end_cursor**: For pagination
         :return:
         """
 
