@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.0.7
+- New shortcut functions for app client
+    * ``self_feed()``
+    * ``post_photo_story()``
+    * ``post_video_story()``
+- Add more validation to ``post_video()``
+
 ## 1.0.6
 - Support specification of location to ``post_photo()``, ``post_video()``
 - Proxy support (alpha)
