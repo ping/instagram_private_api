@@ -2182,6 +2182,15 @@ class Client(object):
         if to_reel and not self.reel_compatible_aspect_ratio(size, is_video=True):
             raise ClientError('Incompatible reel aspect ratio.')
 
+        if duration < 3.0:
+            raise ClientError('Duration is less than 3s')
+
+        if duration > 60.0:
+            raise ClientError('Duration is more than 60s')
+
+        if len(video_data) > 50 * 1024 * 1000:
+            raise ClientError('Video file is too big')
+
         location = kwargs.pop('location', None)
         if location:
             self._validate_location(location)
