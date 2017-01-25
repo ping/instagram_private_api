@@ -1582,28 +1582,53 @@ class Client(object):
         return res
 
     def discover_top_live(self):
-        warnings.warn('This endpoint is not activated.', UserWarning)
-        """Not enabled, returns 404"""
+        """
+        Get top live broadcasts
+
+        :return:
+        """
         endpoint = 'discover/top_live/'
         res = self._call_api(endpoint)
         return res
 
     def broadcast_info(self, broadcast_id):
-        warnings.warn('This endpoint is not verified. Please do not use.', UserWarning)
-        """UNCONFIRMED ENDPOINT - UNTESTED, DO NOT USE
-        Possible Returns:
-            - id
-            - cover_frame_url
-            - dash_playback_url
-            - dash_abr_playback_url
-            - broadcast_owner
-            - viewer_count
-            - published_time
-            - muted
-            - media_id
-            - broadcast_status
-            - ranked_position
-            - seen_ranked_position
+        """
+        Get broadcast information
+
+        :param broadcast_id: Broadcast Id
+        :return:
+            .. code-block:: javascript
+
+                {
+                  "status": "ok",
+                  "broadcast_status": "active",
+                  "media_id": 12345678934374208_123456789",
+                  "cover_frame_url": "https://scontent-hkg3-1.cdninstagram.com/something.jpg",
+                  "broadcast_owner": {
+                    "username": "abc",
+                    "friendship_status": {
+                      "incoming_request": false,
+                      "followed_by": false,
+                      "outgoing_request": false,
+                      "following": false,
+                      "blocking": false,
+                      "is_private": false
+                    },
+                    "profile_pic_url": "http://scontent-hkg3-1.cdninstagram.com/somethingelse.jpg",
+                    "profile_pic_id": "1234567850644676241_123456789",
+                    "full_name": "ABC",
+                    "pk": 123456789,
+                    "is_verified": true,
+                    "is_private": false
+                  },
+                  "dash_abr_playback_url": null,
+                  "broadcast_message": "",
+                  "published_time": 1485312576,
+                  "dash_playback_url": "https://scontent-hkg3-1.cdninstagram.com/hvideo-ash1/v/dash-hd/spmething.mpd",
+                  "rtmp_playback_url": "rtmp://svelivestream007.16.ash1.facebook.com:16000/live-hd/something",
+                  "id": 178591123456789,
+                  "viewer_count": 9000.0
+                }
         """
         endpoint = 'live/%(broadcast_id)s/info/' % {'broadcast_id': broadcast_id}
         res = self._call_api(endpoint)

@@ -293,10 +293,10 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
 
-    @unittest.skip('Not available.')
     def test_discover_top_live(self):
         results = self.api.discover_top_live()
         self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('broadcasts', [])), 0, 'No broadcasts returned.')
 
     @unittest.skip('Modifies data.')
     def test_comment_like(self):
