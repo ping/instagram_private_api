@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.0.8 (pending)
+## 1.0.8
 - New live/broadcast endpoint functions for app client
     * ``top_live_status()``
     * ``broadcast_like()``
