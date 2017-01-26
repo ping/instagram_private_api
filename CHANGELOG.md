@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.0.8 (pending)
+- New live/broadcast endpoint functions for app client
+    * ``top_live_status()``
+    * ``broadcast_like()``
+    * ``broadcast_like_count()``
+    * ``broadcast_comments()``
+    * ``broadcast_heartbeat_and_viewercount()``
+    * ``broadcast_comment()``
+
 ## 1.0.7
 - New shortcut functions for app client
     * ``self_feed()``

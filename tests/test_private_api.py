@@ -298,6 +298,86 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('broadcasts', [])), 0, 'No broadcasts returned.')
 
+    def test_top_live_status(self):
+        results = self.api.discover_top_live()
+        broadcast_ids = [b['id'] for b in results.get('broadcasts', [])]
+        results = self.api.top_live_status(broadcast_ids)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('broadcast_status_items', [])), 0, 'No broadcast_status_items returned.')
+
+    def test_broadcast_info(self):
+        top_live_results = self.api.discover_top_live()
+        for b in top_live_results.get('broadcasts', []):
+            if b['broadcast_status'] != 'active':
+                continue
+            broadcast_id = b['id']
+            results = self.api.broadcast_info(broadcast_id)
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertIsNotNone(results.get('id'))
+            self.assertIsNotNone(results.get('broadcast_owner'))
+            self.assertIsNotNone(results.get('published_time'))
+            self.assertIsNotNone(results.get('dash_playback_url'))
+            break
+
+    def test_broadcast_comments(self):
+        top_live_results = self.api.discover_top_live()
+        for b in top_live_results.get('broadcasts', []):
+            if b['broadcast_status'] != 'active':
+                continue
+            broadcast_id = b['id']
+            results = self.api.broadcast_comments(broadcast_id)
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertGreater(len(results.get('comments', [])), 0, 'No comments returned.')
+            break
+
+    def test_broadcast_heartbeat_and_viewercount(self):
+        top_live_results = self.api.discover_top_live()
+        for b in top_live_results.get('broadcasts', []):
+            if b['broadcast_status'] != 'active':
+                continue
+            broadcast_id = b['id']
+            results = self.api.broadcast_heartbeat_and_viewercount(broadcast_id)
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertIsNotNone(results.get('viewer_count'))
+            self.assertIsNotNone(results.get('broadcast_status'))
+            break
+
+    def test_broadcast_like_count(self):
+        top_live_results = self.api.discover_top_live()
+        for b in top_live_results.get('broadcasts', []):
+            if b['broadcast_status'] != 'active':
+                continue
+            broadcast_id = b['id']
+            results = self.api.broadcast_like_count(broadcast_id)
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertIsNotNone(results.get('likes'))
+            self.assertIsNotNone(results.get('like_ts'))
+            break
+
+    @unittest.skip('Modifies data.')
+    def test_broadcast_like(self):
+        top_live_results = self.api.discover_top_live()
+        for b in top_live_results.get('broadcasts', []):
+            if b['broadcast_status'] != 'active':
+                continue
+            broadcast_id = b['id']
+            results = self.api.broadcast_like(broadcast_id)
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertIsNotNone(results.get('likes'))
+            break
+
+    @unittest.skip('Modifies data.')
+    def test_broadcast_comment(self):
+        top_live_results = self.api.discover_top_live()
+        for b in top_live_results.get('broadcasts', []):
+            if b['broadcast_status'] != 'active':
+                continue
+            broadcast_id = b['id']
+            results = self.api.broadcast_comment(broadcast_id, '...')
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertIsNotNone(results.get('comment'))
+            break
+
     @unittest.skip('Modifies data.')
     def test_comment_like(self):
         results = self.api.comment_like('17852927593096945')
@@ -758,6 +838,10 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_user_reel_media', api, user_id='329452045')
         },
         {
+            'name': 'test_reels_media',
+            'test': TestPrivateApi('test_reels_media', api, user_id='329452045')
+        },
+        {
             'name': 'test_user_story_feed',
             'test': TestPrivateApi('test_user_story_feed', api, user_id='329452045')
         },
@@ -824,6 +908,34 @@ if __name__ == '__main__':
         {
             'name': 'test_discover_top_live',
             'test': TestPrivateApi('test_discover_top_live', api)
+        },
+        {
+            'name': 'test_top_live_status',
+            'test': TestPrivateApi('test_top_live_status', api)
+        },
+        {
+            'name': 'test_broadcast_info',
+            'test': TestPrivateApi('test_broadcast_info', api)
+        },
+        {
+            'name': 'test_broadcast_comments',
+            'test': TestPrivateApi('test_broadcast_comments', api)
+        },
+        {
+            'name': 'test_broadcast_heartbeat_and_viewercount',
+            'test': TestPrivateApi('test_broadcast_heartbeat_and_viewercount', api)
+        },
+        {
+            'name': 'test_broadcast_like_count',
+            'test': TestPrivateApi('test_broadcast_like', api)
+        },
+        {
+            'name': 'test_broadcast_like',
+            'test': TestPrivateApi('test_broadcast_like', api)
+        },
+        {
+            'name': 'test_broadcast_comment',
+            'test': TestPrivateApi('test_broadcast_comment', api)
         },
         {
             'name': 'test_comment_like',
