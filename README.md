@@ -5,7 +5,7 @@ A Python wrapper for the Instagram private API with no 3rd party dependencies. S
 ![](https://img.shields.io/badge/Python-2.7-green.svg)
 ![](https://img.shields.io/badge/Python-3.5-green.svg)
 ![License](https://img.shields.io/badge/license-MIT_License-blue.svg)
-[![Release](https://img.shields.io/badge/release-v1.0.7-orange.svg)](https://github.com/ping/instagram_private_api/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.8-orange.svg)](https://github.com/ping/instagram_private_api/releases)
 [![Docs](https://img.shields.io/badge/docs-readthedocs.io-ff4980.svg)](https://instagram-private-api.readthedocs.io/en/latest/)
 
 ## Overview
@@ -40,11 +40,11 @@ Documentation is available at https://instagram-private-api.readthedocs.io/en/la
 
 No 3rd-party libraries required. Just drop one of or both folders [``instagram_private_api/``](instagram_private_api/) and [``instagram_web_api/``](instagram_web_api/) into your project path or pip install with:
 
-``pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.0.7``
+``pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.0.8``
 
 To update:
 
-``pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.0.7 --upgrade``
+``pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.0.8 --upgrade``
 
 To update with latest repo code:
 
