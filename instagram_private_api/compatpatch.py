@@ -127,6 +127,8 @@ class ClientCompatPatch():
             media['type'] = 'image'
         elif media['media_type'] == 2:
             media['type'] = 'video'
+        elif media['media_type'] == 8:
+            media['type'] = 'carousel'  # will be patched over below
 
         if media['caption']:
             media['caption']['id'] = str(media['caption']['pk'])
@@ -155,13 +157,58 @@ class ClientCompatPatch():
                     ]
                 )
         media['user'] = cls.list_user(media['user'], drop_incompat_keys=drop_incompat_keys)
-        image_versions2 = media.get('image_versions2', {}).get('candidates', [])
-        images = {
-            'low_resolution': cls._get_closest_size(image_versions2, 320),
-            'thumbnail': cls._get_closest_size(image_versions2, 150, 150),
-            'standard_resolution': cls._get_closest_size(image_versions2, media.get('original_width', 1000)),
-        }
-        media['images'] = images
+        if media['media_type'] == 8 and media.get('carousel_media', []):
+            # patch carousel media
+            first_carousel_media = media['carousel_media'][0]
+            image_versions2 = first_carousel_media.get('image_versions2', {}).get('candidates', [])
+            images = {
+                'low_resolution': cls._get_closest_size(image_versions2, 320),
+                'thumbnail': cls._get_closest_size(image_versions2, 150, 150),
+                'standard_resolution': cls._get_closest_size(image_versions2, media.get('original_width', 1000)),
+            }
+            media['images'] = images
+            media['type'] = 'image'
+            if first_carousel_media['media_type'] == 2:
+                video_versions = first_carousel_media.get('video_versions', [])
+                videos = {
+                    'low_bandwidth': cls._get_closest_size(video_versions, 480),
+                    'standard_resolution': cls._get_closest_size(video_versions, media.get('original_width', 640)),
+                    'low_resolution': cls._get_closest_size(video_versions, 640),
+                }
+                if drop_incompat_keys:
+                    [cls._drop_keys(i, ['type']) for i in list(videos.values())]
+                media['videos'] = videos
+                media['type'] = 'video'
+            for carousel_media in media.get('carousel_media', []):
+                if carousel_media['media_type'] == 1:
+                    carousel_media['type'] = 'image'
+                elif carousel_media['media_type'] == 2:
+                    carousel_media['type'] = 'video'
+                image_versions2 = carousel_media.get('image_versions2', {}).get('candidates', [])
+                images = {
+                    'low_resolution': cls._get_closest_size(image_versions2, 320),
+                    'thumbnail': cls._get_closest_size(image_versions2, 150, 150),
+                    'standard_resolution': cls._get_closest_size(image_versions2, media.get('original_width', 1000)),
+                }
+                carousel_media['images'] = images
+                if carousel_media['media_type'] == 2:
+                    video_versions = carousel_media.get('video_versions', [])
+                    videos = {
+                        'low_bandwidth': cls._get_closest_size(video_versions, 480),
+                        'standard_resolution': cls._get_closest_size(video_versions, media.get('original_width', 640)),
+                        'low_resolution': cls._get_closest_size(video_versions, 640),
+                    }
+                    if drop_incompat_keys:
+                        [cls._drop_keys(i, ['type']) for i in list(videos.values())]
+                    carousel_media['videos'] = videos
+        else:
+            image_versions2 = media.get('image_versions2', {}).get('candidates', [])
+            images = {
+                'low_resolution': cls._get_closest_size(image_versions2, 320),
+                'thumbnail': cls._get_closest_size(image_versions2, 150, 150),
+                'standard_resolution': cls._get_closest_size(image_versions2, media.get('original_width', 1000)),
+            }
+            media['images'] = images
 
         if media['media_type'] == 2:
             video_versions = media.get('video_versions', [])

@@ -226,6 +226,7 @@ class TestPrivateApi(unittest.TestCase):
     def test_friendships_show_many(self):
         results = self.api.friendships_show_many(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('friendship_statuses', [])), 0, 'No statuses returned.')
 
     def test_friendships_pending(self):
         results = self.api.friendships_pending()
@@ -533,6 +534,11 @@ class TestPrivateApi(unittest.TestCase):
     def test_logout(self):
         results = self.api.logout()
         self.assertEqual(results.get('status'), 'ok')
+
+    def test_top_search(self):
+        results = self.api.top_search('cats')
+        self.assertEqual(results.get('status'), 'ok')
+        print(json.dumps(results))
 
     # Compat Patch Tests
     def test_compat_media(self):
@@ -1020,6 +1026,10 @@ if __name__ == '__main__':
         {
             'name': 'test_logout',
             'test': TestPrivateApi('test_logout', api)
+        },
+        {
+            'name': 'test_top_search',
+            'test': TestPrivateApi('test_top_search', api)
         },
         {
             'name': 'test_compat_media',

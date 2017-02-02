@@ -729,9 +729,12 @@ class Client(object):
         endpoint = 'maps/user/%(user_id)s/' % {'user_id': user_id}
         return self._call_api(endpoint)
 
-    def feed_timeline(self):
+    def feed_timeline(self, **kwargs):
         """Get timeline feed"""
-        res = self._call_api('feed/timeline/')
+        endpoint = 'feed/timeline/'
+        if kwargs:
+            endpoint += '?' + urlencode(kwargs)
+        res = self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.media(m['media_or_ad'], drop_incompat_keys=self.drop_incompat_keys)
              if m.get('media_or_ad') else m
@@ -1579,6 +1582,20 @@ class Client(object):
         """
         endpoint = 'fbsearch/places/?' + urlencode({'ranked_token': self.rank_token, 'query': query})
         res = self._call_api(endpoint)
+        return res
+
+    def top_search(self, query):
+        """
+        Search for top matching hashtags, users, locations
+
+        :param query: search terms
+        :return:
+        """
+        endpoint = 'fbsearch/topsearch/?' + urlencode({
+            'context': 'blended', 'ranked_token': self.rank_token, 'query': query})
+        res = self._call_api(endpoint)
+        if self.auto_patch and res.get('users', []):
+            [ClientCompatPatch.list_user(u['user']) for u in res['users']]
         return res
 
     def discover_top_live(self, **kwargs):

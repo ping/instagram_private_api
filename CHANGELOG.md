@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.9 (pending)
+- New endpoints for app client
+    * ``top_search()``
+
 ## 1.0.8
 - New live/broadcast endpoint functions for app client
     * ``top_live_status()``
