@@ -66,11 +66,11 @@ class ClientCompatPatch():
         for media in medias:
             if not current:
                 current = media
-            if abs(media['width'] - width) < abs(current['width'] - width) or \
+            if (abs(media['width'] - width) < abs(current['width'] - width) or
                     (media['width'] == current['width'] and not height and
-                     not media['height'] == current['width']) or \
+                     not media['height'] == current['width']) or
                     (media['width'] == current['width'] and height and
-                     abs(media['height'] - height) < abs(current['height'] - height)):
+                     abs(media['height'] - height) < abs(current['height'] - height))):
                 current = media
 
         return current

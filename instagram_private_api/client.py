@@ -1663,7 +1663,7 @@ class Client(object):
         """
         broadcast_id = str(broadcast_id)
         endpoint = 'live/%(broadcast_id)s/get_comment/' % {'broadcast_id': broadcast_id}
-        if last_comment_ts and int(last_comment_ts) > int(time.time() - 3):
+        if last_comment_ts and int(last_comment_ts) > int(time.time()):
             raise ValueError('Invalid last_comment_ts')
         endpoint += '?' + urlencode({'last_comment_ts': last_comment_ts})
         res = self._call_api(endpoint)
