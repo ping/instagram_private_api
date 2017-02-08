@@ -1,8 +1,9 @@
 # Change Log
 
-## 1.0.9 (pending)
+## 1.0.9
 - New endpoints for app client
     * ``top_search()``
+- Fix param validation for ``broadcast_comments()``
 
 ## 1.0.8
 - New live/broadcast endpoint functions for app client
