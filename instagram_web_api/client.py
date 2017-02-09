@@ -242,7 +242,8 @@ class Client(object):
         :return:
         """
         params = {
-            'q': 'ig_user(%(user_id)s) {id, username, full_name, profile_pic_url, biography, external_url, '
+            'q': 'ig_user(%(user_id)s) {id, username, full_name, profile_pic_url, '
+                 'biography, external_url, is_private, is_verified, '
                  'media {count}, followed_by {count}, follows {count} }' % {'user_id': user_id},
         }
         user = self._make_request(self.API_URL, params=params)
