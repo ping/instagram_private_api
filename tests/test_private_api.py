@@ -158,6 +158,11 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('users', [])), 0, 'No items returned.')
 
+    def test_media_likers_chrono(self):
+        results = self.api.media_likers_chrono(self.test_media_id)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('users', [])), 0, 'No items returned.')
+
     def test_user_feed(self):
         results = self.api.user_feed(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
@@ -296,6 +301,11 @@ class TestPrivateApi(unittest.TestCase):
 
     def test_discover_top_live(self):
         results = self.api.discover_top_live()
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('broadcasts', [])), 0, 'No broadcasts returned.')
+
+    def test_suggested_broadcasts(self):
+        results = self.api.suggested_broadcasts()
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('broadcasts', [])), 0, 'No broadcasts returned.')
 
@@ -808,6 +818,10 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_media_likers', api, media_id='1206573574980690068_1497851591')
         },
         {
+            'name': 'test_media_likers_chrono',
+            'test': TestPrivateApi('test_media_likers_chrono', api, media_id='1206573574980690068_1497851591')
+        },
+        {
             'name': 'test_user_feed',
             'test': TestPrivateApi('test_user_feed', api, user_id='124317')
         },
@@ -914,6 +928,10 @@ if __name__ == '__main__':
         {
             'name': 'test_discover_top_live',
             'test': TestPrivateApi('test_discover_top_live', api)
+        },
+        {
+            'name': 'test_suggested_broadcasts',
+            'test': TestPrivateApi('test_suggested_broadcasts', api)
         },
         {
             'name': 'test_top_live_status',

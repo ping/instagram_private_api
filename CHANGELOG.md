@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.1.0 (pending)
+- New endpoints for app client
+    * ``suggested_broadcasts()``
+    * ``media_likers_chrono()``
+
 ## 1.0.9
 - New endpoints for app client
     * ``top_search()``

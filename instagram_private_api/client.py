@@ -969,6 +969,19 @@ class Client(object):
              for u in res.get('users', [])]
         return res
 
+    def media_likers_chrono(self, media_id):
+        """
+        Get users who have liked a post in chronological order
+
+        :param media_id:
+        :return:
+        """
+        res = self._call_api('media/%(media_id)s/likers_chrono/' % {'media_id': media_id})
+        if self.auto_patch:
+            [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
+             for u in res.get('users', [])]
+        return res
+
     def post_like(self, media_id):
         """
         Like a post
@@ -1607,6 +1620,19 @@ class Client(object):
         :return:
         """
         endpoint = 'discover/top_live/'
+        if kwargs:
+            endpoint += '?' + urlencode(kwargs)
+        return self._call_api(endpoint)
+
+    def suggested_broadcasts(self, **kwargs):
+        """
+        Get sugggested broadcasts
+        :param kwargs:
+        :return:
+        """
+        endpoint = 'live/get_suggested_broadcasts/'
+        if kwargs:
+            endpoint += '?' + urlencode(kwargs)
         return self._call_api(endpoint)
 
     def top_live_status(self, broadcast_ids):
