@@ -66,11 +66,6 @@ class Client(object):
             - **proxy**: Specify a proxy ex: 'http://127.0.0.1:8888' (ALPHA)
         :return:
         """
-        """
-        Key arguments:
-        auto_patch -- whether to automatically patch entities for compatibility
-        drop_incompat_keys -- whether to remove incompatible entity keys
-        """
         self.username = username
         self.password = password
         self.auto_patch = kwargs.pop('auto_patch', False)
@@ -1627,6 +1622,7 @@ class Client(object):
     def suggested_broadcasts(self, **kwargs):
         """
         Get sugggested broadcasts
+
         :param kwargs:
         :return:
         """
