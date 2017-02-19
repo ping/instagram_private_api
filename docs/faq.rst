@@ -12,7 +12,7 @@ What does error code XXX mean?
 
 - **400**: Bad request. Please check the parameters specified.
 - **403**: The method requires authentication (web client) or the request has been denied by IG.
-- **404**: The entity requested is not found (web client) or the endpoint does not exists.
+- **404**: The entity requested is not found (web client) or the endpoint does not exist.
 - **429**: Too many requests. You're making too many calls.
 
 IG may also return other 4XX or 5XX codes.

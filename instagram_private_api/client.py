@@ -282,7 +282,7 @@ class Client(object):
 
     @property
     def token(self):
-        """For compatibility. Equivalent to csrftoken"""
+        """For compatibility. Equivalent to :meth:`csrftoken`"""
         return self.csrftoken
 
     @property
@@ -1196,7 +1196,7 @@ class Client(object):
 
     def user_story_feed(self, user_id):
         """
-        Get a user's story feed
+        Get a user's story feed and current broadcast (if currently live)
 
         :param user_id:
         :return:
@@ -1743,7 +1743,7 @@ class Client(object):
                 {
                   "status": "ok",
                   "broadcast_status": "active",
-                  "media_id": 12345678934374208_123456789",
+                  "media_id": "12345678934374208_123456789",
                   "cover_frame_url": "https://scontent-hkg3-1.cdninstagram.com/something.jpg",
                   "broadcast_owner": {
                     "username": "abc",
@@ -2245,7 +2245,7 @@ class Client(object):
         """
         Upload a photo.
 
-        [TODO] FLAKY, IG is very finicky about sizes, etc, needs testing.
+        [CAUTION] FLAKY, IG is very finicky about sizes, etc, needs testing.
 
         :param photo_data: byte string of the image
         :param size: tuple of (width, height)
@@ -2327,7 +2327,7 @@ class Client(object):
         """
         Upload a video
 
-        [TODO] FLAKY, IG is very picky about sizes, etc, needs testing.
+        [CAUTION] FLAKY, IG is very picky about sizes, etc, needs testing.
 
         :param video_data: byte string of the video content
         :param size: tuple of (width, height)

@@ -24,9 +24,12 @@ Problems? Please check the [docs](https://instagram-private-api.readthedocs.io/e
     * [Post](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.post_comment)/[delete](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.delete_comment) comments
     * [Like](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_like)/[unlike](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_unlike) comments
     * [Follow](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.friendships_create)/[unfollow](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.friendships_destroy) users
+    * User [stories](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.user_story_feed)
+    * And [more](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client)!
 - The web api client supports a subset of functions that do not require login, such as:
     * Get user [info](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.user_info) and [feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.user_feed)
     * Get [post comments](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.media_comments)
+    * And [more](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client)!
 - Compatible with functions available through the public API using the ClientCompatPatch ([app](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.ClientCompatPatch)/[web](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.ClientCompatPatch)) utility class
 - Beta Python 3 support
 
