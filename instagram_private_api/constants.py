@@ -1,11 +1,11 @@
 
 class Constants:
 
-    IG_SIG_KEY = 'b45edf687482d21f67e5b2efd36c3fd61222cc138f268f55982a08f2e93a5c95'
+    IG_SIG_KEY = 'e1712d2f592becfdea858c4d0ad4e7c5f230c446094155a1663d612e1290c841'
     IG_CAPABILITIES = '3ToAAA=='    # = base64.b64encode(struct.pack('<i', 15069)).decode('ascii')
     SIG_KEY_VERSION = '4'
 
-    APP_VERSION = '10.4.0'
+    APP_VERSION = '10.9.0'
     ANDROID_VERSION = 18
     ANDROID_RELEASE = '4.3'
     PHONE_MANUFACTURER = 'Xiaomi'
