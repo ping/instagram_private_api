@@ -7,6 +7,7 @@ import uuid
 import json
 import re
 import time
+from datetime import datetime
 import gzip
 from io import BytesIO
 import warnings
@@ -302,6 +303,16 @@ class Client(object):
         return None
 
     @property
+    def phone_id(self):
+        """Current phone ID. For use in certain functions."""
+        return self.generate_uuid(return_hex=False, seed=self.device_id)
+
+    @property
+    def timezone_offset(self):
+        """Timezone offset in seconds. For use in certain functions."""
+        return int(round((datetime.now() - datetime.utcnow()).total_seconds()))
+
+    @property
     def rank_token(self):
         if not self.authenticated_user_id:
             return None
@@ -482,7 +493,7 @@ class Client(object):
         login_params = {
             'device_id': self.device_id,
             'guid': self.uuid,
-            'phone_id': self.generate_uuid(return_hex=False, seed=self.device_id),
+            'phone_id': self.phone_id,
             '_csrftoken': csrf,
             'username': self.username,
             'password': self.password,
@@ -524,7 +535,7 @@ class Client(object):
         """Logout user"""
         endpoint = 'accounts/logout/'
         params = {
-            'phone_id': self.generate_uuid(return_hex=False, seed=self.device_id),
+            'phone_id': self.phone_id,
             '_csrftoken': self.csrftoken,
             'guid': self.uuid,
             'device_id': self.device_id,
@@ -725,11 +736,23 @@ class Client(object):
         return self._call_api(endpoint)
 
     def feed_timeline(self, **kwargs):
-        """Get timeline feed"""
+        """
+        Get timeline feed. To get a new timeline feed, you can mark a set of media
+        as seen by setting seen_posts = comma-separated list of media IDs. Example:
+        api.feed_timeline(seen_posts='123456789_12345,987654321_54321')
+        """
         endpoint = 'feed/timeline/'
+        params = {
+            '_uuid': self.uuid,
+            '_csrftoken': self.csrftoken,
+            'is_prefetch': '0',
+            'is_pull_to_refresh': '0',
+            'phone_id': self.phone_id,
+            'timezone_offset': self.timezone_offset,
+        }
         if kwargs:
-            endpoint += '?' + urlencode(kwargs)
-        res = self._call_api(endpoint)
+            params.update(kwargs)
+        res = self._call_api(endpoint, params=params, unsigned=True)
         if self.auto_patch:
             [ClientCompatPatch.media(m['media_or_ad'], drop_incompat_keys=self.drop_incompat_keys)
              if m.get('media_or_ad') else m
