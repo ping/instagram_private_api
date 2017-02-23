@@ -95,14 +95,50 @@ class ClientCompatPatch():
             } for ut in usertags]
             media['users_in_photo'] = users_in_photo
 
+        # Try to make carousel_media for app api compat
+        if media.get('edge_sidecar_to_children', {}).get('edges', []):
+            carousel_media = []
+            edges = media.get('edge_sidecar_to_children', {}).get('edges', [])
+            for edge in edges:
+                node = edge.get('node', {})
+                images = {
+                    'standard_resolution': {
+                        'url': node['display_url'],
+                        'width': node['dimensions']['width'],
+                        'height': node['dimensions']['height']},
+                    'low_resolution': {'url': cls._generate_image_url(node['display_url'], '320', 'p')},
+                    'thumbnail': {'url': cls._generate_image_url(node['display_url'], '150', 's')},
+                }
+                node['images'] = images
+                node['type'] = 'image'
+                if node.get('is_video'):
+                    videos = {
+                        'standard_resolution': {
+                            'url': node['video_url'],
+                            'width': node['dimensions']['width'],
+                            'height': node['dimensions']['height']},
+                        'low_resolution': {'url': node['video_url']},
+                        'low_bandwidth': {'url': node['video_url']},
+                    }
+                    node['videos'] = videos
+                    node['type'] = 'video'
+                node['pk'] = node['id']
+                node['id'] = '%s_%s' % (node['id'], media['owner']['id'])
+                node['original_width'] = node['dimensions']['width']
+                node['original_height'] = node['dimensions']['height']
+                carousel_media.append(node)
+            media['carousel_media'] = carousel_media
+
         if drop_incompat_keys:
             cls._drop_keys(
                 media, [
+                    '__typename',
                     'code',
                     'comments_disabled',
                     'date',
                     'dimensions',
                     'display_src',
+                    'edge_sidecar_to_children',
                     'is_ad',
                     'is_video',
                     'owner',

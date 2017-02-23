@@ -278,7 +278,7 @@ class Client(object):
                  'usertags {nodes {x, y, user {id, username, full_name, profile_pic_url} }}, '
                  'location {id, name, lat, lng}, display_src, id, is_video, is_ad, '
                  'likes {count}, owner {id, username, full_name, profile_pic_url}, '
-                 'thumbnail_src, video_views, video_url}, page_info}}' % {
+                 '__typename, thumbnail_src, video_views, video_url}, page_info}}' % {
                      'user_id': user_id, 'count': count, 'command': command},
             'ref': 'tags::show'
         }
@@ -309,12 +309,38 @@ class Client(object):
                  'usertags {nodes {x, y, user {id, username, full_name, profile_pic_url} }}, '
                  'location {id, name, lat, lng}, display_src, id, is_video, is_ad, '
                  'likes {count}, owner {id, username, full_name, profile_pic_url}, '
+                 '__typename, edge {edges}, '
                  'thumbnail_src, video_views, video_url }' % {'media_code': short_code}
         }
         media = self._make_request(self.API_URL, params=params)
         if not media.get('code'):
             raise ClientError('Not Found', 404)
 
+        if self.auto_patch:
+            media = ClientCompatPatch.media(media, drop_incompat_keys=self.drop_incompat_keys)
+        return media
+
+    def media_info2(self, short_code):
+        """
+        Alternative method to get media info
+
+        :param short_code: A media's shortcode
+        :param kwargs:
+        :return:
+        """
+        headers = {
+            'User-Agent': self.user_agent,
+            'Accept': '*/*',
+            'Accept-Language': 'en-US',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'close',
+            'Referer': 'https://www.instagram.com',
+            'x-requested-with': 'XMLHttpRequest',
+        }
+        info = self._make_request(
+            'https://www.instagram.com/p/%s/?__a=1&__b=1' % short_code,
+            headers=headers)
+        media = info.get('media', {})
         if self.auto_patch:
             media = ClientCompatPatch.media(media, drop_incompat_keys=self.drop_incompat_keys)
         return media

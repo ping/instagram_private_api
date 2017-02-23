@@ -54,6 +54,13 @@ class TestWebApi(unittest.TestCase):
         results = self.api.media_info(self.test_media_shortcode)
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('link'))
+        self.assertIsNotNone(results.get('images'))
+
+    def test_carousel_media_info(self):
+        results = self.api.media_info2('BQ0eAlwhDrw')
+        self.assertIsNotNone(results.get('link'))
+        self.assertIsNotNone(results.get('type'))
+        self.assertIsNotNone(results.get('images'))
 
     def test_media_comments(self):
         results = self.api.media_comments(self.test_media_shortcode, count=20)
@@ -261,6 +268,10 @@ if __name__ == '__main__':
             'name': 'test_compat_user_list',
             'test': TestWebApi('test_compat_user_list', api),
             'require_auth': True,
+        },
+        {
+            'name': 'test_carousel_media_info',
+            'test': TestWebApi('test_carousel_media_info', api),
         }
     ]
 
