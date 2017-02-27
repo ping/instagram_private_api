@@ -4,6 +4,13 @@
 - New endpoints for app client
     * ``suggested_broadcasts()``
     * ``media_likers_chrono()``
+- New method for web client: ``media_info2()`` that retrieves carousel media info
+- Fixes for app api:
+    * ``feed_timeline()``
+    * ``broadcast_like_count()``
+    * ``feed_location()``
+    * ``username_feed()``
+    * compat patch: ``media()``
 
 ## 1.0.9
 - New endpoints for app client
