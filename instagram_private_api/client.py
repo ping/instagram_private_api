@@ -422,6 +422,8 @@ class Client(object):
                         error_response=json.dumps(error_obj))
                 elif error_obj.get('message'):
                     error_msg = '%s: %s' % (e.reason, error_obj['message'])
+            except (ClientLoginError, ClientLoginRequiredError):
+                raise
             except:
                 # do nothing, prob can't parse json
                 pass
@@ -1070,6 +1072,8 @@ class Client(object):
         :return:
         """
         endpoint = 'feed/user/%(user_name)s/username/' % {'user_name': user_name}
+        if kwargs:
+            endpoint += '?' + urlencode(kwargs)
         res = self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -1526,7 +1530,7 @@ class Client(object):
             ClientCompatPatch.media(res.get('media'))
         return res
 
-    def feed_location(self, location_id):
+    def feed_location(self, location_id, **kwargs):
         """
         Get a location feed
 
@@ -1534,6 +1538,8 @@ class Client(object):
         :return:
         """
         endpoint = 'feed/location/%(location_id)s/' % {'location_id': location_id}
+        if kwargs:
+            endpoint += '?' + urlencode(kwargs)
         res = self._call_api(endpoint)
         if self.auto_patch:
             if res.get('items'):
