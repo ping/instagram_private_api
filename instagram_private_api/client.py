@@ -761,10 +761,16 @@ class Client(object):
              for m in res.get('feed_items', [])]
         return res
 
-    def feed_popular(self):
+    def feed_popular(self, **kwargs):
         """Get popular feed"""
-        endpoint = 'feed/popular/?' + urlencode({
-            'people_teaser_supported': '1', 'rank_token': self.rank_token, 'ranked_content': 'true'})
+        query = {
+            'people_teaser_supported': '1',
+            'rank_token': self.rank_token,
+            'ranked_content': 'true'
+        }
+        if kwargs:
+            query.update(kwargs)
+        endpoint = 'feed/popular/?' + urlencode(query)
         res = self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -976,14 +982,17 @@ class Client(object):
         res = self._call_api(endpoint, params=params)
         return res
 
-    def media_likers(self, media_id):
+    def media_likers(self, media_id, **kwargs):
         """
         Get users who have liked a post
 
         :param media_id:
         :return:
         """
-        res = self._call_api('media/%(media_id)s/likers/' % {'media_id': media_id})
+        endpoint = 'media/%(media_id)s/likers/' % {'media_id': media_id}
+        if kwargs:
+            endpoint += '?' + urlencode(kwargs)
+        res = self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
@@ -1434,7 +1443,7 @@ class Client(object):
         res = self._call_api(endpoint)
         return res
 
-    def feed_tag(self, tag):
+    def feed_tag(self, tag, **kwargs):
         """
         Get tag feed
 
@@ -1442,6 +1451,8 @@ class Client(object):
         :return:
         """
         endpoint = 'feed/tag/%(tag)s/' % {'tag': tag}
+        if kwargs:
+            endpoint += '?' + urlencode(kwargs)
         res = self._call_api(endpoint)
         if self.auto_patch:
             if res.get('items'):
@@ -1463,7 +1474,7 @@ class Client(object):
         res = self._call_api(endpoint)
         return res
 
-    def tag_related(self, tag):
+    def tag_related(self, tag, **kwargs):
         """
         Get related tags
 
@@ -1474,6 +1485,8 @@ class Client(object):
         params = {
             'visited': json.dumps([{'id': tag, 'type': 'hashtag'}], separators=(',', ':')),
             'related_types': json.dumps(['hashtag'], separators=(',', ':'))}
+        if kwargs:
+            params.update(kwargs)
         endpoint += '?' + urlencode(params)
         res = self._call_api(endpoint)
         return res
@@ -1575,7 +1588,7 @@ class Client(object):
         endpoint = 'locations/%(location_id)s/info/' % {'location_id': location_id}
         return self._call_api(endpoint)
 
-    def location_related(self, location_id):
+    def location_related(self, location_id, **kwargs):
         """
         Get related locations
 
@@ -1586,6 +1599,8 @@ class Client(object):
         params = {
             'visited': json.dumps([{'id': location_id, 'type': 'location'}], separators=(',', ':')),
             'related_types': json.dumps(['location'], separators=(',', ':'))}
+        if kwargs:
+            params.update(kwargs)
         endpoint += '?' + urlencode(params)
         return self._call_api(endpoint)
 
@@ -1863,13 +1878,15 @@ class Client(object):
         params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
 
-    def saved_feed(self):
+    def saved_feed(self, **kwargs):
         """
         Get saved photo feed
 
         :return:
         """
         endpoint = 'feed/saved/'
+        if kwargs:
+            endpoint += '?' + urlencode(kwargs)
         res = self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)

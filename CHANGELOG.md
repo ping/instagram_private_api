@@ -8,9 +8,9 @@
 - Fixes for app api:
     * ``feed_timeline()``
     * ``broadcast_like_count()``
-    * ``feed_location()``
-    * ``username_feed()``
+    * pagination fixes for ``feed_location()``, ``username_feed()``, ``saved_feed()``, ``location_related()``, ``tag_related()``, ``media_likers()``, ``feed_popular()``
     * compat patch: ``media()``
+- Update app client version to 10.9.0
 
 ## 1.0.9
 - New endpoints for app client
