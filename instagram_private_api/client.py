@@ -1693,7 +1693,7 @@ class Client(object):
         """
         broadcast_id = str(broadcast_id)
         endpoint = 'live/%(broadcast_id)s/get_like_count/' % {'broadcast_id': broadcast_id}
-        if like_ts and int(like_ts) > int(time.time() - 3):
+        if like_ts and int(like_ts) > int(time.time()):
             raise ValueError('Invalid like_ts')
         endpoint += '?' + urlencode({'like_ts': like_ts})
         return self._call_api(endpoint)
