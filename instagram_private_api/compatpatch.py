@@ -201,6 +201,31 @@ class ClientCompatPatch():
                     if drop_incompat_keys:
                         [cls._drop_keys(i, ['type']) for i in list(videos.values())]
                     carousel_media['videos'] = videos
+
+                # patch user tags
+                if carousel_media.get('usertags', {}).get('in', []):
+                    usertags = carousel_media['usertags']['in']
+                    user_tags = []
+                    for ut in usertags:
+                        pos = {'y': ut['position'][1], 'x': ut['position'][0]}
+                        user = ut['user']
+                        user['id'] = str(ut['user']['pk'])
+                        user['profile_picture'] = ut['user']['profile_pic_url']
+                        if drop_incompat_keys:
+                            cls._drop_keys(user, ['profile_pic_url', 'pk', 'is_private'])
+
+                        user_tags.append({
+                            'position': pos,
+                            'user': user,
+                        })
+                    carousel_media['users_in_photo'] = user_tags
+                # patch location
+                if 'location' not in carousel_media or not carousel_media['location'].get('lat'):
+                    carousel_media['location'] = None
+                else:
+                    carousel_media['location']['latitude'] = carousel_media['location']['lat']
+                    carousel_media['location']['longitude'] = carousel_media['location']['lng']
+                    carousel_media['location']['id'] = carousel_media['location']['pk']
         else:
             image_versions2 = media.get('image_versions2', {}).get('candidates', [])
             images = {
