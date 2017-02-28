@@ -161,6 +161,8 @@ class Client(object):
         self.opener = opener
 
         if not cookie_string:   # or not self.token or not self.rank_token:
+            if not self.username or not self.password:
+                raise ClientLoginRequiredError('login_required', code=400)
             self.login()
 
     @property
