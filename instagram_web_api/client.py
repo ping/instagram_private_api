@@ -277,7 +277,8 @@ class Client(object):
                  'caption, code, comments {count}, date, dimensions {height, width}, comments_disabled, '
                  'usertags {nodes {x, y, user {id, username, full_name, profile_pic_url} }}, '
                  'location {id, name, lat, lng}, display_src, id, is_video, is_ad, '
-                 'likes {count}, owner {id, username, full_name, profile_pic_url}, '
+                 'likes {count}, owner {id, username, full_name, profile_pic_url, '
+                 'is_verified, is_private }, '
                  '__typename, thumbnail_src, video_views, video_url}, page_info}}' % {
                      'user_id': user_id, 'count': count, 'command': command},
             'ref': 'tags::show'
@@ -308,8 +309,8 @@ class Client(object):
                  'dimensions {height, width}, comments_disabled, '
                  'usertags {nodes {x, y, user {id, username, full_name, profile_pic_url} }}, '
                  'location {id, name, lat, lng}, display_src, id, is_video, is_ad, '
-                 'likes {count}, owner {id, username, full_name, profile_pic_url}, '
-                 '__typename, edge {edges}, '
+                 'likes {count}, owner {id, username, full_name, profile_pic_url, '
+                 'is_private, is_verified}, __typename, edge {edges}, '
                  'thumbnail_src, video_views, video_url }' % {'media_code': short_code}
         }
         media = self._make_request(self.API_URL, params=params)
@@ -360,7 +361,8 @@ class Client(object):
 
         params = {
             'q': 'ig_shortcode(%(media_code)s) {comments.before(%(before_comment_id)s, %(count)d) {count, nodes {'
-                 'id, created_at, text, user {id, profile_pic_url, username, full_name}}, page_info}}' %
+                 'id, created_at, text, user {id, profile_pic_url, username, full_name, is_verified, is_private}}, '
+                 'page_info}}' %
                  {'media_code': short_code, 'before_comment_id': before_comment_id, 'count': count},
             'ref': 'media::show'
         }
@@ -400,7 +402,7 @@ class Client(object):
 
         params = {
             'q': 'ig_user(%(user_id)s) {%(command)s {count, page_info {end_cursor, has_next_page}, '
-                 'nodes {id, is_verified, followed_by_viewer, requested_by_viewer, full_name, '
+                 'nodes {id, is_verified, is_private, followed_by_viewer, requested_by_viewer, full_name, '
                  'profile_pic_url, username}}}' % {'user_id': user_id, 'command': command},
             'ref': 'relationships::follow_list',
         }
@@ -435,7 +437,7 @@ class Client(object):
 
         params = {
             'q': 'ig_user(%(user_id)s) {%(command)s {count, page_info {end_cursor, has_next_page}, '
-                 'nodes {id, is_verified, followed_by_viewer, requested_by_viewer, full_name, '
+                 'nodes {id, is_verified, is_private, followed_by_viewer, requested_by_viewer, full_name, '
                  'profile_pic_url, username}}}' % {'user_id': user_id, 'command': command},
             'ref': 'relationships::follow_list',
         }
