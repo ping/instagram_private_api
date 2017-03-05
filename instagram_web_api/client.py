@@ -310,7 +310,7 @@ class Client(object):
                  'usertags {nodes {x, y, user {id, username, full_name, profile_pic_url} }}, '
                  'location {id, name, lat, lng}, display_src, id, is_video, is_ad, '
                  'likes {count}, owner {id, username, full_name, profile_pic_url, '
-                 'is_private, is_verified}, __typename, edge {edges}, '
+                 'is_private, is_verified}, __typename, '
                  'thumbnail_src, video_views, video_url }' % {'media_code': short_code}
         }
         media = self._make_request(self.API_URL, params=params)
