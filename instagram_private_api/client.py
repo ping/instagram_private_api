@@ -275,13 +275,16 @@ class Client(object):
             'parsed_params': parse_params
         }
 
+    def get_cookie_value(self, key):
+        for cookie in self.cookie_jar:
+            if cookie.name.lower() == key.lower():
+                return cookie.value
+        return None
+
     @property
     def csrftoken(self):
         """The client's current csrf token"""
-        for cookie in self.cookie_jar:
-            if cookie.name.lower() == 'csrftoken':
-                return cookie.value
-        return None
+        return self.get_cookie_value('csrftoken')
 
     @property
     def token(self):
@@ -397,7 +400,7 @@ class Client(object):
                 data = ''.encode('ascii')
             else:
                 if not unsigned:
-                    json_params = json.dumps(params)
+                    json_params = json.dumps(params, separators=(',', ':'))
                     hash_sig = self._generate_signature(json_params)
                     post_params = {
                         'ig_sig_key_version': self.key_version,
@@ -889,7 +892,7 @@ class Client(object):
         params.update(self.authenticated_params)
         if usertags:
             utags = {'in': [{'user_id': u['user_id'], 'position': u['position']} for u in usertags]}
-            params['usertags'] = json.dumps(utags)
+            params['usertags'] = json.dumps(utags, separators=(',', ':'))
         res = self._call_api(endpoint, params=params)
         if self.auto_patch:
             ClientCompatPatch.media(res.get('media'))
@@ -1737,6 +1740,8 @@ class Client(object):
         res = self._call_api(endpoint)
         if self.auto_patch and res.get('comments'):
             [ClientCompatPatch.comment(c) for c in res.get('comments', [])]
+            if res.get('pinned_comment'):
+                ClientCompatPatch.comment(res['pinned_comment'])
         return res
 
     def broadcast_heartbeat_and_viewercount(self, broadcast_id):
@@ -2087,7 +2092,8 @@ class Client(object):
         this_ratio = 1.0 * width / height
         return min_ratio <= this_ratio <= max_ratio
 
-    def configure(self, upload_id, size, caption='', location=None):
+    def configure(self, upload_id, size, caption='', location=None,
+                  disable_comments=False, is_sidecar=False):
         """
         Finalises a photo upload. This should not be called directly.
         Use :meth:`post_photo` instead.
@@ -2135,13 +2141,20 @@ class Client(object):
                 params['posting_longitude'] = str(location['lng'])
                 params['media_latitude'] = str(location['lat'])
                 params['media_latitude'] = str(location['lng'])
+        if disable_comments:
+            params['disable_comments'] = '1'
+
+        if is_sidecar:
+            return params
+
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
         if self.auto_patch and res.get('media'):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def configure_video(self, upload_id, size, duration, thumbnail_data, caption='', location=None):
+    def configure_video(self, upload_id, size, duration, thumbnail_data, caption='',
+                        location=None, disable_comments=False, is_sidecar=False):
         """
         Finalises a video upload. This should not be called directly.
         Use :meth:`post_video` instead.
@@ -2156,7 +2169,9 @@ class Client(object):
         if not self.compatible_aspect_ratio(size):
             raise ClientError('Incompatible aspect ratio.')
 
-        self.post_photo(thumbnail_data, size, caption, upload_id, location=location)
+        # upload video thumbnail
+        self.post_photo(thumbnail_data, size, caption, upload_id, location=location,
+                        disable_comments=disable_comments, is_sidecar=is_sidecar)
 
         width, height = size
         endpoint = 'media/configure/?' + urlencode({'video': 1})
@@ -2185,6 +2200,8 @@ class Client(object):
                 'source_height': height
             }
         }
+        if disable_comments:
+            params['disable_comments'] = '1'
         if location:
             media_loc = self._validate_location(location)
             params['location'] = json.dumps(media_loc)
@@ -2196,6 +2213,9 @@ class Client(object):
                 params['posting_longitude'] = str(location['lng'])
                 params['media_latitude'] = str(location['lat'])
                 params['media_latitude'] = str(location['lng'])
+
+        if is_sidecar:
+            return params
 
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -2303,6 +2323,7 @@ class Client(object):
         :param kwargs:
             - **location**: a dict of venue/location information,
                 from :meth:`location_search` or :meth:`location_fb_search`
+            - **disable_comments**: bool to disable comments
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
@@ -2319,7 +2340,9 @@ class Client(object):
         location = kwargs.pop('location', None)
         if location:
             self._validate_location(location)
+        disable_comments = True if kwargs.pop('disable_comments', False) else False
 
+        is_sidecar = kwargs.pop('is_sidecar', False)
         if not upload_id:
             upload_id = str(int(time.time() * 1000))
 
@@ -2330,6 +2353,11 @@ class Client(object):
             ('_csrftoken', self.csrftoken),
             ('image_compression', '{"lib_name":"jt","lib_version":"1.3.0","quality":"87"}')
         ]
+        if is_sidecar:
+            fields.append(('is_sidecar', '1'))
+            if for_video:
+                fields.append(('media_type', '2'))
+
         files = [
             ('photo', 'pending_media_%s%s' % (str(int(time.time() * 1000)), '.jpg'),
              'application/octet-stream', photo_data)
@@ -2342,10 +2370,12 @@ class Client(object):
 
         req = Request(self.api_url + endpoint, body, headers=headers)
         try:
+            self.logger.debug('POST %s' % self.api_url + endpoint)
             response = self.opener.open(req, timeout=self.timeout)
         except HTTPError as e:
             error_msg = e.reason
             error_response = e.read()
+            self.logger.debug('RESPONSE: %s' % error_response)
             try:
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):
@@ -2355,7 +2385,12 @@ class Client(object):
                 pass
             raise ClientError(error_msg, e.code, error_response)
 
-        json_response = json.loads(self._read_response(response))
+        post_response = self._read_response(response)
+        self.logger.debug('RESPONSE: %s' % post_response)
+        json_response = json.loads(post_response)
+
+        if for_video and is_sidecar:
+            return json_response
 
         upload_id = json_response['upload_id']
 
@@ -2365,11 +2400,11 @@ class Client(object):
         # if for_video:
         #     logger.debug('Skip photo configure.')
         #     return json_response
-
         if to_reel:
             return self.configure_to_reel(upload_id, size)
         else:
-            return self.configure(upload_id, size, caption=caption, location=location)
+            return self.configure(upload_id, size, caption=caption, location=location,
+                                  disable_comments=disable_comments, is_sidecar=is_sidecar)
 
     def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False, **kwargs):
         """
@@ -2386,6 +2421,7 @@ class Client(object):
         :param kwargs:
              - **location**: a dict of venue/location information,
                 from :meth:`location_search` or :meth:`location_fb_search`
+             - **disable_comments**: bool to disable comments
         :return:
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
@@ -2408,23 +2444,33 @@ class Client(object):
         location = kwargs.pop('location', None)
         if location:
             self._validate_location(location)
+        disable_comments = True if kwargs.pop('disable_comments', False) else False
 
         endpoint = 'upload/video/'
         upload_id = str(int(time.time() * 1000))
+
         width, height = size
         params = {
             '_csrftoken': self.csrftoken,
             '_uuid': self.uuid,
             'upload_id': upload_id,
-            'media_type': '2',
-            'upload_media_duration_ms': int(duration * 1000),
-            'upload_media_width': width,
-            'upload_media_height': height,
         }
+        is_sidecar = kwargs.pop('is_sidecar', False)
+        if is_sidecar:
+            params['is_sidecar'] = '1'
+        else:
+            params.update({
+                'media_type': '2',
+                'upload_media_duration_ms': int(duration * 1000),
+                'upload_media_width': width,
+                'upload_media_height': height
+            })
 
         res = self._call_api(endpoint, params=params, unsigned=True)
         upload_url = res['video_upload_urls'][-1]['url']
         upload_job = res['video_upload_urls'][-1]['job']
+        # upload_url = res['video_upload_urls'][0]['url']
+        # upload_job = res['video_upload_urls'][0]['job']
 
         chunk_count = 4
         total_len = len(video_data)
@@ -2432,15 +2478,19 @@ class Client(object):
         # Alternatively, can use max_chunk_size_generator(20480, video_data)
         # [TODO] We can be a little smart about using either generators
         # depending on the file size, or other factors
+        # for chunk, data in max_chunk_size_generator(200000, video_data):
         for chunk, data in max_chunk_count_generator(chunk_count, video_data):
             headers = self.default_headers
             headers['Connection'] = 'keep-alive'
             headers['Content-Type'] = 'application/octet-stream'
             headers['Content-Disposition'] = 'attachment; filename="video.mov"'
             headers['Session-ID'] = upload_id
+            if is_sidecar:
+                headers['Cookie'] = 'sessionid=' + self.get_cookie_value('sessionid')
             headers['job'] = upload_job
             headers['Content-Length'] = chunk.length
             headers['Content-Range'] = 'bytes %d-%d/%d' % (chunk.start, chunk.end - 1, total_len)
+            self.logger.debug('POST %s' % upload_url)
             self.logger.debug('Uploading Content-Range: %s' % headers['Content-Range'])
 
             req = Request(
@@ -2448,10 +2498,11 @@ class Client(object):
 
             try:
                 res = self.opener.open(req, timeout=self.timeout)
+                post_response = self._read_response(res)
+                self.logger.debug('RESPONSE: %s' % post_response)
                 if chunk.is_last and res.info().get('Content-Type') == 'application/json':
                     # last chunk
-                    upload_res = json.loads(self._read_response(res))
-
+                    upload_res = json.loads(post_response)
                     configure_delay = int(upload_res.get('configure_delay_ms', 0)) / 1000.0
                     self.logger.debug('Configure delay: %s' % configure_delay)
                     time.sleep(configure_delay)
@@ -2459,6 +2510,7 @@ class Client(object):
             except HTTPError as e:
                 error_msg = e.reason
                 error_response = e.read()
+                self.logger.debug('RESPONSE: %s' % error_response)
                 try:
                     error_obj = json.loads(error_response)
                     if error_obj.get('message'):
@@ -2470,7 +2522,8 @@ class Client(object):
 
         if not to_reel:
             return self.configure_video(
-                upload_id, size, duration, thumbnail_data, caption=caption, location=location)
+                upload_id, size, duration, thumbnail_data, caption=caption, location=location,
+                disable_comments=disable_comments, is_sidecar=is_sidecar)
         else:
             return self.configure_video_to_reel(upload_id, size, duration, thumbnail_data)
 
@@ -2498,3 +2551,96 @@ class Client(object):
         return self.post_video(
             video_data=video_data, size=size, duration=duration,
             thumbnail_data=thumbnail_data, to_reel=True)
+
+    def post_album(self, medias, caption='', location=None, **kwargs):
+        """
+        Post an album of up to 10 photos/videos.
+
+        :param medias: an iterable list/collection of media dict objects
+
+            .. code-block:: javascript
+
+                medias = [
+                    {"type": "image", "size": (720, 720), "data": "..."},
+                    {
+                        "type": "image", "size": (720, 720),
+                        "usertags": [{"user_id":4292127751, "position":[0.625347,0.4384531]}],
+                        "data": "..."
+                    },
+                    {"type": "video", "size": (720, 720), "duration": 12.4, "thumbnail": "...", "data": "..."}
+                ]
+
+        :param caption:
+        :param location:
+        :return:
+        """
+        album_upload_id = str(int(time.time() * 1000))
+        children_metadata = []
+        for media in medias:
+            if len(children_metadata) >= 10:
+                continue
+            if media.get('type', '') not in ['image', 'video']:
+                raise ClientError('Invalid media type: %s' % media.get('type', ''))
+            if not media.get('data'):
+                raise ClientError('Data not specified.')
+            if not media.get('size'):
+                raise ClientError('Size not specified.')
+            if media['type'] == 'video':
+                if not media.get('duration'):
+                    raise ClientError('Duration not specified.')
+                if not media.get('thumbnail'):
+                    raise ClientError('Thumbnail not specified.')
+            aspect_ratio = (media['size'][0] * 1.0) / (media['size'][1] * 1.0)
+            if aspect_ratio > 1.0 or aspect_ratio < 1.0:
+                raise ClientError('Invalid media aspect ratio')
+
+            if media['type'] == 'video':
+                metadata = self.post_video(
+                    video_data=media['data'],
+                    size=media['size'],
+                    duration=media['duration'],
+                    thumbnail_data=media['thumbnail'],
+                    is_sidecar=True
+                )
+            else:
+                metadata = self.post_photo(
+                    photo_data=media['data'],
+                    size=media['size'],
+                    is_sidecar=True,
+                )
+                if media.get('usertags'):
+                    usertags = media['usertags']
+                    utags = {'in': [{'user_id': str(u['user_id']), 'position': u['position']} for u in usertags]}
+                    metadata['usertags'] = json.dumps(utags, separators=(',', ':'))
+            children_metadata.append(metadata)
+
+        if len(children_metadata) <= 1:
+            raise ClientError('Invalid number of media objects: %d' % len(children_metadata))
+
+        # configure as sidecar
+        endpoint = 'media/configure_sidecar/'
+        params = {
+            'caption': caption,
+            'client_sidecar_id': album_upload_id,
+            'children_metadata': children_metadata
+        }
+        if location:
+            media_loc = self._validate_location(location)
+            params['location'] = json.dumps(media_loc)
+            if 'lat' in location and 'lng' in location:
+                params['geotag_enabled'] = '1'
+                params['exif_latitude'] = '0.0'
+                params['exif_longitude'] = '0.0'
+                params['posting_latitude'] = str(location['lat'])
+                params['posting_longitude'] = str(location['lng'])
+                params['media_latitude'] = str(location['lat'])
+                params['media_latitude'] = str(location['lng'])
+        disable_comments = kwargs.pop('disable_comments', False)
+        if disable_comments:
+            params['disable_comments'] = '1'
+
+        params.update(self.authenticated_params)
+        res = self._call_api(endpoint, params=params)
+        if self.auto_patch and res.get('media'):
+            ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
+        return res

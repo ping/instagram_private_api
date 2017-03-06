@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.1.1 (pending)
+- Support album posting with ``post_album()``
+
 ## 1.1.0
 - New endpoints for app client
     * ``suggested_broadcasts()``
