@@ -2492,7 +2492,7 @@ class Client(object):
             self.logger.debug('Uploading Content-Range: %s' % headers['Content-Range'])
 
             req = Request(
-                upload_url.encode('utf-8'), data=data, headers=headers)
+                str(upload_url), data=data, headers=headers)
 
             try:
                 res = self.opener.open(req, timeout=self.timeout)

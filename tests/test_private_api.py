@@ -479,6 +479,34 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
 
+    @unittest.skip('Modifies data.')
+    def test_post_album(self):
+        # Reposting from https://www.instagram.com/p/BL5hkEHDyd5/
+        media_id = '1367271575733086073_2958144170'
+        res = self.api.media_info(media_id)
+        media_info = res['items'][0]
+        video_url = media_info['videos']['standard_resolution']['url']
+        video_size = (media_info['videos']['standard_resolution']['width'],
+                      media_info['videos']['standard_resolution']['height'])
+        thumbnail_url = media_info['images']['standard_resolution']['url']
+        video_res = urlopen(video_url)
+        video_data = video_res.read()
+        thumb_res = urlopen(thumbnail_url)
+        thumb_data = thumb_res.read()
+        duration = media_info['video_duration']
+        medias = [
+            {
+                'type': 'image', 'size': video_size, 'data': thumb_data
+            },
+            {
+                'type': 'video', 'size': video_size, 'duration': duration,
+                'thumbnail': thumb_data, 'data': video_data
+            }
+        ]
+        results = self.api.post_album(medias, caption='Testing...')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('media'))
+
     @unittest.skip('Modifies data. Needs info setup.')
     def test_usertag_self_remove(self):
         results = self.api.usertag_self_remove(self.test_media_id)
@@ -1003,6 +1031,10 @@ if __name__ == '__main__':
         {
             'name': 'test_post_video',
             'test': TestPrivateApi('test_post_video', api)
+        },
+        {
+            'name': 'test_post_album',
+            'test': TestPrivateApi('test_post_album', api)
         },
         {
             'name': 'test_usertag_self_remove',
