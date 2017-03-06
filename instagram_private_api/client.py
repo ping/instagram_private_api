@@ -2469,8 +2469,6 @@ class Client(object):
         res = self._call_api(endpoint, params=params, unsigned=True)
         upload_url = res['video_upload_urls'][-1]['url']
         upload_job = res['video_upload_urls'][-1]['job']
-        # upload_url = res['video_upload_urls'][0]['url']
-        # upload_job = res['video_upload_urls'][0]['job']
 
         chunk_count = 4
         total_len = len(video_data)

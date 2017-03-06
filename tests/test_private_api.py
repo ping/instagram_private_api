@@ -548,7 +548,6 @@ class TestPrivateApi(unittest.TestCase):
     def test_top_search(self):
         results = self.api.top_search('cats')
         self.assertEqual(results.get('status'), 'ok')
-        print(json.dumps(results))
 
     # Compat Patch Tests
     def test_compat_media(self):
