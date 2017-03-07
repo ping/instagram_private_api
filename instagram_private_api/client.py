@@ -52,7 +52,7 @@ class Client(object):
     def __init__(self, username, password, **kwargs):
         """
 
-        :param username: Login usernam
+        :param username: Login username
         :param password: Login password
         :param kwargs: See below
 
@@ -90,7 +90,7 @@ class Client(object):
             kwargs.pop('key_version', None) or user_settings.get('key_version') or
             self.SIG_KEY_VERSION)
         self.ig_capabilities = (
-            kwargs.pop('ig_capabilities', None) or user_settings.get('ig_capabilities')or
+            kwargs.pop('ig_capabilities', None) or user_settings.get('ig_capabilities') or
             self.IG_CAPABILITIES)
 
         # to maintain backward compat for user_agent kwarg
