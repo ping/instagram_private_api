@@ -2,6 +2,7 @@
 
 ## 1.1.1 (pending)
 - Support album posting with ``post_album()``
+- New stickers endpoint
 
 ## 1.1.0
 - New endpoints for app client
