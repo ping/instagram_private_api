@@ -7,6 +7,7 @@ import uuid
 import json
 import re
 import time
+import random
 from datetime import datetime
 import gzip
 from io import BytesIO
@@ -346,6 +347,7 @@ class Client(object):
             'Accept-Encoding': 'gzip, deflate',
             'X-IG-Capabilities': self.ig_capabilities,
             'X-IG-Connection-Type': 'WIFI',
+            'X-IG-Connection-Speed': '%dkbps' % random.randint(1000, 5000),
         }
 
     def _generate_signature(self, input):
@@ -1882,6 +1884,30 @@ class Client(object):
         """
         endpoint = 'media/%(media_id)s/unsave/' % {'media_id': media_id}
         params = {'radio_type': 'WIFI'}
+        params.update(self.authenticated_params)
+        return self._call_api(endpoint, params=params)
+
+    def stickers(self, sticker_type='static_stickers', location=None):
+        """
+        Get sticker assets
+
+        :param sticker_type: One of ['static_stickers']
+        :param location: dict containing 'lat', 'lng', 'horizontalAccuracy'.
+            Example: {'lat': '', 'lng': '', 'horizontalAccuracy': ''}
+        :return:
+        """
+        if sticker_type not in ['static_stickers']:
+            raise ValueError('Invalid sticker_type: %s' % sticker_type)
+        if location and not ('lat' in location and 'lng' in location and 'horizontalAccuracy' in location):
+            raise ValueError('Invalid location')
+        endpoint = 'creatives/assets/'
+        params = {
+            'type': sticker_type
+        }
+        if location:
+            params['lat'] = location['lat']
+            params['lng'] = location['lng']
+            params['horizontalAccuracy'] = location['horizontalAccuracy']
         params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
 

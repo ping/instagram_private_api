@@ -577,6 +577,11 @@ class TestPrivateApi(unittest.TestCase):
         results = self.api.top_search('cats')
         self.assertEqual(results.get('status'), 'ok')
 
+    def test_stickers(self):
+        results = self.api.stickers()
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('static_stickers'))
+
     # Compat Patch Tests
     def test_compat_media(self):
         self.api.auto_patch = False
@@ -1079,6 +1084,10 @@ if __name__ == '__main__':
         {
             'name': 'test_top_search',
             'test': TestPrivateApi('test_top_search', api)
+        },
+        {
+            'name': 'test_stickers',
+            'test': TestPrivateApi('test_stickers', api)
         },
         {
             'name': 'test_compat_media',
