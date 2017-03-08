@@ -1,29 +1,18 @@
-try:
-    # python 2.x
-    import cookielib
-except ImportError:
-    # python 3.x
-    import http.cookiejar as cookielib
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
 from io import BytesIO
 import sys
 import codecs
 import mimetypes
 import uuid
+from .compat import compat_cookiejar, compat_pickle
 
 
-class ClientCookieJar(cookielib.CookieJar):
+class ClientCookieJar(compat_cookiejar.CookieJar):
     """Custom CookieJar that can be pickled to/from strings
     """
     def __init__(self, cookie_string=None, policy=None):
-        cookielib.CookieJar.__init__(self, policy)
+        compat_cookiejar.CookieJar.__init__(self, policy)
         if cookie_string:
-            self._cookies = pickle.loads(cookie_string.encode('utf-8'))
+            self._cookies = compat_pickle.loads(cookie_string.encode('utf-8'))
 
     @property
     def expires_earliest(self):
@@ -32,7 +21,7 @@ class ClientCookieJar(cookielib.CookieJar):
         return None
 
     def dump(self):
-        return pickle.dumps(self._cookies)
+        return compat_pickle.dumps(self._cookies)
 
 
 class MultipartFormDataEncoder(object):

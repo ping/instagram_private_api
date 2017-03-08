@@ -8,27 +8,11 @@ from io import BytesIO
 import time
 import warnings
 from functools import wraps
-try:
-    # python 2.x
-    import cookielib
-    from urllib2 import (
-        build_opener, Request, HTTPError, URLError, HTTPCookieProcessor,
-        ProxyHandler, HTTPHandler, HTTPSHandler)
-    from urllib import urlencode
-    from urlparse import urlparse
-except ImportError:
-    # python 3.x
-    import http.cookiejar as cookielib
-    from urllib.request import (
-        build_opener, Request, HTTPCookieProcessor,
-        ProxyHandler, HTTPHandler, HTTPSHandler)
-    from urllib.error import HTTPError, URLError
-    from urllib.parse import urlencode, urlparse
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
+from .compat import (
+    compat_pickle, compat_cookiejar, compat_urllib_request,
+    compat_urllib_parse, compat_urllib_parse_urlparse, compat_urllib_error
+)
 from .compatpatch import ClientCompatPatch
 from .errors import ClientError, ClientLoginError, ClientCookieExpiredError
 
@@ -89,27 +73,27 @@ class Client(object):
         proxy = kwargs.pop('proxy', None)
         if proxy:
             warnings.warn('Proxy support is alpha.', UserWarning)
-            parsed_url = urlparse(proxy)
+            parsed_url = compat_urllib_parse_urlparse(proxy)
             if parsed_url.netloc and parsed_url.scheme:
                 proxy_address = '%s://%s' % (parsed_url.scheme, parsed_url.netloc)
-                proxy_handler = ProxyHandler({'https': proxy_address})
+                proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
             else:
                 raise ClientError('Invalid proxy argument: %s' % proxy)
         handlers = []
         if proxy_handler:
             handlers.append(proxy_handler)
-        cookie_handler = HTTPCookieProcessor(cookie_jar)
+        cookie_handler = compat_urllib_request.HTTPCookieProcessor(cookie_jar)
         try:
-            httpshandler = HTTPSHandler(context=custom_ssl_context)
+            httpshandler = compat_urllib_request.HTTPSHandler(context=custom_ssl_context)
         except TypeError as e:
             # py version < 2.7.9
-            httpshandler = HTTPSHandler()
+            httpshandler = compat_urllib_request.HTTPSHandler()
 
         handlers.extend([
-            HTTPHandler(),
+            compat_urllib_request.HTTPHandler(),
             httpshandler,
             cookie_handler])
-        opener = build_opener(*handlers)
+        opener = compat_urllib_request.build_opener(*handlers)
         opener.cookie_jar = cookie_jar
         self.opener = opener
 
@@ -179,7 +163,7 @@ class Client(object):
                     'Origin': 'https://www.instagram.com',
                     'Content-Type': 'application/x-www-form-urlencoded'
                 })
-        req = Request(url, headers=headers)
+        req = compat_urllib_request.Request(url, headers=headers)
         if get_method:
             req.get_method = get_method
 
@@ -188,7 +172,7 @@ class Client(object):
             if params == '':    # force post if empty string
                 data = ''.encode('ascii')
             else:
-                data = urlencode(params).encode('ascii')
+                data = compat_urllib_parse.urlencode(params).encode('ascii')
         try:
             self.logger.debug('REQUEST: %s %s' % (url, req.get_method()))
             self.logger.debug('DATA: %s' % data)
@@ -205,9 +189,9 @@ class Client(object):
             self.logger.debug('RESPONSE: %s' % response_content)
             return json.loads(response_content)
 
-        except HTTPError as e:
+        except compat_urllib_error.HTTPError as e:
             raise ClientError('HTTPError "%s" while opening %s' % (e.reason, url), e.code)
-        except URLError as e:
+        except compat_urllib_error.URLError as e:
             raise ClientError('URLError "%s" while opening %s' % (e.reason, url))
 
     def _sanitise_media_id(self, media_id):
@@ -561,7 +545,8 @@ class Client(object):
         :param query_text: Search text
         :return:
         """
-        endpoint = 'https://www.instagram.com/web/search/topsearch/?' + urlencode({'query': query_text})
+        endpoint = 'https://www.instagram.com/web/search/topsearch/?' + compat_urllib_parse_urlparse(
+            {'query': query_text})
         res = self._make_request(endpoint)
         if self.auto_patch:
             for u in res.get('users', []):
@@ -569,13 +554,13 @@ class Client(object):
         return res
 
 
-class ClientCookieJar(cookielib.CookieJar):
+class ClientCookieJar(compat_cookiejar.CookieJar):
     """Custom CookieJar that can be pickled to/from strings
     """
     def __init__(self, cookie_string=None, policy=None):
-        cookielib.CookieJar.__init__(self, policy)
+        compat_cookiejar.CookieJar.__init__(self, policy)
         if cookie_string:
-            self._cookies = pickle.loads(cookie_string.encode('utf-8'))
+            self._cookies = compat_pickle.loads(cookie_string.encode('utf-8'))
 
     @property
     def expires_earliest(self):
@@ -584,4 +569,4 @@ class ClientCookieJar(cookielib.CookieJar):
         return None
 
     def dump(self):
-        return pickle.dumps(self._cookies)
+        return compat_pickle.dumps(self._cookies)
