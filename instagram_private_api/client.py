@@ -420,7 +420,7 @@ class Client(object):
         except HTTPError as e:
             error_msg = e.reason
             error_response = e.read()
-            self.logger.debug('RESPONSE: %s' % error_response)
+            self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
             try:
                 error_obj = json.loads(error_response)
                 if error_obj.get('message') == 'login_required':
@@ -440,7 +440,7 @@ class Client(object):
             return response
 
         response_content = self._read_response(response)
-        self.logger.debug('RESPONSE: %s' % response_content)
+        self.logger.debug('RESPONSE: %d %s' % (response.code, response_content))
         json_response = json.loads(response_content)
 
         if json_response.get('message', '') == 'login_required':
@@ -2401,7 +2401,7 @@ class Client(object):
         except HTTPError as e:
             error_msg = e.reason
             error_response = e.read()
-            self.logger.debug('RESPONSE: %s' % error_response)
+            self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
             try:
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):
@@ -2412,7 +2412,7 @@ class Client(object):
             raise ClientError(error_msg, e.code, error_response)
 
         post_response = self._read_response(response)
-        self.logger.debug('RESPONSE: %s' % post_response)
+        self.logger.debug('RESPONSE: %d %s' % (response.code, post_response))
         json_response = json.loads(post_response)
 
         if for_video and is_sidecar:
@@ -2523,18 +2523,25 @@ class Client(object):
             try:
                 res = self.opener.open(req, timeout=self.timeout)
                 post_response = self._read_response(res)
-                self.logger.debug('RESPONSE: %s' % post_response)
+                self.logger.debug('RESPONSE: %d %s' % (res.code, post_response))
                 if chunk.is_last and res.info().get('Content-Type') == 'application/json':
                     # last chunk
                     upload_res = json.loads(post_response)
                     configure_delay = int(upload_res.get('configure_delay_ms', 0)) / 1000.0
                     self.logger.debug('Configure delay: %s' % configure_delay)
                     time.sleep(configure_delay)
+                elif not chunk.is_last and not post_response.startswith('0-'):
+                    # A correct response will look like 0-199999/4062266 where
+                    # 199999 is the cumulated count of uploaded bytes
+                    # If a non-zero range start value is received, the upload will
+                    # eventually 'Transcode timeout' at configure
+                    self.logger.error('Received chunk upload response: %s' % post_response)
+                    raise ClientError('Upload has unexpectedly failed', code=500)
 
             except HTTPError as e:
                 error_msg = e.reason
                 error_response = e.read()
-                self.logger.debug('RESPONSE: %s' % error_response)
+                self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
                 try:
                     error_obj = json.loads(error_response)
                     if error_obj.get('message'):
