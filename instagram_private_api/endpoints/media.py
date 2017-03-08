@@ -1,7 +1,6 @@
 import json
 import re
 
-from ..compat import compat_urllib_parse
 from ..utils import gen_user_breadcrumb
 from ..compatpatch import ClientCompatPatch
 
@@ -27,14 +26,13 @@ class MediaEndpointsMixin(object):
         if isinstance(media_ids, str):
             media_ids = [media_ids]
 
-        endpoint = 'media/infos/'
         params = {
             '_uuid': self.uuid,
             '_csrftoken': self.csrftoken,
             'media_ids': ','.join(media_ids),
             'ranked_content': 'true'
         }
-        res = self._call_api(endpoint, params=params, unsigned=True)
+        res = self._call_api('media/infos/', params=params, unsigned=True)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
@@ -55,10 +53,8 @@ class MediaEndpointsMixin(object):
             **max_id**: For pagination
         :return:
         """
-        endpoint = 'media/%(media_id)s/comments/?' % {'media_id': media_id}
-        if kwargs:
-            endpoint += compat_urllib_parse.urlencode(kwargs)
-        res = self._call_api(endpoint)
+        endpoint = 'media/%(media_id)s/comments/' % {'media_id': media_id}
+        res = self._call_api(endpoint, query=kwargs)
 
         if self.auto_patch:
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
@@ -76,17 +72,17 @@ class MediaEndpointsMixin(object):
         :return:
         """
 
-        endpoint = 'media/%(media_id)s/comments/?' % {'media_id': media_id}
+        endpoint = 'media/%(media_id)s/comments/' % {'media_id': media_id}
 
         comments = []
         if kwargs:
-            results = self._call_api(endpoint + compat_urllib_parse.urlencode(kwargs))
+            results = self._call_api(endpoint, query=kwargs)
         else:
             results = self._call_api(endpoint)
         comments.extend(results.get('comments', []))
         while results.get('has_more_comments') and results.get('next_max_id') and len(comments) < n:
             kwargs.update({'max_id': results.get('next_max_id')})
-            results = self._call_api(endpoint + compat_urllib_parse.urlencode(kwargs))
+            results = self._call_api(endpoint, query=kwargs)
             comments.extend(results.get('comments', []))
             if not results.get('next_max_id') or not results.get('comments'):
                 # bail out if no max_id or comments returned
@@ -221,9 +217,7 @@ class MediaEndpointsMixin(object):
         :return:
         """
         endpoint = 'media/%(media_id)s/likers/' % {'media_id': media_id}
-        if kwargs:
-            endpoint += '?' + compat_urllib_parse.urlencode(kwargs)
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
@@ -296,10 +290,9 @@ class MediaEndpointsMixin(object):
 
         :return:
         """
-        endpoint = 'media/seen/'
         params = {'nuxes': {}, 'reels': reels}
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        res = self._call_api('media/seen/', params=params)
         return res
 
     def comment_like(self, comment_id):

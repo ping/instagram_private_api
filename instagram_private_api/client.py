@@ -383,8 +383,11 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             res = response.read().decode('utf8')
         return res
 
-    def _call_api(self, endpoint, params=None, return_response=False, unsigned=False):
+    def _call_api(self, endpoint, params=None, query=None, return_response=False, unsigned=False):
         url = self.api_url + endpoint
+        if query:
+            url += ('?' if '?' not in endpoint else '&') + compat_urllib_parse.urlencode(query)
+
         headers = self.default_headers
         data = None
         if params or params == '':
@@ -446,56 +449,3 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 error_response=json.dumps(json_response))
 
         return json_response
-
-    def login(self):
-        """Login."""
-        challenge_response = self._call_api(
-            'si/fetch_headers/?' + compat_urllib_parse.urlencode(
-                {'challenge_type': 'signup', 'guid': self.generate_uuid(True)}),
-            params='', return_response=True)
-        cookie_info = challenge_response.info().get('Set-Cookie')
-        mobj = re.search(r'csrftoken=(?P<csrf>[^;]+)', cookie_info)
-        if not mobj:
-            raise ClientError('Unable to get csrf from login challenge.')
-        csrf = mobj.group('csrf')
-
-        login_params = {
-            'device_id': self.device_id,
-            'guid': self.uuid,
-            'phone_id': self.phone_id,
-            '_csrftoken': csrf,
-            'username': self.username,
-            'password': self.password,
-            'login_attempt_count': '0',
-        }
-
-        try:
-            login_response = self._call_api(
-                'accounts/login/', params=login_params, return_response=True)
-        except compat_urllib_error.HTTPError as e:
-            error_response = e.read()
-            if e.code == 400:
-                raise ClientLoginError('Unable to login: %s' % e)
-            raise ClientError(e.reason, e.code, error_response)
-
-        if not self.csrftoken:
-            raise ClientError('Unable to get csrf from login.')
-
-        login_json = json.loads(self._read_response(login_response))
-
-        if not login_json.get('logged_in_user', {}).get('pk'):
-            raise ClientLoginError('Unable to login.')
-
-        if self.on_login:
-            on_login_callback = self.on_login
-            on_login_callback(self)
-
-        # # Post-login calls in client
-        # self.sync()
-        # self.autocomplete_user_list()
-        # self.feed_timeline()
-        # self.ranked_recipients()
-        # self.recent_recipients()
-        # self.direct_v2_inbox()
-        # self.news_inbox()
-        # self.explore()

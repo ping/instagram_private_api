@@ -1,6 +1,5 @@
 import json
 import time
-from ..compat import compat_urllib_parse
 
 
 class LocationsEndpointsMixin(object):
@@ -38,13 +37,12 @@ class LocationsEndpointsMixin(object):
         :return:
         """
         endpoint = 'locations/%(location_id)s/related/' % {'location_id': location_id}
-        params = {
+        query = {
             'visited': json.dumps([{'id': location_id, 'type': 'location'}], separators=(',', ':')),
             'related_types': json.dumps(['location'], separators=(',', ':'))}
         if kwargs:
-            params.update(kwargs)
-        endpoint += '?' + compat_urllib_parse.urlencode(params)
-        return self._call_api(endpoint)
+            query.update(kwargs)
+        return self._call_api(endpoint, query=query)
 
     def location_search(self, latitude, longitude, query=None):
         """
@@ -55,14 +53,12 @@ class LocationsEndpointsMixin(object):
         :param query:
         :return:
         """
-        endpoint = 'location_search/'
-        params = {
+        query_params = {
             'rank_token': self.rank_token,
             'latitude': latitude,
             'longitude': longitude,
             'timestamp': int(time.time())
         }
         if query:
-            params['search_query'] = query
-        endpoint += '?' + compat_urllib_parse.urlencode(params)
-        return self._call_api(endpoint)
+            query_params['search_query'] = query
+        return self._call_api('location_search/', query=query_params)

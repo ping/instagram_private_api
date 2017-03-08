@@ -1,5 +1,4 @@
 import json
-from ..compat import compat_urllib_parse
 
 
 class TagsEndpointsMixin(object):
@@ -23,13 +22,10 @@ class TagsEndpointsMixin(object):
         :return:
         """
         endpoint = 'tags/%(tag)s/related/' % {'tag': tag}
-        params = {
+        query = {
             'visited': json.dumps([{'id': tag, 'type': 'hashtag'}], separators=(',', ':')),
             'related_types': json.dumps(['hashtag'], separators=(',', ':'))}
-        if kwargs:
-            params.update(kwargs)
-        endpoint += '?' + compat_urllib_parse.urlencode(params)
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query=query)
         return res
 
     def tag_search(self, text, **kwargs):
@@ -40,7 +36,6 @@ class TagsEndpointsMixin(object):
         :param kwargs:
         :return:
         """
-        endpoint = 'tags/search/'
         query = {
             'is_typeahead': True,
             'q': text,
@@ -48,6 +43,5 @@ class TagsEndpointsMixin(object):
         }
         if kwargs:
             query.update(kwargs)
-        endpoint += '?' + compat_urllib_parse.urlencode(query)
-        res = self._call_api(endpoint)
+        res = self._call_api('tags/search/', query=query)
         return res

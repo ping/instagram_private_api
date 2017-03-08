@@ -1,6 +1,5 @@
 import time
 
-from ..compat import compat_urllib_parse
 from ..utils import gen_user_breadcrumb
 from ..compatpatch import ClientCompatPatch
 
@@ -34,8 +33,7 @@ class LiveEndpointsMixin(object):
         endpoint = 'live/%(broadcast_id)s/get_like_count/' % {'broadcast_id': broadcast_id}
         if like_ts and int(like_ts) > int(time.time()):
             raise ValueError('Invalid like_ts')
-        endpoint += '?' + compat_urllib_parse.urlencode({'like_ts': like_ts})
-        return self._call_api(endpoint)
+        return self._call_api(endpoint, query={'like_ts': like_ts})
 
     def broadcast_comments(self, broadcast_id, last_comment_ts=0):
         """
@@ -49,8 +47,7 @@ class LiveEndpointsMixin(object):
         endpoint = 'live/%(broadcast_id)s/get_comment/' % {'broadcast_id': broadcast_id}
         if last_comment_ts and int(last_comment_ts) > int(time.time()):
             raise ValueError('Invalid last_comment_ts')
-        endpoint += '?' + compat_urllib_parse.urlencode({'last_comment_ts': last_comment_ts})
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query={'last_comment_ts': last_comment_ts})
         if self.auto_patch and res.get('comments'):
             [ClientCompatPatch.comment(c) for c in res.get('comments', [])]
             if res.get('pinned_comment'):
@@ -146,7 +143,4 @@ class LiveEndpointsMixin(object):
         :param kwargs:
         :return:
         """
-        endpoint = 'live/get_suggested_broadcasts/'
-        if kwargs:
-            endpoint += '?' + compat_urllib_parse.urlencode(kwargs)
-        return self._call_api(endpoint)
+        return self._call_api('live/get_suggested_broadcasts/', query=kwargs)

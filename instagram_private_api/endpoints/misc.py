@@ -1,5 +1,4 @@
 import warnings
-from ..compat import compat_urllib_parse
 from ..constants import Constants
 from ..compatpatch import ClientCompatPatch
 
@@ -8,7 +7,6 @@ class MiscEndpointsMixin(object):
 
     def sync(self, prelogin=False):
         """Synchronise experiments."""
-        endpoint = 'qe/sync/'
         if prelogin:
             params = {
                 'id': self.generate_uuid(),
@@ -20,16 +18,15 @@ class MiscEndpointsMixin(object):
                 'experiments': Constants.EXPERIMENTS
             }
             params.update(self.authenticated_params)
-        return self._call_api(endpoint, params=params)
+        return self._call_api('qe/sync/', params=params)
 
     def expose(self, experiment='ig_android_profile_contextual_feed'):
-        endpoint = 'qe/expose/'
         params = {
             'id': self.authenticated_user_id,
             'experiment': experiment
         }
         params.update(self.authenticated_params)
-        return self._call_api(endpoint, params=params)
+        return self._call_api('qe/expose/', params=params)
 
     def megaphone_log(self, log_type='feed_aysf', action='seen', reason='', **kwargs):
         """
@@ -41,7 +38,6 @@ class MiscEndpointsMixin(object):
         :param kwargs:
         :return:
         """
-        endpoint = 'megaphone/log/'
         params = {
             'type': log_type,
             'action': action,
@@ -53,12 +49,11 @@ class MiscEndpointsMixin(object):
         }
         if kwargs:
             params.update(kwargs)
-        return self._call_api(endpoint, params=params, unsigned=True)
+        return self._call_api('megaphone/log/', params=params, unsigned=True)
 
     def ranked_recipients(self):
         """Get ranked recipients"""
-        res = self._call_api('direct_v2/ranked_recipients/?' + compat_urllib_parse.urlencode(
-            {'show_threads': 'true'}))
+        res = self._call_api('direct_v2/ranked_recipients/', query={'show_threads': 'true'})
         return res
 
     def recent_recipients(self):
@@ -72,8 +67,8 @@ class MiscEndpointsMixin(object):
 
     def news_inbox(self):
         """Get news inbox"""
-        return self._call_api('news/inbox/?' + compat_urllib_parse.urlencode(
-            {'limited_activity': 'true', 'show_su': 'true'}))
+        return self._call_api(
+            'news/inbox/', query={'limited_activity': 'true', 'show_su': 'true'})
 
     def direct_v2_inbox(self):
         """Get v2 inbox"""
@@ -81,12 +76,10 @@ class MiscEndpointsMixin(object):
 
     def oembed(self, url, **kwargs):
         """Get oembed info"""
-        endpoint = 'oembed?'
-        params = {'url': url}
+        query = {'url': url}
         if kwargs:
-            params.update(kwargs)
-        endpoint += compat_urllib_parse.urlencode(params)
-        res = self._call_api(endpoint)
+            query.update(kwargs)
+        res = self._call_api('oembed', query=query)
         return res
 
     def translate(self, object_id, object_type):
@@ -96,9 +89,9 @@ class MiscEndpointsMixin(object):
             - 2 = COMMENT - unsupported
             - 3 = BIOGRAPHY
         """
-        endpoint = 'language/translate/' + '?' + compat_urllib_parse.urlencode({
-            'id': object_id, 'type': object_type})
-        res = self._call_api(endpoint)
+        res = self._call_api(
+            'language/translate/',
+            query={'id': object_id, 'type': object_type})
         return res
 
     def bulk_translate(self, comment_ids):
@@ -110,11 +103,8 @@ class MiscEndpointsMixin(object):
         """
         if isinstance(comment_ids, str):
             comment_ids = [comment_ids]
-
-        endpoint = 'language/bulk_translate/'
-        params = {'comment_ids': ','.join(comment_ids)}
-        endpoint += '?' + compat_urllib_parse.urlencode(params)
-        res = self._call_api(endpoint)
+        query = {'comment_ids': ','.join(comment_ids)}
+        res = self._call_api('language/bulk_translate/', query=query)
         return res
 
     def location_fb_search(self, query):
@@ -124,10 +114,9 @@ class MiscEndpointsMixin(object):
         :param query: search terms
         :return:
         """
-        endpoint = 'fbsearch/places/?' + compat_urllib_parse.urlencode(
-            {'ranked_token': self.rank_token, 'query': query})
-        res = self._call_api(endpoint)
-        return res
+        return self._call_api(
+            'fbsearch/places/',
+            query={'ranked_token': self.rank_token, 'query': query})
 
     def top_search(self, query):
         """
@@ -136,9 +125,9 @@ class MiscEndpointsMixin(object):
         :param query: search terms
         :return:
         """
-        endpoint = 'fbsearch/topsearch/?' + compat_urllib_parse.urlencode({
-            'context': 'blended', 'ranked_token': self.rank_token, 'query': query})
-        res = self._call_api(endpoint)
+        res = self._call_api(
+            'fbsearch/topsearch/',
+            query={'context': 'blended', 'ranked_token': self.rank_token, 'query': query})
         if self.auto_patch and res.get('users', []):
             [ClientCompatPatch.list_user(u['user']) for u in res['users']]
         return res
@@ -156,7 +145,6 @@ class MiscEndpointsMixin(object):
             raise ValueError('Invalid sticker_type: %s' % sticker_type)
         if location and not ('lat' in location and 'lng' in location and 'horizontalAccuracy' in location):
             raise ValueError('Invalid location')
-        endpoint = 'creatives/assets/'
         params = {
             'type': sticker_type
         }
@@ -165,4 +153,4 @@ class MiscEndpointsMixin(object):
             params['lng'] = location['lng']
             params['horizontalAccuracy'] = location['horizontalAccuracy']
         params.update(self.authenticated_params)
-        return self._call_api(endpoint, params=params)
+        return self._call_api('creatives/assets/', params=params)

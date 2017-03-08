@@ -1,4 +1,3 @@
-from ..compat import compat_urllib_parse
 from ..compatpatch import ClientCompatPatch
 
 
@@ -6,9 +5,9 @@ class FriendshipsEndpointsMixin(object):
 
     def autocomplete_user_list(self):
         """User list for autocomplete"""
-        endpoint = 'friendships/autocomplete_user_list/?' + compat_urllib_parse.urlencode(
-            {'followinfo': 'True', 'version': '2'})
-        res = self._call_api(endpoint)
+        res = self._call_api(
+            'friendships/autocomplete_user_list/',
+            query={'followinfo': 'True', 'version': '2'})
         if self.auto_patch:
             [ClientCompatPatch.list_user(user, drop_incompat_keys=self.drop_incompat_keys)
              for user in res['users']]
@@ -23,15 +22,13 @@ class FriendshipsEndpointsMixin(object):
             - **max_id**: For pagination
         :return:
         """
-        endpoint = 'friendships/%(user_id)s/following/?' % {'user_id': user_id}
-        default_params = {
+        endpoint = 'friendships/%(user_id)s/following/' % {'user_id': user_id}
+        query = {
             'rank_token': self.rank_token,
         }
-        params = default_params.copy()
         if kwargs:
-            params.update(kwargs)
-        endpoint += compat_urllib_parse.urlencode(params)
-        res = self._call_api(endpoint)
+            query.update(kwargs)
+        res = self._call_api(endpoint, query=query)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
@@ -46,15 +43,13 @@ class FriendshipsEndpointsMixin(object):
             - **max_id**: For pagination
         :return:
         """
-        endpoint = 'friendships/%(user_id)s/followers/?' % {'user_id': user_id}
-        default_params = {
+        endpoint = 'friendships/%(user_id)s/followers/' % {'user_id': user_id}
+        query = {
             'rank_token': self.rank_token,
         }
-        params = default_params.copy()
         if kwargs:
-            params.update(kwargs)
-        endpoint += compat_urllib_parse.urlencode(params)
-        res = self._call_api(endpoint)
+            query.update(kwargs)
+        res = self._call_api(endpoint, query=query)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
@@ -115,13 +110,12 @@ class FriendshipsEndpointsMixin(object):
         if isinstance(user_ids, str):
             user_ids = [user_ids]
 
-        endpoint = 'friendships/show_many/'
         params = {
             '_uuid': self.uuid,
             '_csrftoken': self.csrftoken,
             'user_ids': ','.join(user_ids)
         }
-        res = self._call_api(endpoint, params=params, unsigned=True)
+        res = self._call_api('friendships/show_many/', params=params, unsigned=True)
         return res
 
     def friendships_create(self, user_id):

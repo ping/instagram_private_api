@@ -1,4 +1,3 @@
-from ..compat import compat_urllib_parse
 from ..compatpatch import ClientCompatPatch
 
 
@@ -18,7 +17,6 @@ class FeedEndpointsMixin(object):
         as seen by setting seen_posts = comma-separated list of media IDs. Example:
         api.feed_timeline(seen_posts='123456789_12345,987654321_54321')
         """
-        endpoint = 'feed/timeline/'
         params = {
             '_uuid': self.uuid,
             '_csrftoken': self.csrftoken,
@@ -29,7 +27,7 @@ class FeedEndpointsMixin(object):
         }
         if kwargs:
             params.update(kwargs)
-        res = self._call_api(endpoint, params=params, unsigned=True)
+        res = self._call_api('feed/timeline/', params=params, unsigned=True)
         if self.auto_patch:
             [ClientCompatPatch.media(m['media_or_ad'], drop_incompat_keys=self.drop_incompat_keys)
              if m.get('media_or_ad') else m
@@ -45,8 +43,7 @@ class FeedEndpointsMixin(object):
         }
         if kwargs:
             query.update(kwargs)
-        endpoint = 'feed/popular/?' + compat_urllib_parse.urlencode(query)
-        res = self._call_api(endpoint)
+        res = self._call_api('feed/popular', query=query)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
@@ -62,13 +59,11 @@ class FeedEndpointsMixin(object):
             - **min_timestamp**: For pagination
         :return:
         """
-        endpoint = 'feed/user/%(user_id)s/?' % {'user_id': user_id}
-        default_params = {'rank_token': self.rank_token, 'ranked_content': 'true'}
-        params = default_params.copy()
+        endpoint = 'feed/user/%(user_id)s/' % {'user_id': user_id}
+        query = {'rank_token': self.rank_token, 'ranked_content': 'true'}
         if kwargs:
-            params.update(kwargs)
-        endpoint += compat_urllib_parse.urlencode(params)
-        res = self._call_api(endpoint)
+            query.update(kwargs)
+        res = self._call_api(endpoint, query=query)
 
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -90,9 +85,7 @@ class FeedEndpointsMixin(object):
         :return:
         """
         endpoint = 'feed/user/%(user_name)s/username/' % {'user_name': user_name}
-        if kwargs:
-            endpoint += '?' + compat_urllib_parse.urlencode(kwargs)
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
@@ -100,13 +93,7 @@ class FeedEndpointsMixin(object):
 
     def reels_tray(self, **kwargs):
         """Get story reels tray"""
-        endpoint = 'feed/reels_tray/'
-        params = {}
-        if kwargs or params:
-            params.update(kwargs)
-            endpoint += '?' + compat_urllib_parse.urlencode(params)
-
-        res = self._call_api(endpoint)
+        res = self._call_api('feed/reels_tray/', query=kwargs)
         if self.auto_patch:
             for u in res.get('tray', []):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -122,12 +109,7 @@ class FeedEndpointsMixin(object):
         :return:
         """
         endpoint = 'feed/user/%(user_id)s/reel_media/' % {'user_id': user_id}
-        params = {}
-        if kwargs or params:
-            params.update(kwargs)
-            endpoint += '?' + compat_urllib_parse.urlencode(params)
-
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
@@ -141,13 +123,12 @@ class FeedEndpointsMixin(object):
         :param kwargs:
         :return:
         """
-        endpoint = 'feed/reels_media/'
         user_ids = list(map(lambda x: str(x), user_ids))
         params = {'user_ids': user_ids}
         if kwargs:
             params.update(kwargs)
 
-        res = self._call_api(endpoint, params=params)
+        res = self._call_api('feed/reels_media/', params=params)
         if self.auto_patch:
             for reel_media in res.get('reels_media', []):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -165,9 +146,7 @@ class FeedEndpointsMixin(object):
         :return:
         """
         endpoint = 'feed/tag/%(tag)s/' % {'tag': tag}
-        if kwargs:
-            endpoint += '?' + compat_urllib_parse.urlencode(kwargs)
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             if res.get('items'):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -199,9 +178,7 @@ class FeedEndpointsMixin(object):
         :return:
         """
         endpoint = 'feed/location/%(location_id)s/' % {'location_id': location_id}
-        if kwargs:
-            endpoint += '?' + compat_urllib_parse.urlencode(kwargs)
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             if res.get('items'):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -217,10 +194,7 @@ class FeedEndpointsMixin(object):
 
         :return:
         """
-        endpoint = 'feed/saved/'
-        if kwargs:
-            endpoint += '?' + compat_urllib_parse.urlencode(kwargs)
-        res = self._call_api(endpoint)
+        res = self._call_api('feed/saved/', query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', []) if m.get('media')]

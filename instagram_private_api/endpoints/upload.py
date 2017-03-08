@@ -2,7 +2,7 @@ import json
 import time
 import warnings
 
-from ..compat import compat_urllib_parse, compat_urllib_error, compat_urllib_request
+from ..compat import compat_urllib_error, compat_urllib_request
 from ..errors import ClientError
 from ..http import MultipartFormDataEncoder
 from ..utils import max_chunk_count_generator
@@ -183,7 +183,6 @@ class UploadEndpointsMixin(object):
                         disable_comments=disable_comments, is_sidecar=is_sidecar)
 
         width, height = size
-        endpoint = 'media/configure/?' + compat_urllib_parse.urlencode({'video': 1})
         params = {
             'upload_id': upload_id,
             'caption': caption,
@@ -227,7 +226,7 @@ class UploadEndpointsMixin(object):
             return params
 
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        res = self._call_api('media/configure/', params=params, query={'video': 1})
         if res.get('media') and self.auto_patch:
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
@@ -285,7 +284,6 @@ class UploadEndpointsMixin(object):
 
         res = self.post_photo(thumbnail_data, size, '', upload_id=upload_id, to_reel=True)
 
-        endpoint = 'media/configure_to_reel/?' + compat_urllib_parse.urlencode({'video': '1'})
         width, height = size
         params = {
             'source_type': '3',
@@ -313,7 +311,7 @@ class UploadEndpointsMixin(object):
         }
 
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        res = self._call_api('media/configure_to_reel/', params=params, query={'video': '1'})
         if self.auto_patch and res.get('media'):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res

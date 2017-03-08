@@ -1,6 +1,5 @@
 import warnings
 
-from ..compat import compat_urllib_parse
 from ..compatpatch import ClientCompatPatch
 
 
@@ -43,9 +42,7 @@ class UsersEndpointsMixin(object):
         warnings.warn('This endpoint is experimental. Do not use.', UserWarning)
 
         endpoint = 'users/%(user_id)s/full_detail_info/' % {'user_id': user_id}
-        if kwargs:
-            endpoint += '?' + compat_urllib_parse.urlencode(kwargs)
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             ClientCompatPatch.user(res['user_detail']['user'], drop_incompat_keys=self.drop_incompat_keys)
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -75,18 +72,15 @@ class UsersEndpointsMixin(object):
             - **max_id**: For pagination
         :return:
         """
-        endpoint = 'users/search/?'
-        default_params = {
+        query_params = {
             'rank_token': self.rank_token,
             'ig_sig_key_version': self.key_version,
             'is_typeahead': 'true',
             'query': query
         }
-        params = default_params.copy()
         if kwargs:
-            params.update(kwargs)
-        endpoint += compat_urllib_parse.urlencode(params)
-        res = self._call_api(endpoint)
+            query_params.update(kwargs)
+        res = self._call_api('users/search/', query=query_params)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]

@@ -1,18 +1,72 @@
 import json
+import re
 
 from ..compat import compat_urllib_request, compat_urllib_error
-from ..errors import ClientError
+from ..errors import ClientError, ClientLoginError
 from ..http import MultipartFormDataEncoder
 from ..compatpatch import ClientCompatPatch
 
 
 class AccountsEndpointsMixin(object):
 
+    def login(self):
+        """Login."""
+        challenge_response = self._call_api(
+            'si/fetch_headers/',
+            params='',
+            query={'challenge_type': 'signup', 'guid': self.generate_uuid(True)},
+            return_response=True)
+        cookie_info = challenge_response.info().get('Set-Cookie')
+        mobj = re.search(r'csrftoken=(?P<csrf>[^;]+)', cookie_info)
+        if not mobj:
+            raise ClientError('Unable to get csrf from login challenge.')
+        csrf = mobj.group('csrf')
+
+        login_params = {
+            'device_id': self.device_id,
+            'guid': self.uuid,
+            'phone_id': self.phone_id,
+            '_csrftoken': csrf,
+            'username': self.username,
+            'password': self.password,
+            'login_attempt_count': '0',
+        }
+
+        try:
+            login_response = self._call_api(
+                'accounts/login/', params=login_params, return_response=True)
+        except compat_urllib_error.HTTPError as e:
+            error_response = e.read()
+            if e.code == 400:
+                raise ClientLoginError('Unable to login: %s' % e)
+            raise ClientError(e.reason, e.code, error_response)
+
+        if not self.csrftoken:
+            raise ClientError('Unable to get csrf from login.')
+
+        login_json = json.loads(self._read_response(login_response))
+
+        if not login_json.get('logged_in_user', {}).get('pk'):
+            raise ClientLoginError('Unable to login.')
+
+        if self.on_login:
+            on_login_callback = self.on_login
+            on_login_callback(self)
+
+        # # Post-login calls in client
+        # self.sync()
+        # self.autocomplete_user_list()
+        # self.feed_timeline()
+        # self.ranked_recipients()
+        # self.recent_recipients()
+        # self.direct_v2_inbox()
+        # self.news_inbox()
+        # self.explore()
+
     def current_user(self):
         """Get current user info"""
-        endpoint = 'accounts/current_user/?edit=true'
         params = self.authenticated_params
-        res = self._call_api(endpoint, params=params)
+        res = self._call_api('accounts/current_user/', params=params, query={'edit': 'true'})
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
@@ -34,7 +88,6 @@ class AccountsEndpointsMixin(object):
         if not email:
             raise ValueError('Email is required.')
 
-        endpoint = 'accounts/edit_profile/'
         params = {
             'username': self.authenticated_user_name,
             'gender': int(gender),
@@ -45,15 +98,15 @@ class AccountsEndpointsMixin(object):
             'email': email,
         }
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        res = self._call_api('accounts/edit_profile/', params=params)
         if self.auto_patch:
             ClientCompatPatch.user(res.get('user'))
         return res
 
     def remove_profile_picture(self):
         """Remove profile picture"""
-        endpoint = 'accounts/remove_profile_picture/'
-        res = self._call_api(endpoint, params=self.authenticated_params)
+        res = self._call_api(
+            'accounts/remove_profile_picture/', params=self.authenticated_params)
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
@@ -106,23 +159,20 @@ class AccountsEndpointsMixin(object):
 
     def set_account_private(self):
         """Make account private"""
-        endpoint = 'accounts/set_private/'
-        res = self._call_api(endpoint, params=self.authenticated_params)
+        res = self._call_api('accounts/set_private/', params=self.authenticated_params)
         if self.auto_patch:
             ClientCompatPatch.list_user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
     def set_account_public(self):
         """Make account public"""""
-        endpoint = 'accounts/set_public/'
-        res = self._call_api(endpoint, params=self.authenticated_params)
+        res = self._call_api('accounts/set_public/', params=self.authenticated_params)
         if self.auto_patch:
             ClientCompatPatch.list_user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
     def logout(self):
         """Logout user"""
-        endpoint = 'accounts/logout/'
         params = {
             'phone_id': self.phone_id,
             '_csrftoken': self.csrftoken,
@@ -130,4 +180,4 @@ class AccountsEndpointsMixin(object):
             'device_id': self.device_id,
             '_uuid': self.uuid
         }
-        return self._call_api(endpoint, params=params, unsigned=True)
+        return self._call_api('accounts/logout/', params=params, unsigned=True)
