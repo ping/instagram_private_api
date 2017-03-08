@@ -12,25 +12,18 @@ from datetime import datetime
 import gzip
 from io import BytesIO
 import warnings
-from .compat import compat_urllib_parse
-from .compat import compat_urllib_error
-from .compat import compat_urllib_request
-from .compat import compat_urllib_parse_urlparse
+from .compat import (
+    compat_urllib_parse, compat_urllib_error,
+    compat_urllib_request, compat_urllib_parse_urlparse)
 from .errors import ClientError, ClientLoginError, ClientLoginRequiredError, ClientCookieExpiredError
 from .constants import Constants
 from .http import ClientCookieJar
-from .endpoints.accounts import AccountsEndpointsMixin
-from .endpoints.discover import DiscoverEndpointsMixin
-from .endpoints.feed import FeedEndpointsMixin
-from .endpoints.friendships import FriendshipsEndpointsMixin
-from .endpoints.live import LiveEndpointsMixin
-from .endpoints.media import MediaEndpointsMixin
-from .endpoints.misc import MiscEndpointsMixin
-from .endpoints.locations import LocationsEndpointsMixin
-from .endpoints.tags import TagsEndpointsMixin
-from .endpoints.upload import UploadEndpointsMixin
-from .endpoints.users import UsersEndpointsMixin
-from .endpoints.usertags import UsertagsEndpointsMixin
+from .endpoints import (
+    AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
+    FriendshipsEndpointsMixin, LiveEndpointsMixin, MediaEndpointsMixin,
+    MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
+    UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin
+)
 
 logger = logging.getLogger(__name__)
 
