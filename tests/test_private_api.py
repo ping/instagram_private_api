@@ -582,6 +582,13 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('static_stickers'))
 
+    def test_check_username(self):
+        results = self.api.check_username('instagram')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('available'))
+        self.assertIsNotNone(results.get('error'))
+        self.assertIsNotNone(results.get('error_type'))
+
     # Compat Patch Tests
     def test_compat_media(self):
         self.api.auto_patch = False
@@ -1088,6 +1095,10 @@ if __name__ == '__main__':
         {
             'name': 'test_stickers',
             'test': TestPrivateApi('test_stickers', api)
+        },
+        {
+            'name': 'test_check_username',
+            'test': TestPrivateApi('test_check_username', api)
         },
         {
             'name': 'test_compat_media',

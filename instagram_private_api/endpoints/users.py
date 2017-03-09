@@ -85,3 +85,22 @@ class UsersEndpointsMixin(object):
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
         return res
+
+    def check_username(self, username):
+        """
+        Check username
+
+        :param username:
+        :return:
+            .. code-block:: javascript
+
+                {
+                  "status": "ok",
+                  "available": false,
+                  "username": "xxx",
+                  "error_type": "username_is_taken",
+                  "error": "The username xxx is not available."
+                }
+        """
+        params = {'username': username}
+        return self._call_api('users/check_username/', params=params)
