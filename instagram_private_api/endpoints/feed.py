@@ -96,6 +96,8 @@ class FeedEndpointsMixin(object):
         res = self._call_api('feed/reels_tray/', query=kwargs)
         if self.auto_patch:
             for u in res.get('tray', []):
+                if not u.get('items'):
+                    continue
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
                  for m in u.get('items', [])]
         return res
