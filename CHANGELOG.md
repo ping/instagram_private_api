@@ -1,8 +1,9 @@
 # Change Log
 
-## 1.1.1 (pending)
+## 1.1.1
 - Support album posting with ``post_album()``
 - New stickers endpoint
+- Internal refactoring
 
 ## 1.1.0
 - New endpoints for app client
