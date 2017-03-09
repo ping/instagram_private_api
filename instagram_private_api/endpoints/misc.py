@@ -75,7 +75,13 @@ class MiscEndpointsMixin(object):
         return self._call_api('direct_v2/inbox/')
 
     def oembed(self, url, **kwargs):
-        """Get oembed info"""
+        """
+        Get oembed info
+
+        :param url:
+        :param kwargs:
+        :return:
+        """
         query = {'url': url}
         if kwargs:
             query.update(kwargs)
@@ -83,12 +89,16 @@ class MiscEndpointsMixin(object):
         return res
 
     def translate(self, object_id, object_type):
-        warnings.warn('This endpoint is not tested fully.', UserWarning)
-        """type values:
-            - 1 = CAPTION - unsupported
-            - 2 = COMMENT - unsupported
-            - 3 = BIOGRAPHY
         """
+
+        :param object_id: id value for the object
+        :param object_type: One of [1, 2, 3] where
+                            1 = CAPTION - unsupported
+                            2 = COMMENT - unsupported
+                            3 = BIOGRAPHY
+        :return:
+        """
+        warnings.warn('This endpoint is not tested fully.', UserWarning)
         res = self._call_api(
             'language/translate/',
             query={'id': object_id, 'type': object_type})
@@ -138,7 +148,7 @@ class MiscEndpointsMixin(object):
 
         :param sticker_type: One of ['static_stickers']
         :param location: dict containing 'lat', 'lng', 'horizontalAccuracy'.
-            Example: {'lat': '', 'lng': '', 'horizontalAccuracy': ''}
+                         Example: {'lat': '', 'lng': '', 'horizontalAccuracy': ''}
         :return:
         """
         if sticker_type not in ['static_stickers']:

@@ -110,7 +110,10 @@ class UploadEndpointsMixin(object):
         :param upload_id:
         :param size: tuple of (width, height)
         :param caption:
-        :param location: a dict of location information
+        :param location: a dict of venue/location information,
+                         from :meth:`location_search` or :meth:`location_fb_search`
+        :param disable_comments:
+        :param is_sidecar: bool flag for album upload
         :return:
         """
         if not self.compatible_aspect_ratio(size):
@@ -173,6 +176,10 @@ class UploadEndpointsMixin(object):
         :param duration: in seconds
         :param thumbnail_data: byte string of thumbnail photo
         :param caption:
+        :param location: a dict of venue/location information,
+                         from :meth:`location_search` or :meth:`location_fb_search`
+        :param disable_comments:
+        :param is_sidecar: bool flag for album upload
         :return:
         """
         if not self.compatible_aspect_ratio(size):
@@ -277,6 +284,8 @@ class UploadEndpointsMixin(object):
 
         :param upload_id:
         :param size: tuple of (width, height)
+        :param duration: in seconds
+        :param thumbnail_data: byte string of thumbnail photo
         :return:
         """
         if not self.reel_compatible_aspect_ratio(size, is_video=True):
@@ -328,8 +337,8 @@ class UploadEndpointsMixin(object):
         :param upload_id:
         :param to_reel: a Story photo
         :param kwargs:
-            - **location**: a dict of venue/location information,
-                from :meth:`location_search` or :meth:`location_fb_search`
+            - **location**: a dict of venue/location information, from :meth:`location_search`
+              or :meth:`location_fb_search`
             - **disable_comments**: bool to disable comments
         :return:
         """
@@ -426,8 +435,8 @@ class UploadEndpointsMixin(object):
         :param caption:
         :param to_reel: post to reel as Story
         :param kwargs:
-             - **location**: a dict of venue/location information,
-                from :meth:`location_search` or :meth:`location_fb_search`
+             - **location**: a dict of venue/location information, from :meth:`location_search`
+               or :meth:`location_fb_search`
              - **disable_comments**: bool to disable comments
         :return:
         """

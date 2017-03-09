@@ -4,7 +4,13 @@ from ..compatpatch import ClientCompatPatch
 class DiscoverEndpointsMixin(object):
 
     def explore(self, **kwargs):
-        """Get explore items"""
+        """
+        Get explore items
+
+        :param kwargs:
+            - **max_id**: For pagination
+        :return:
+        """
         query = {'is_prefetch': 'false', 'is_from_promote': 'false'}
         if kwargs:
             query.update(kwargs)

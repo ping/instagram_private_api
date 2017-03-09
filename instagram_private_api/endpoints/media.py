@@ -8,7 +8,12 @@ from ..compatpatch import ClientCompatPatch
 class MediaEndpointsMixin(object):
 
     def media_info(self, media_id):
-        """Get media info"""
+        """
+        Get media info
+
+        :param media_id:
+        :return:
+        """
         endpoint = 'media/%(media_id)s/info/' % {'media_id': media_id}
         res = self._call_api(endpoint)
         if self.auto_patch:
@@ -39,7 +44,12 @@ class MediaEndpointsMixin(object):
         return res
 
     def media_permalink(self, media_id):
-        """Get media permalink"""
+        """
+        Get media permalink
+
+        :param media_id:
+        :return:
+        """
         endpoint = 'media/%(media_id)s/permalink/' % {'media_id': media_id}
         res = self._call_api(endpoint)
         return res
