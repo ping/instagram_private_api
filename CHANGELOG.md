@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.2 (pending)
+- New check username endpoint ``check_username()``
+- New comment likers endpoint ``comment_likers()``
+
 ## 1.1.1
 - Support album posting with ``post_album()``
 - New stickers endpoint

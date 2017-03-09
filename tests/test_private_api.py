@@ -399,6 +399,11 @@ class TestPrivateApi(unittest.TestCase):
         results = self.api.comment_unlike('17852927593096945')
         self.assertEqual(results.get('status'), 'ok')
 
+    def test_comment_likers(self):
+        results = self.api.comment_likers('17852927593096945')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('users'))
+
     @unittest.skip('Modifies data.')
     def test_edit_media(self):
         results = self.api.edit_media(self.test_media_id, 'Hello')
@@ -1007,6 +1012,10 @@ if __name__ == '__main__':
         {
             'name': 'test_comment_unlike',
             'test': TestPrivateApi('test_comment_unlike', api)
+        },
+        {
+            'name': 'test_comment_likers',
+            'test': TestPrivateApi('test_comment_likers', api)
         },
         {
             'name': 'test_save_photo',

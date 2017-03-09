@@ -320,6 +320,20 @@ class MediaEndpointsMixin(object):
         params = self.authenticated_params
         return self._call_api(endpoint, params=params)
 
+    def comment_likers(self, comment_id):
+        """
+        Get users who have liked a comment
+
+        :param comment_id:
+        :return:
+        """
+        endpoint = 'media/%(comment_id)s/comment_likers/' % {'comment_id': comment_id}
+        res = self._call_api(endpoint)
+        if self.auto_patch:
+            [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
+             for u in res.get('users', [])]
+        return res
+
     def comment_unlike(self, comment_id):
         """
         Unlike a comment
