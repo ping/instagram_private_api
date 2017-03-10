@@ -1,4 +1,5 @@
 import json
+import codecs
 import datetime
 import os.path
 import logging
@@ -11,10 +12,24 @@ except ImportError:
     import instagram_private_api as app_api
 
 
+def to_json(python_object):
+    if isinstance(python_object, bytes):
+        return {'__class__': 'bytes',
+                '__value__': codecs.encode(python_object, 'base64').decode()}
+    raise TypeError(repr(python_object) + ' is not JSON serializable')
+
+
+def from_json(json_object):
+    if '__class__' in json_object:
+        if json_object['__class__'] == 'bytes':
+            return codecs.decode(json_object['__value__'].encode(), 'base64')
+    return json_object
+
+
 def onlogin_callback(api, new_settings_file):
     cache_settings = api.settings
     with open(new_settings_file, 'w') as outfile:
-        json.dump(cache_settings, outfile, indent=2)
+        json.dump(cache_settings, outfile, default=to_json)
         print('SAVED: %s' % new_settings_file)
 
 
@@ -51,7 +66,7 @@ if __name__ == '__main__':
                 on_login=lambda x: onlogin_callback(x, args.settings_file_path))
         else:
             with open(settings_file) as file_data:
-                cached_settings = json.load(file_data)
+                cached_settings = json.load(file_data, object_hook=from_json)
             print('Reusing settings: %s' % settings_file)
 
             # reuse auth settings

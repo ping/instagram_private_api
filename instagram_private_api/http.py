@@ -12,7 +12,10 @@ class ClientCookieJar(compat_cookiejar.CookieJar):
     def __init__(self, cookie_string=None, policy=None):
         compat_cookiejar.CookieJar.__init__(self, policy)
         if cookie_string:
-            self._cookies = compat_pickle.loads(cookie_string.encode('utf-8'))
+            if isinstance(cookie_string, bytes):
+                self._cookies = compat_pickle.loads(cookie_string)
+            else:
+                self._cookies = compat_pickle.loads(cookie_string.encode('utf-8'))
 
     @property
     def expires_earliest(self):
