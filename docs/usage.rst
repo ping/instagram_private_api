@@ -99,30 +99,3 @@ The saved auth cookie can be reused for up to 90 days.
 An example of how to save and reuse the auth setting can be found in the examples_.
 
 .. _examples: https://github.com/ping/instagram_private_api/blob/master/examples/savesettings_logincallback.py
-
-
-Miscellaneous Notes
--------------------
-
-Cookies can be shared between both the web and private (app) client, as long as you modify the cookie domain values accordingly.
-
-Example: Web client using app cookie
-
-.. code-block:: python
-
-    from instagram_web_api import Client
-
-    cached_app_cookie = '...'
-    webclient = Client(
-        cookie=cached_app_cookie.replace('i.instagram.com', 'www.instagram.com'))
-
-Example: App client using web cookie
-
-.. code-block:: python
-
-    from instagram_private_api import Client
-
-    cached_web_cookie = '...'
-    appclient = Client(
-        user_name, password,
-        cookie=cached_web_cookie.replace('www.instagram.com', 'i.instagram.com'))
