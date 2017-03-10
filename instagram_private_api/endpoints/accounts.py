@@ -19,7 +19,9 @@ class AccountsEndpointsMixin(object):
         cookie_info = challenge_response.info().get('Set-Cookie')
         mobj = re.search(r'csrftoken=(?P<csrf>[^;]+)', cookie_info)
         if not mobj:
-            raise ClientError('Unable to get csrf from login challenge.')
+            raise ClientError(
+                'Unable to get csrf from login challenge.',
+                error_response=self._read_response(challenge_response))
         csrf = mobj.group('csrf')
 
         login_params = {
@@ -42,7 +44,9 @@ class AccountsEndpointsMixin(object):
             raise ClientError(e.reason, e.code, error_response)
 
         if not self.csrftoken:
-            raise ClientError('Unable to get csrf from login.')
+            raise ClientError(
+                'Unable to get csrf from login.',
+                error_response=self._read_response(login_response))
 
         login_json = json.loads(self._read_response(login_response))
 
