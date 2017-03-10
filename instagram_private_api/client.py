@@ -286,18 +286,12 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     @property
     def authenticated_user_id(self):
         """The current authenticated user id"""
-        for cookie in self.cookie_jar:
-            if cookie.name.lower() == 'ds_user_id':
-                return cookie.value
-        return None
+        return self.get_cookie_value('ds_user_id')
 
     @property
     def authenticated_user_name(self):
         """The current authenticated user name"""
-        for cookie in self.cookie_jar:
-            if cookie.name.lower() == 'ds_user':
-                return cookie.value
-        return None
+        return self.get_cookie_value('ds_user')
 
     @property
     def phone_id(self):
