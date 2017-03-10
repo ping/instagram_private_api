@@ -159,26 +159,6 @@ class ClientCompatPatch():
         media['user'] = cls.list_user(media['user'], drop_incompat_keys=drop_incompat_keys)
         if media['media_type'] == 8 and media.get('carousel_media', []):
             # patch carousel media
-            first_carousel_media = media['carousel_media'][0]
-            image_versions2 = first_carousel_media.get('image_versions2', {}).get('candidates', [])
-            images = {
-                'low_resolution': cls._get_closest_size(image_versions2, 320),
-                'thumbnail': cls._get_closest_size(image_versions2, 150, 150),
-                'standard_resolution': cls._get_closest_size(image_versions2, media.get('original_width', 1000)),
-            }
-            media['images'] = images
-            media['type'] = 'image'
-            if first_carousel_media['media_type'] == 2:
-                video_versions = first_carousel_media.get('video_versions', [])
-                videos = {
-                    'low_bandwidth': cls._get_closest_size(video_versions, 480),
-                    'standard_resolution': cls._get_closest_size(video_versions, media.get('original_width', 640)),
-                    'low_resolution': cls._get_closest_size(video_versions, 640),
-                }
-                if drop_incompat_keys:
-                    [cls._drop_keys(i, ['type']) for i in list(videos.values())]
-                media['videos'] = videos
-                media['type'] = 'video'
             for carousel_media in media.get('carousel_media', []):
                 if carousel_media['media_type'] == 1:
                     carousel_media['type'] = 'image'
@@ -226,6 +206,12 @@ class ClientCompatPatch():
                     carousel_media['location']['latitude'] = carousel_media['location']['lat']
                     carousel_media['location']['longitude'] = carousel_media['location']['lng']
                     carousel_media['location']['id'] = carousel_media['location']['pk']
+
+            first_carousel_media = media['carousel_media'][0]
+            media['images'] = first_carousel_media['images']
+            media['type'] = first_carousel_media['type']
+            if first_carousel_media['media_type'] == 2:
+                media['videos'] = first_carousel_media['videos']
         else:
             image_versions2 = media.get('image_versions2', {}).get('candidates', [])
             images = {
