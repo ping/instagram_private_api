@@ -1,5 +1,4 @@
 import json
-import re
 
 from ..compat import compat_urllib_request, compat_urllib_error
 from ..errors import ClientError, ClientLoginError
@@ -16,19 +15,17 @@ class AccountsEndpointsMixin(object):
             params='',
             query={'challenge_type': 'signup', 'guid': self.generate_uuid(True)},
             return_response=True)
-        cookie_info = challenge_response.info().get('Set-Cookie')
-        mobj = re.search(r'csrftoken=(?P<csrf>[^;]+)', cookie_info)
-        if not mobj:
+
+        if not self.csrftoken:
             raise ClientError(
                 'Unable to get csrf from login challenge.',
                 error_response=self._read_response(challenge_response))
-        csrf = mobj.group('csrf')
 
         login_params = {
             'device_id': self.device_id,
             'guid': self.uuid,
             'phone_id': self.phone_id,
-            '_csrftoken': csrf,
+            '_csrftoken': self.csrftoken,
             'username': self.username,
             'password': self.password,
             'login_attempt_count': '0',
