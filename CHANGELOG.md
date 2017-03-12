@@ -1,8 +1,9 @@
 # Change Log
 
-## 1.1.2 (pending)
+## 1.1.2
 - New check username endpoint ``check_username()``
 - New comment likers endpoint ``comment_likers()``
+- Better Python 3 compatibility
 
 ## 1.1.1
 - Support album posting with ``post_album()``
