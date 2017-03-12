@@ -52,7 +52,7 @@ class UploadEndpointsMixin(object):
     @classmethod
     def standard_ratios(cls):
         """
-        Acceptable min, max values of with/height ratios for an standard media upload
+        Acceptable min, max values of with/height ratios for a standard media upload
 
         :return: tuple of (min. ratio, max. ratio)
         """
@@ -64,14 +64,14 @@ class UploadEndpointsMixin(object):
     @classmethod
     def reel_ratios(cls):
         """
-        Acceptable min, max values of with/height ratios for an story upload
+        Acceptable min, max values of with/height ratios for a story upload
 
         :return: tuple of (min. ratio, max. ratio)
         """
         # min_ratio = 9.0/16.0
         # max_ratio = 3.0/4.0 if is_video else 9.0/16.0
         device_ratios = [(3, 4), (2, 3), (5, 8), (3, 5), (9, 16), (10, 16), (40, 71)]
-        aspect_ratios = map(lambda x: 1.0 * x[0] / x[1], device_ratios)
+        aspect_ratios = list(map(lambda x: 1.0 * x[0] / x[1], device_ratios))
         return min(aspect_ratios), max(aspect_ratios)
 
     @classmethod
