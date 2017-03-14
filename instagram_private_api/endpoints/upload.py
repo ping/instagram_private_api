@@ -1,5 +1,6 @@
 import json
 import time
+from random import randint
 import warnings
 
 from ..compat import compat_urllib_error, compat_urllib_request
@@ -93,9 +94,9 @@ class UploadEndpointsMixin(object):
         Helper method to check aspect ratio for story uploads
 
         :param size: tuple of (width, height)
-        :param is_video: True/False
         :return: True/False
         """
+        warnings.warn('The is_video parameter will be removed in a future version.', FutureWarning)
         min_ratio, max_ratio = cls.reel_ratios()
         width, height = size
         this_ratio = 1.0 * width / height
@@ -247,14 +248,18 @@ class UploadEndpointsMixin(object):
         :param size: tuple of (width, height)
         :return:
         """
-        if not self.reel_compatible_aspect_ratio(size, is_video=False):
+        if not self.reel_compatible_aspect_ratio(size):
             raise ClientError('Incompatible aspect ratio.')
 
-        endpoint = 'media/configure_to_reel/'
+        endpoint = 'media/configure_to_story/'
         width, height = size
         params = {
-            'source_type': '3',
+            'source_type': '4',
             'upload_id': upload_id,
+            'story_media_creation_date': str(int(time.time()) - randint(11, 20)),
+            'client_shared_at': str(int(time.time()) - randint(3, 10)),
+            'client_timestamp': str(int(time.time())),
+            'configure_mode': 1,      # 1 - REEL_SHARE, 2 - DIRECT_STORY_SHARE
             'device': {
                 'manufacturer': self.phone_manufacturer,
                 'model': self.phone_device,
@@ -288,15 +293,19 @@ class UploadEndpointsMixin(object):
         :param thumbnail_data: byte string of thumbnail photo
         :return:
         """
-        if not self.reel_compatible_aspect_ratio(size, is_video=True):
+        if not self.reel_compatible_aspect_ratio(size):
             raise ClientError('Incompatible aspect ratio.')
 
         res = self.post_photo(thumbnail_data, size, '', upload_id=upload_id, to_reel=True)
 
         width, height = size
         params = {
-            'source_type': '3',
+            'source_type': '4',
             'upload_id': upload_id,
+            'story_media_creation_date': str(int(time.time()) - randint(11, 20)),
+            'client_shared_at': str(int(time.time()) - randint(3, 10)),
+            'client_timestamp': str(int(time.time())),
+            'configure_mode': 1,      # 1 - REEL_SHARE, 2 - DIRECT_STORY_SHARE
             'poster_frame_index': 0,
             'length': duration * 1.0,
             'audio_muted': False,
@@ -304,7 +313,7 @@ class UploadEndpointsMixin(object):
             'video_result': 'deprecated',
             'clips': {
                 'length': duration * 1.0,
-                'source_type': '3',
+                'source_type': '4',
                 'camera_position': 'back'
             },
             'device': {
@@ -320,7 +329,7 @@ class UploadEndpointsMixin(object):
         }
 
         params.update(self.authenticated_params)
-        res = self._call_api('media/configure_to_reel/', params=params, query={'video': '1'})
+        res = self._call_api('media/configure_to_story/', params=params, query={'video': '1'})
         if self.auto_patch and res.get('media'):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
@@ -350,7 +359,7 @@ class UploadEndpointsMixin(object):
         if not for_video:
             if not to_reel and not self.compatible_aspect_ratio(size):
                 raise ClientError('Incompatible aspect ratio.')
-            if to_reel and not self.reel_compatible_aspect_ratio(size, is_video=True):
+            if to_reel and not self.reel_compatible_aspect_ratio(size):
                 raise ClientError('Incompatible reel aspect ratio.')
 
         location = kwargs.pop('location', None)
@@ -445,7 +454,7 @@ class UploadEndpointsMixin(object):
         if not to_reel and not self.compatible_aspect_ratio(size):
             raise ClientError('Incompatible aspect ratio.')
 
-        if to_reel and not self.reel_compatible_aspect_ratio(size, is_video=True):
+        if to_reel and not self.reel_compatible_aspect_ratio(size):
             raise ClientError('Incompatible reel aspect ratio.')
 
         if duration < 3.0:
