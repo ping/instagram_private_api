@@ -47,8 +47,7 @@ class MiscEndpointsMixin(object):
             '_csrftoken': self.csrftoken,
             'uuid': self.generate_uuid(return_hex=True)
         }
-        if kwargs:
-            params.update(kwargs)
+        params.update(kwargs)
         return self._call_api('megaphone/log/', params=params, unsigned=True)
 
     def ranked_recipients(self):
@@ -83,8 +82,7 @@ class MiscEndpointsMixin(object):
         :return:
         """
         query = {'url': url}
-        if kwargs:
-            query.update(kwargs)
+        query.update(kwargs)
         res = self._call_api('oembed', query=query)
         return res
 

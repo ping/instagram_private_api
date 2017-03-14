@@ -85,10 +85,7 @@ class MediaEndpointsMixin(object):
         endpoint = 'media/%(media_id)s/comments/' % {'media_id': media_id}
 
         comments = []
-        if kwargs:
-            results = self._call_api(endpoint, query=kwargs)
-        else:
-            results = self._call_api(endpoint)
+        results = self._call_api(endpoint, query=kwargs)
         comments.extend(results.get('comments', []))
         while results.get('has_more_comments') and results.get('next_max_id') and len(comments) < n:
             kwargs.update({'max_id': results.get('next_max_id')})

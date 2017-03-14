@@ -25,8 +25,7 @@ class FeedEndpointsMixin(object):
             'phone_id': self.phone_id,
             'timezone_offset': self.timezone_offset,
         }
-        if kwargs:
-            params.update(kwargs)
+        params.update(kwargs)
         res = self._call_api('feed/timeline/', params=params, unsigned=True)
         if self.auto_patch:
             [ClientCompatPatch.media(m['media_or_ad'], drop_incompat_keys=self.drop_incompat_keys)
@@ -41,8 +40,7 @@ class FeedEndpointsMixin(object):
             'rank_token': self.rank_token,
             'ranked_content': 'true'
         }
-        if kwargs:
-            query.update(kwargs)
+        query.update(kwargs)
         res = self._call_api('feed/popular', query=query)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -61,8 +59,7 @@ class FeedEndpointsMixin(object):
         """
         endpoint = 'feed/user/%(user_id)s/' % {'user_id': user_id}
         query = {'rank_token': self.rank_token, 'ranked_content': 'true'}
-        if kwargs:
-            query.update(kwargs)
+        query.update(kwargs)
         res = self._call_api(endpoint, query=query)
 
         if self.auto_patch:
@@ -127,8 +124,7 @@ class FeedEndpointsMixin(object):
         """
         user_ids = list(map(lambda x: str(x), user_ids))
         params = {'user_ids': user_ids}
-        if kwargs:
-            params.update(kwargs)
+        params.update(kwargs)
 
         res = self._call_api('feed/reels_media/', params=params)
         if self.auto_patch:

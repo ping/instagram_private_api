@@ -40,11 +40,10 @@ class LocationsEndpointsMixin(object):
         query = {
             'visited': json.dumps([{'id': location_id, 'type': 'location'}], separators=(',', ':')),
             'related_types': json.dumps(['location'], separators=(',', ':'))}
-        if kwargs:
-            query.update(kwargs)
+        query.update(kwargs)
         return self._call_api(endpoint, query=query)
 
-    def location_search(self, latitude, longitude, query=None):
+    def location_search(self, latitude, longitude, query=None, **kwargs):
         """
         Location search
 
@@ -61,4 +60,5 @@ class LocationsEndpointsMixin(object):
         }
         if query:
             query_params['search_query'] = query
+        query_params.update(kwargs)
         return self._call_api('location_search/', query=query_params)

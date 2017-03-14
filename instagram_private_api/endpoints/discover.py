@@ -12,8 +12,7 @@ class DiscoverEndpointsMixin(object):
         :return:
         """
         query = {'is_prefetch': 'false', 'is_from_promote': 'false'}
-        if kwargs:
-            query.update(kwargs)
+        query.update(kwargs)
         res = self._call_api('discover/explore/', query=query)
         if self.auto_patch:
             [ClientCompatPatch.media(item['media'], drop_incompat_keys=self.drop_incompat_keys)

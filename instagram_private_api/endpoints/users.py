@@ -78,8 +78,7 @@ class UsersEndpointsMixin(object):
             'is_typeahead': 'true',
             'query': query
         }
-        if kwargs:
-            query_params.update(kwargs)
+        query_params.update(kwargs)
         res = self._call_api('users/search/', query=query_params)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)

@@ -26,8 +26,7 @@ class FriendshipsEndpointsMixin(object):
         query = {
             'rank_token': self.rank_token,
         }
-        if kwargs:
-            query.update(kwargs)
+        query.update(kwargs)
         res = self._call_api(endpoint, query=query)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
@@ -47,8 +46,7 @@ class FriendshipsEndpointsMixin(object):
         query = {
             'rank_token': self.rank_token,
         }
-        if kwargs:
-            query.update(kwargs)
+        query.update(kwargs)
         res = self._call_api(endpoint, query=query)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)

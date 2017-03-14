@@ -41,7 +41,6 @@ class TagsEndpointsMixin(object):
             'q': text,
             'rank_token': self.rank_token,
         }
-        if kwargs:
-            query.update(kwargs)
+        query.update(kwargs)
         res = self._call_api('tags/search/', query=query)
         return res
