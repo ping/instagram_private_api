@@ -17,11 +17,13 @@ try:
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
+    from instagram_private_api.utils import InstagramID
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
+    from instagram_private_api.utils import InstagramID
 
 
 class TestPrivateApi(unittest.TestCase):
@@ -693,6 +695,28 @@ class TestPrivateApi(unittest.TestCase):
         self.assertIsNotNone(user_patched.get('profile_picture'))
 
 
+class TestPrivateApiUtils(unittest.TestCase):
+
+    def __init__(self, testname):
+        super(TestPrivateApiUtils, self).__init__(testname)
+
+    def test_expand_code(self):
+        id = InstagramID.expand_code('BRo7njqD75U')
+        self.assertEqual(id, 1470687481426853460)
+
+    def test_shorten_id(self):
+        shortcode = InstagramID.shorten_id(1470687481426853460)
+        self.assertEqual(shortcode, 'BRo7njqD75U')
+
+    def test_shorten_media_id(self):
+        shortcode = InstagramID.shorten_media_id('1470654893538426156_25025320')
+        self.assertEqual(shortcode, 'BRo0NV0jD0s')
+
+    def test_weblink_from_media_id(self):
+        weblink = InstagramID.weblink_from_media_id('1470517649007430315_25025320')
+        self.assertEqual(weblink, 'https://www.instagram.com/p/BRoVAK5B8qr/')
+
+
 if __name__ == '__main__':
 
     logging.basicConfig()
@@ -1158,6 +1182,22 @@ if __name__ == '__main__':
         {
             'name': 'test_compat_user_list',
             'test': TestPrivateApi('test_compat_user_list', api, user_id='124317')
+        },
+        {
+            'name': 'test_expand_code',
+            'test': TestPrivateApiUtils('test_expand_code')
+        },
+        {
+            'name': 'test_shorten_id',
+            'test': TestPrivateApiUtils('test_shorten_id')
+        },
+        {
+            'name': 'test_shorten_media_id',
+            'test': TestPrivateApiUtils('test_shorten_media_id')
+        },
+        {
+            'name': 'test_weblink_from_media_id',
+            'test': TestPrivateApiUtils('test_weblink_from_media_id')
         }
     ]
 

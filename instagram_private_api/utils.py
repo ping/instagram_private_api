@@ -61,3 +61,74 @@ def max_chunk_size_generator(chunk_size, file_data):
 def max_chunk_count_generator(chunk_count, file_data):
     chunk_size = len(file_data) // chunk_count
     return chunk_generator(chunk_count, chunk_size, file_data)
+
+
+class InstagramID:
+    ENCODING_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
+
+    @classmethod
+    def _encode(cls, num, alphabet=ENCODING_CHARS):
+        if num == 0:
+            return alphabet[0]
+        arr = []
+        base = len(alphabet)
+        while num:
+            rem = num % base
+            num //= base
+            arr.append(alphabet[rem])
+        arr.reverse()
+        return ''.join(arr)
+
+    @classmethod
+    def _decode(cls, shortcode, alphabet=ENCODING_CHARS):
+        base = len(alphabet)
+        strlen = len(shortcode)
+        num = 0
+        idx = 0
+        for char in shortcode:
+            power = (strlen - (idx + 1))
+            num += alphabet.index(char) * (base ** power)
+            idx += 1
+        return num
+
+    @classmethod
+    def weblink_from_media_id(cls, media_id):
+        """
+        Returns the web link for the media id
+
+        :param media_id:
+        :return:
+        """
+        return 'https://www.instagram.com/p/%s/' % cls.shorten_media_id(media_id)
+
+    @classmethod
+    def shorten_media_id(cls, media_id):
+        """
+        Returns the shortcode for a media id
+
+        :param media_id: string in the format id format: AAA_BB where AAA is the pk, BB is user_id
+        :return:
+        """
+         # media id format: AAA_BB where AAA is the pk, BB is user_id
+        internal_id = int((str(media_id).split('_')[0]))
+        return cls.shorten_id(internal_id)
+
+    @classmethod
+    def shorten_id(cls, internal_id):
+        """
+        Returns the shortcode for a numeric media PK
+
+        :param internal_id: numeric ID value
+        :return:
+        """
+        return cls._encode(internal_id)
+
+    @classmethod
+    def expand_code(cls, short_code):
+        """
+        Returns the numeric ID for a shortcode
+
+        :param short_code:
+        :return:
+        """
+        return cls._decode(short_code)
