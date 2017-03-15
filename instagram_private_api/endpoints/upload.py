@@ -460,8 +460,11 @@ class UploadEndpointsMixin(object):
         if duration < 3.0:
             raise ClientError('Duration is less than 3s')
 
-        if duration > 60.0:
+        if not to_reel and duration > 60.0:
             raise ClientError('Duration is more than 60s')
+
+        if to_reel and duration > 15.0:
+            raise ClientError('Duration is more than 15s')
 
         if len(video_data) > 50 * 1024 * 1000:
             raise ClientError('Video file is too big')

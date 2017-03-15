@@ -512,6 +512,32 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
 
+    @unittest.skip('Modifies data.')
+    def test_post_photo_story(self):
+        sample_url = 'http://i.imgur.com/3QzazV2.jpg'
+        res = urlopen(sample_url)
+        photo_data = res.read()
+        size = (1080, 1920)
+        results = self.api.post_photo_story(photo_data, size)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('media'))
+
+    @unittest.skip('Modifies data.')
+    def test_post_video_story(self):
+        video_url = 'http://cdn-e1.streamable.com/video/mp4/bccy0.mp4' \
+                    '?token=1490759887_8f6ca9d18a579dd155fedba8aabd372bd5e4cc6c'
+        video_size = (406, 720)
+        thumbnail_url = 'http://cdn-e1.streamable.com/image/bccy0_first.jpg' \
+                        '?token=1490759887_45002956fe19a20646e633812a2875cd79c61b3d'
+        duration = 10.03
+        video_res = urlopen(video_url)
+        video_data = video_res.read()
+        thumb_res = urlopen(thumbnail_url)
+        thumb_data = thumb_res.read()
+        results = self.api.post_video_story(video_data, video_size, duration, thumb_data)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('media'))
+
     @unittest.skip('Modifies data. Needs info setup.')
     def test_usertag_self_remove(self):
         results = self.api.usertag_self_remove(self.test_media_id)
@@ -1056,6 +1082,14 @@ if __name__ == '__main__':
         {
             'name': 'test_post_album',
             'test': TestPrivateApi('test_post_album', api)
+        },
+        {
+            'name': 'test_post_photo_story',
+            'test': TestPrivateApi('test_post_photo_story', api)
+        },
+        {
+            'name': 'test_post_video_story',
+            'test': TestPrivateApi('test_post_video_story', api)
         },
         {
             'name': 'test_usertag_self_remove',
