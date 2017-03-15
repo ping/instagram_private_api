@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.1.4
+- Update story configure endpoint and parameters
+- Validate video story duration
+- New utility class InstagramID for ID/shortcode conversions
+
+## 1.1.3
+Minor improvements
+
 ## 1.1.2
 - New check username endpoint ``check_username()``
 - New comment likers endpoint ``comment_likers()``
