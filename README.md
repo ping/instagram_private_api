@@ -7,6 +7,7 @@ A Python wrapper for the Instagram private API with no 3rd party dependencies. S
 ![License: MIT](https://img.shields.io/badge/license-MIT_License-blue.svg)
 [![Release](https://img.shields.io/badge/release-v1.1.4-orange.svg)](https://github.com/ping/instagram_private_api/releases)
 [![Docs](https://img.shields.io/badge/docs-readthedocs.io-ff4980.svg)](https://instagram-private-api.readthedocs.io/en/latest/)
+[![Build](https://img.shields.io/travis/ping/instagram_private_api.svg)](https://travis-ci.org/ping/instagram_private_api)
 
 ## Overview
 
