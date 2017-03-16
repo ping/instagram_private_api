@@ -109,7 +109,7 @@ class InstagramID:
         :param media_id: string in the format id format: AAA_BB where AAA is the pk, BB is user_id
         :return:
         """
-         # media id format: AAA_BB where AAA is the pk, BB is user_id
+        # media id format: AAA_BB where AAA is the pk, BB is user_id
         internal_id = int((str(media_id).split('_')[0]))
         return cls.shorten_id(internal_id)
 
