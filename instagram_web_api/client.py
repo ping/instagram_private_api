@@ -85,7 +85,7 @@ class Client(object):
         cookie_handler = compat_urllib_request.HTTPCookieProcessor(cookie_jar)
         try:
             httpshandler = compat_urllib_request.HTTPSHandler(context=custom_ssl_context)
-        except TypeError as e:
+        except TypeError:
             # py version < 2.7.9
             httpshandler = compat_urllib_request.HTTPSHandler()
 

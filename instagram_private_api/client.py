@@ -140,7 +140,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             handlers.append(proxy_handler)
         try:
             httpshandler = compat_urllib_request.HTTPSHandler(context=custom_ssl_context)
-        except TypeError as e:
+        except TypeError:
             # py version < 2.7.9
             httpshandler = compat_urllib_request.HTTPSHandler()
 
