@@ -545,7 +545,7 @@ class Client(object):
         :param query_text: Search text
         :return:
         """
-        endpoint = 'https://www.instagram.com/web/search/topsearch/?' + compat_urllib_parse_urlparse(
+        endpoint = 'https://www.instagram.com/web/search/topsearch/?' + compat_urllib_parse.urlencode(
             {'query': query_text})
         res = self._make_request(endpoint)
         if self.auto_patch:
