@@ -7,6 +7,7 @@ import copy
 import sys
 import logging
 import re
+import warnings
 try:
     from instagram_web_api import (
         __version__, Client, ClientError, ClientLoginError,
@@ -147,6 +148,7 @@ class TestWebApi(unittest.TestCase):
 
 if __name__ == '__main__':
 
+    warnings.simplefilter('ignore', UserWarning)
     logging.basicConfig()
     logger = logging.getLogger('instagram_web_api')
     logger.setLevel(logging.WARNING)

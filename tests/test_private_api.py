@@ -7,6 +7,7 @@ import copy
 import sys
 import logging
 import re
+import warnings
 try:
     # python 2.x
     from urllib2 import urlopen
@@ -719,6 +720,7 @@ class TestPrivateApiUtils(unittest.TestCase):
 
 if __name__ == '__main__':
 
+    warnings.simplefilter('ignore', UserWarning)
     logging.basicConfig()
     logger = logging.getLogger('instagram_private_api')
     logger.setLevel(logging.WARNING)
