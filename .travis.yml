@@ -9,7 +9,6 @@ install:
 
 script:
 - flake8 --max-line-length=120 --exclude=./instagram_private_api/compat.py,./instagram_web_api/compat.py,./instagram_private_api/endpoints/__init__.py
-- python -m compileall -q instagram_web_api instagram_private_api examples tests
 
 branches:
   only:
