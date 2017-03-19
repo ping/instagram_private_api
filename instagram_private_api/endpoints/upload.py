@@ -58,8 +58,7 @@ class UploadEndpointsMixin(object):
         :return: tuple of (min. ratio, max. ratio)
         """
         # Based on IG sampling
-        # differs from https://help.instagram.com/1469029763400082
-        # return 4.0/5.0, 1.19.0/1.0
+        # and from https://help.instagram.com/1469029763400082
         return 4.0 / 5.0, 90.0 / 47.0
 
     @classmethod
@@ -361,6 +360,9 @@ class UploadEndpointsMixin(object):
                 raise ClientError('Incompatible aspect ratio.')
             if to_reel and not self.reel_compatible_aspect_ratio(size):
                 raise ClientError('Incompatible reel aspect ratio.')
+            if not 320 <= size[0] <= 1080:
+                # range from https://help.instagram.com/1631821640426723
+                raise ClientError('Invalid image width.')
 
         location = kwargs.pop('location', None)
         if location:
@@ -456,6 +458,10 @@ class UploadEndpointsMixin(object):
 
         if to_reel and not self.reel_compatible_aspect_ratio(size):
             raise ClientError('Incompatible reel aspect ratio.')
+
+        if not 612 <= size[0] <= 1080:
+            # range was determined through sampling of video uploads
+            raise ClientError('Invalid video width.')
 
         if duration < 3.0:
             raise ClientError('Duration is less than 3s')
