@@ -8,6 +8,7 @@ __version__ = '1.1.4'
 
 packages = [
     'instagram_private_api',
+    'instagram_private_api.endpoints',
     'instagram_web_api'
 ]
 
