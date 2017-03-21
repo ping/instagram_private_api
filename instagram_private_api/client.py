@@ -124,7 +124,6 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             raise ClientCookieExpiredError('Oldest cookie expired at %s' % cookie_jar.expires_earliest)
         cookie_handler = compat_urllib_request.HTTPCookieProcessor(cookie_jar)
 
-        custom_ssl_context = kwargs.pop('custom_ssl_context', None)
         proxy_handler = None
         proxy = kwargs.pop('proxy', None)
         if proxy:
@@ -138,6 +137,9 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         handlers = []
         if proxy_handler:
             handlers.append(proxy_handler)
+
+        # Allow user to override custom ssl context where possible
+        custom_ssl_context = kwargs.pop('custom_ssl_context', None)
         try:
             httpshandler = compat_urllib_request.HTTPSHandler(context=custom_ssl_context)
         except TypeError:
@@ -152,7 +154,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         opener.cookie_jar = cookie_jar
         self.opener = opener
 
-        if not cookie_string:   # or not self.token or not self.rank_token:
+        if not cookie_string:   # [TODO] There's probably a better way than to depend on cookie_string
             if not self.username or not self.password:
                 raise ClientLoginRequiredError('login_required', code=400)
             self.login()
@@ -397,6 +399,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                         'signed_body': hash_sig + '.' + json_params
                     }
                 else:
+                    # direct form post
                     post_params = params
                 data = compat_urllib_parse.urlencode(post_params).encode('ascii')
 

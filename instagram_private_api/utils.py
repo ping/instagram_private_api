@@ -23,6 +23,9 @@ def gen_user_breadcrumb(size):
 
 
 class Chunk(object):
+    """
+    Simple object class to encapulate an upload Chunk
+    """
     def __init__(self, index, start, end, total):
         self.index = index
         self.start = start
@@ -43,6 +46,14 @@ class Chunk(object):
 
 
 def chunk_generator(chunk_count, chunk_size, file_data):
+    """
+    Generic chunk generator logic
+
+    :param chunk_count: Number of chunks wanted
+    :param chunk_size: Size of each chunk
+    :param file_data: bytes to be split into chunk
+    :return:
+    """
     total_len = len(file_data)
     for i in range(chunk_count):
         start_range = i * chunk_size
@@ -52,6 +63,13 @@ def chunk_generator(chunk_count, chunk_size, file_data):
 
 
 def max_chunk_size_generator(chunk_size, file_data):
+    """
+    Generate chunks by defining a maximum chunk size
+
+    :param chunk_size: Maximum chunk size allow
+    :param file_data: bytes data
+    :return:
+    """
     chunk_count, final_chunk = divmod(len(file_data), chunk_size)
     if final_chunk:
         chunk_count += 1
@@ -59,11 +77,22 @@ def max_chunk_size_generator(chunk_size, file_data):
 
 
 def max_chunk_count_generator(chunk_count, file_data):
+    """
+    Generate chunks by defining a maximum number of chunks
+
+    :param chunk_count: Max number of chunks
+    :param file_data: bytes data
+    :return:
+    """
     chunk_size = len(file_data) // chunk_count
     return chunk_generator(chunk_count, chunk_size, file_data)
 
 
 class InstagramID:
+    """
+    Utility class to convert between IG's internal numeric ID and the shortcode used in weblinks.
+    Does NOT apply to private accounts.
+    """
     ENCODING_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
 
     @classmethod
