@@ -195,11 +195,13 @@ class Client(object):
             raise ClientError('URLError "%s" while opening %s' % (e.reason, url))
 
     def _sanitise_media_id(self, media_id):
+        """The web API uses the numeric media ID only, and not the formatted one where it's XXXXX_YYY"""
         if re.match(r'[0-9]+_[0-9]+', media_id):    # endpoint uses the entirely numeric ID, not XXXX_YYY
             media_id = media_id.split('_')[0]
         return media_id
 
     def init(self):
+        """Make a HEAD request to get the first csrf token"""
         self._make_request(
             'https://www.instagram.com/', return_response=True, get_method=lambda: 'HEAD')
         if not self.csrftoken:
@@ -212,6 +214,7 @@ class Client(object):
         login_res = self._make_request('https://www.instagram.com/accounts/login/ajax/', params=params)
         if not login_res.get('status', '') == 'ok' or not login_res.get('authenticated'):
             raise ClientLoginError('Unable to login')
+
         if self.on_login:
             on_login_callback = self.on_login
             on_login_callback(self)
@@ -247,6 +250,7 @@ class Client(object):
         :param kwargs:
             - **count**: Number of items to return. Default: 16
             - **min_media_id** / **end_cursor**: For pagination
+            - **extract**: bool. Return a simple list of media
         :return:
         """
 
@@ -276,13 +280,14 @@ class Client(object):
         if self.auto_patch:
             [ClientCompatPatch.media(media, drop_incompat_keys=self.drop_incompat_keys)
              for media in info.get('media', {}).get('nodes', [])]
+
         if kwargs.pop('extract', True):
             return info.get('media', {}).get('nodes', [])
         return info
 
     def media_info(self, short_code, **kwargs):
         """
-        Get media info
+        Get media info. Does not properly extract carousel media.
 
         :param short_code: A media's shortcode
         :param kwargs:
@@ -307,7 +312,7 @@ class Client(object):
 
     def media_info2(self, short_code):
         """
-        Alternative method to get media info
+        Alternative method to get media info. This method works for carousel media.
 
         :param short_code: A media's shortcode
         :param kwargs:
@@ -338,6 +343,7 @@ class Client(object):
         :param kwargs:
             - **count**: Number of comments to return. Default: 16. Maximum: 1000
             - **before_comment_id**: For pagination
+            - **extract**: bool. Return a simple list of comments
         :return:
         """
         count = kwargs.pop('count', 16)
@@ -360,6 +366,7 @@ class Client(object):
         if self.auto_patch:
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
              for c in info.get('comments', {}).get('nodes', [])]
+
         if kwargs.pop('extract', True):
             return info.get('comments', {}).get('nodes', [])
         return info
@@ -373,6 +380,7 @@ class Client(object):
         :param kwargs:
             - **count**: Number of followings. Default: 10
             - **end_cursor**: For pagination
+            - **extract**: bool. Return a simple list of users
         :return:
         """
         count = kwargs.pop('count', 10)
@@ -408,6 +416,7 @@ class Client(object):
         :param kwargs:
             - **count**: Number of followers. Default: 10
             - **end_cursor**: For pagination
+            - **extract**: bool. Return a simple list of users
         :return:
         """
         count = kwargs.pop('count', 10)
@@ -494,12 +503,12 @@ class Client(object):
         return self._make_request(endpoint, params='')
 
     @login_required
-    def post_comment(self, media_id, comment):
+    def post_comment(self, media_id, comment_text):
         """
         Post a new comment. Login required.
 
         :param media_id: Media id (all numeric format, without _userid)
-        :param comment: Comment text
+        :param comment_text: Comment text
         :return:
             .. code-block:: javascript
 
@@ -516,9 +525,18 @@ class Client(object):
                     "id": "1785811280000000"
                 }
         """
+        if len(comment_text) > 300:
+            raise ValueError('The total length of the comment cannot exceed 300 characters.')
+        if re.search(r'[a-z]+', comment_text, re.IGNORECASE) and comment_text == comment_text.upper():
+            raise ValueError('The comment cannot consist of all capital letters.')
+        if len(re.findall(r'#[^#]+\b', comment_text, re.UNICODE | re.MULTILINE)) > 4:
+            raise ValueError('The comment cannot contain more than 4 hashtags.')
+        if len(re.findall(r'\bhttps?://\S+\.\S+', comment_text)) > 1:
+            raise ValueError('The comment cannot contain more than 1 URL.')
+
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/comments/%(media_id)s/add/' % {'media_id': media_id}
-        params = {'comment_text': comment}
+        params = {'comment_text': comment_text}
         return self._make_request(endpoint, params=params)
 
     @login_required
