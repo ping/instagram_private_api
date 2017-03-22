@@ -15,7 +15,9 @@ import warnings
 from .compat import (
     compat_urllib_parse, compat_urllib_error,
     compat_urllib_request, compat_urllib_parse_urlparse)
-from .errors import ClientError, ClientLoginError, ClientLoginRequiredError, ClientCookieExpiredError
+from .errors import (
+    ClientErrorCodes, ClientError, ClientLoginError, ClientLoginRequiredError,
+    ClientCookieExpiredError, ClientThrottledError)
 from .constants import Constants
 from .http import ClientCookieJar
 from .endpoints import (
@@ -416,6 +418,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 error_obj = json.loads(error_response)
                 if error_obj.get('message') == 'login_required':
                     raise ClientLoginRequiredError(
+                        error_obj.get('message'), code=e.code,
+                        error_response=json.dumps(error_obj))
+                elif e.code == ClientErrorCodes.TOO_MANY_REQUESTS:
+                    raise ClientThrottledError(
                         error_obj.get('message'), code=e.code,
                         error_response=json.dumps(error_obj))
                 elif error_obj.get('message'):
