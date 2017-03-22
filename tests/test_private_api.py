@@ -623,6 +623,50 @@ class TestPrivateApi(unittest.TestCase):
         self.assertIsNotNone(results.get('error'))
         self.assertIsNotNone(results.get('error_type'))
 
+    def test_validate_useragent(self):
+        ua = 'Instagram 9.2.0 Android (22/5.1.1; 480dpi; 1080x1920; Xiaomi; Redmi Note 3; kenzo; qcom; en_GB)'
+        results = Client.validate_useragent(ua)
+        self.assertEqual(results['parsed_params']['brand'], 'Xiaomi')
+        self.assertEqual(results['parsed_params']['device'], 'Redmi Note 3')
+        self.assertEqual(results['parsed_params']['model'], 'kenzo')
+        self.assertEqual(results['parsed_params']['resolution'], '1080x1920')
+        self.assertEqual(results['parsed_params']['dpi'], '480dpi')
+        self.assertEqual(results['parsed_params']['chipset'], 'qcom')
+        self.assertEqual(results['parsed_params']['android_version'], 22)
+        self.assertEqual(results['parsed_params']['android_release'], '5.1.1')
+        self.assertEqual(results['parsed_params']['app_version'], '9.2.0')
+
+    def test_validate_useragent2(self):
+        ua = 'Instagram 9.2.0 Android (xx/5.1.1; 480dpi; 1080x1920; Xiaomi; Redmi Note 3; kenzo; qcom; en_GB)'
+        with self.assertRaises(ValueError):
+            Client.validate_useragent(ua)
+
+    def test_generate_useragent(self):
+        custom_device = {
+            'manufacturer': 'Samsung',
+            'model': 'maguro',
+            'device': 'Galaxy Nexus',
+            'android_release': '4.3',
+            'android_version': 18,
+            'dpi': '320dpi',
+            'resolution': '720x1280',
+            'chipset': 'qcom'
+        }
+        custom_ua = Client.generate_useragent(
+            android_release=custom_device['android_release'],
+            android_version=custom_device['android_version'],
+            phone_manufacturer=custom_device['manufacturer'],
+            phone_device=custom_device['device'],
+            phone_model=custom_device['model'],
+            phone_dpi=custom_device['dpi'],
+            phone_resolution=custom_device['resolution'],
+            phone_chipset=custom_device['chipset']
+        )
+        self.assertEqual(
+            custom_ua,
+            'Instagram 10.9.0 Android (18/4.3; 320dpi; 720x1280; '
+            'Samsung; Galaxy Nexus; maguro; qcom; en_US)')
+
     # Compat Patch Tests
     def test_compat_media(self):
         self.api.auto_patch = False
@@ -1168,6 +1212,18 @@ if __name__ == '__main__':
         {
             'name': 'test_check_username',
             'test': TestPrivateApi('test_check_username', api)
+        },
+        {
+            'name': 'test_validate_useragent',
+            'test': TestPrivateApi('test_validate_useragent', api)
+        },
+        {
+            'name': 'test_validate_useragent2',
+            'test': TestPrivateApi('test_validate_useragent2', api)
+        },
+        {
+            'name': 'test_generate_useragent',
+            'test': TestPrivateApi('test_generate_useragent', api)
         },
         {
             'name': 'test_compat_media',
