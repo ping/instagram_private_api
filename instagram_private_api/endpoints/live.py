@@ -4,6 +4,16 @@ from ..compatpatch import ClientCompatPatch
 
 class LiveEndpointsMixin(object):
 
+    def user_broadcast(self, user_id):
+        """
+        Helper method to get a user's broadcast if there is one currently live. Returns none otherwise.
+
+        :param user_id:
+        :return:
+        """
+        results = self.user_story_feed(user_id)
+        return results.get('broadcast')
+
     def broadcast_like(self, broadcast_id, like_count=1):
         """
         Like a live broadcast
