@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.2.0
+- Invalid parameters now consistently raise ValueError. Affected endpoints can be found in 146a84b.
+- New ClientThrottledError for 429 (too many requests) errors
+
+## 1.1.5
+- Fix pip setup
+- Fix web client search
+- Add size validation for post_photo and post_video
+
 ## 1.1.4
 - Update story configure endpoint and parameters
 - Validate video story duration

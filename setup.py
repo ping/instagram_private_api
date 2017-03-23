@@ -4,7 +4,7 @@ except ImportError:
     from distutils.core import setup
 
 __author__ = 'ping <lastmodified@gmail.com>'
-__version__ = '1.1.5'
+__version__ = '1.2.0'
 
 packages = [
     'instagram_private_api',
