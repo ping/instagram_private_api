@@ -117,7 +117,7 @@ class UploadEndpointsMixin(object):
         :return:
         """
         if not self.compatible_aspect_ratio(size):
-            raise ClientError('Incompatible aspect ratio.')
+            raise ValueError('Incompatible aspect ratio.')
 
         endpoint = 'media/configure/'
         width, height = size
@@ -183,7 +183,7 @@ class UploadEndpointsMixin(object):
         :return:
         """
         if not self.compatible_aspect_ratio(size):
-            raise ClientError('Incompatible aspect ratio.')
+            raise ValueError('Incompatible aspect ratio.')
 
         # upload video thumbnail
         self.post_photo(thumbnail_data, size, caption, upload_id, location=location,
@@ -248,7 +248,7 @@ class UploadEndpointsMixin(object):
         :return:
         """
         if not self.reel_compatible_aspect_ratio(size):
-            raise ClientError('Incompatible aspect ratio.')
+            raise ValueError('Incompatible aspect ratio.')
 
         endpoint = 'media/configure_to_story/'
         width, height = size
@@ -293,7 +293,7 @@ class UploadEndpointsMixin(object):
         :return:
         """
         if not self.reel_compatible_aspect_ratio(size):
-            raise ClientError('Incompatible aspect ratio.')
+            raise ValueError('Incompatible aspect ratio.')
 
         res = self.post_photo(thumbnail_data, size, '', upload_id=upload_id, to_reel=True)
 
@@ -357,12 +357,12 @@ class UploadEndpointsMixin(object):
 
         if not for_video:
             if not to_reel and not self.compatible_aspect_ratio(size):
-                raise ClientError('Incompatible aspect ratio.')
+                raise ValueError('Incompatible aspect ratio.')
             if to_reel and not self.reel_compatible_aspect_ratio(size):
-                raise ClientError('Incompatible reel aspect ratio.')
+                raise ValueError('Incompatible reel aspect ratio.')
             if not 320 <= size[0] <= 1080:
                 # range from https://help.instagram.com/1631821640426723
-                raise ClientError('Invalid image width.')
+                raise ValueError('Invalid image width.')
 
         location = kwargs.pop('location', None)
         if location:
@@ -454,26 +454,26 @@ class UploadEndpointsMixin(object):
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
 
         if not to_reel and not self.compatible_aspect_ratio(size):
-            raise ClientError('Incompatible aspect ratio.')
+            raise ValueError('Incompatible aspect ratio.')
 
         if to_reel and not self.reel_compatible_aspect_ratio(size):
-            raise ClientError('Incompatible reel aspect ratio.')
+            raise ValueError('Incompatible reel aspect ratio.')
 
         if not 612 <= size[0] <= 1080:
             # range was determined through sampling of video uploads
-            raise ClientError('Invalid video width.')
+            raise ValueError('Invalid video width.')
 
         if duration < 3.0:
-            raise ClientError('Duration is less than 3s')
+            raise ValueError('Duration is less than 3s')
 
         if not to_reel and duration > 60.0:
-            raise ClientError('Duration is more than 60s')
+            raise ValueError('Duration is more than 60s')
 
         if to_reel and duration > 15.0:
-            raise ClientError('Duration is more than 15s')
+            raise ValueError('Duration is more than 15s')
 
         if len(video_data) > 50 * 1024 * 1000:
-            raise ClientError('Video file is too big')
+            raise ValueError('Video file is too big')
 
         location = kwargs.pop('location', None)
         if location:
@@ -619,19 +619,19 @@ class UploadEndpointsMixin(object):
             if len(children_metadata) >= 10:
                 continue
             if media.get('type', '') not in ['image', 'video']:
-                raise ClientError('Invalid media type: %s' % media.get('type', ''))
+                raise ValueError('Invalid media type: %s' % media.get('type', ''))
             if not media.get('data'):
-                raise ClientError('Data not specified.')
+                raise ValueError('Data not specified.')
             if not media.get('size'):
-                raise ClientError('Size not specified.')
+                raise ValueError('Size not specified.')
             if media['type'] == 'video':
                 if not media.get('duration'):
-                    raise ClientError('Duration not specified.')
+                    raise ValueError('Duration not specified.')
                 if not media.get('thumbnail'):
-                    raise ClientError('Thumbnail not specified.')
+                    raise ValueError('Thumbnail not specified.')
             aspect_ratio = (media['size'][0] * 1.0) / (media['size'][1] * 1.0)
             if aspect_ratio > 1.0 or aspect_ratio < 1.0:
-                raise ClientError('Invalid media aspect ratio')
+                raise ValueError('Invalid media aspect ratio')
 
             if media['type'] == 'video':
                 metadata = self.post_video(
@@ -654,7 +654,7 @@ class UploadEndpointsMixin(object):
             children_metadata.append(metadata)
 
         if len(children_metadata) <= 1:
-            raise ClientError('Invalid number of media objects: %d' % len(children_metadata))
+            raise ValueError('Invalid number of media objects: %d' % len(children_metadata))
 
         # configure as sidecar
         endpoint = 'media/configure_sidecar/'
