@@ -1,6 +1,6 @@
 ## Please follow the guide below
 
-- Issues submitted without this template format will likely be **ignored**.
+- Issues submitted without this template format will be **ignored**.
 - You will be asked some questions and requested to provide some information, please read them **carefully** and answer completely.
 - Put an `x` into all the boxes [ ] relevant to your issue (like so [x]).
 - Use the *Preview* tab to see how your issue will actually look like.
