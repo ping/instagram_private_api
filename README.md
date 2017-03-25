@@ -113,6 +113,9 @@ You are advised to persist/cache the auth cookie details to avoid logging in eve
 
 The saved auth cookie can be reused for up to **90 days**.
 
+## Support
+Make sure to review the [contributing documentation](CONTRIBUTING.md) before submitting an issue report or pull request.
+
 ## Legal
 
 Disclaimer: This is not affliated, endorsed or certified by Instagram. This is an independent and unofficial API. Strictly **not for spam**. Use at your own risk.
