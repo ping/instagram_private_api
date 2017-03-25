@@ -5,11 +5,17 @@ import os.path
 import logging
 import argparse
 try:
-    import instagram_private_api as app_api
+    from instagram_private_api import (
+        Client, ClientError, ClientLoginError,
+        ClientCookieExpiredError, ClientLoginRequiredError,
+        __version__ as client_version)
 except ImportError:
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    import instagram_private_api as app_api
+    from instagram_private_api import (
+        Client, ClientError, ClientLoginError,
+        ClientCookieExpiredError, ClientLoginRequiredError,
+        __version__ as client_version)
 
 
 def to_json(python_object):
@@ -51,7 +57,7 @@ if __name__ == '__main__':
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    print('Client version: %s' % app_api.__version__)
+    print('Client version: %s' % client_version)
 
     device_id = None
     try:
@@ -62,7 +68,7 @@ if __name__ == '__main__':
             print('Unable to find file: %s' % settings_file)
 
             # login new
-            api = app_api.Client(
+            api = Client(
                 args.username, args.password,
                 on_login=lambda x: onlogin_callback(x, args.settings_file_path))
         else:
@@ -72,24 +78,24 @@ if __name__ == '__main__':
 
             device_id = cached_settings.get('device_id')
             # reuse auth settings
-            api = app_api.Client(
+            api = Client(
                 args.username, args.password,
                 settings=cached_settings)
 
-    except (app_api.ClientCookieExpiredError, app_api.ClientLoginRequiredError) as e:
+    except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
         print('ClientCookieExpiredError/ClientLoginRequiredError: %s' % e)
 
         # Login expired
         # Do relogin but use default ua, keys and such
-        api = app_api.Client(
+        api = Client(
             args.username, args.password,
             device_id=device_id,
             on_login=lambda x: onlogin_callback(x, args.settings_file_path))
 
-    except app_api.ClientLoginError as e:
+    except ClientLoginError as e:
         print('ClientLoginError %s' % e)
         exit(9)
-    except app_api.ClientError as e:
+    except ClientError as e:
         print('ClientError %s (Code: %d, Response: %s)' % (e.msg, e.code, e.error_response))
         exit(9)
     except Exception as e:

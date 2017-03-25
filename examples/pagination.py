@@ -3,11 +3,13 @@ import os.path
 import logging
 import argparse
 try:
-    import instagram_private_api as app_api
+    from instagram_private_api import (
+        Client, __version__ as client_version)
 except ImportError:
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    import instagram_private_api as app_api
+    from instagram_private_api import (
+        Client, __version__ as client_version)
 
 
 if __name__ == '__main__':
@@ -27,8 +29,8 @@ if __name__ == '__main__':
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    print('Client version: %s' % app_api.__version__)
-    api = app_api.Client(args.username, args.password)
+    print('Client version: %s' % client_version)
+    api = Client(args.username, args.password)
 
     user_id = '2958144170'
     followers = []
