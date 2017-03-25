@@ -53,6 +53,7 @@ if __name__ == '__main__':
 
     print('Client version: %s' % app_api.__version__)
 
+    device_id = None
     try:
 
         settings_file = args.settings_file_path
@@ -69,6 +70,7 @@ if __name__ == '__main__':
                 cached_settings = json.load(file_data, object_hook=from_json)
             print('Reusing settings: %s' % settings_file)
 
+            device_id = cached_settings.get('device_id')
             # reuse auth settings
             api = app_api.Client(
                 args.username, args.password,
@@ -81,6 +83,7 @@ if __name__ == '__main__':
         # Do relogin but use default ua, keys and such
         api = app_api.Client(
             args.username, args.password,
+            device_id=device_id,
             on_login=lambda x: onlogin_callback(x, args.settings_file_path))
 
     except app_api.ClientLoginError as e:
