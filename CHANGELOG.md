@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.1
+- New helper method ``user_broadcast()`` to get a user's live broadcast
+- Add new filters to ``ClientCompatPatch``
+
 ## 1.2.0
 - Invalid parameters now consistently raise ValueError. Affected endpoints can be found in 146a84b.
 - New ClientThrottledError for 429 (too many requests) errors
