@@ -32,6 +32,6 @@ Official Endpoints | Availability | Notes |
 /locations/``location-id`` | Yes | [``api.location_info()``](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.location_info)
 /locations/``location-id``/media/recent | Yes | [``api.feed_location()``](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.feed_location)
 /locations/search | Yes | [``api.location_search()``](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.location_search), [``web.search()``](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.search)
-[Embedding] (https://www.instagram.com/developer/embedding/) |
+[Embedding](https://www.instagram.com/developer/embedding/) |
 /embed | Yes | [``api.oembed()``](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.oembed)
 /p/``shortcode``/media | No

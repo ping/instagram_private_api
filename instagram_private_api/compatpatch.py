@@ -50,6 +50,9 @@ class ClientCompatPatch():
         614: 'Reyes',
         615: 'Lark',
         616: 'Crema',
+        640: 'BrightContrast',
+        642: 'CrazyColor',
+        643: 'SubtleColor',
     }
 
     @classmethod
