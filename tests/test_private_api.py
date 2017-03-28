@@ -527,12 +527,12 @@ class TestPrivateApi(unittest.TestCase):
 
     @unittest.skip('Modifies data.')
     def test_post_video_story(self):
-        video_url = 'http://cdn-e1.streamable.com/video/mp4/bccy0.mp4' \
-                    '?token=1490759887_8f6ca9d18a579dd155fedba8aabd372bd5e4cc6c'
-        video_size = (406, 720)
-        thumbnail_url = 'http://cdn-e1.streamable.com/image/bccy0_first.jpg' \
-                        '?token=1490759887_45002956fe19a20646e633812a2875cd79c61b3d'
-        duration = 10.03
+        video_url = 'https://cdn-e1.streamable.com/video/mp4/08ico.mp4' \
+                    '?token=1491915108_d9b57adee14177db6458eea586a6071f3e53bd38'
+        video_size = (612, 816)
+        thumbnail_url = 'https://cdn-e1.streamable.com/image/08ico_first.jpg' \
+                        '?token=1491915108_792590fd88f6c602e7fef32da17ad06fdee082da'
+        duration = 14.9
         video_res = urlopen(video_url)
         video_data = video_res.read()
         thumb_res = urlopen(thumbnail_url)
