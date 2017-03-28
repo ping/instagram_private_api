@@ -195,7 +195,7 @@ class UploadEndpointsMixin(object):
             'caption': caption,
             'source_type': '3',
             'poster_frame_index': 0,
-            'length': 0.0,
+            'length': duration * 1.0,
             'audio_muted': False,
             'filter_type': '0',
             'video_result': 'deprecated',
