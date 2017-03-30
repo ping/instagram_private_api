@@ -854,6 +854,10 @@ if __name__ == '__main__':
 
     else:
         try:
+            # remove previous app version specific info so that we
+            # can test the new sig key whenever there's an update
+            for k in ['app_version', 'signature_key', 'key_version', 'ig_capabilities']:
+                cached_auth.pop(k, None)
             api = Client(
                 args.username, args.password,
                 auto_patch=True, drop_incompat_keys=False,
