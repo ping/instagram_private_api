@@ -19,12 +19,14 @@ try:
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
     from instagram_private_api.utils import InstagramID
+    from instagram_private_api.constants import Constants
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
     from instagram_private_api.utils import InstagramID
+    from instagram_private_api.constants import Constants
 
 
 class TestPrivateApi(unittest.TestCase):
@@ -664,8 +666,8 @@ class TestPrivateApi(unittest.TestCase):
         )
         self.assertEqual(
             custom_ua,
-            'Instagram 10.9.0 Android (18/4.3; 320dpi; 720x1280; '
-            'Samsung; Galaxy Nexus; maguro; qcom; en_US)')
+            'Instagram %s Android (18/4.3; 320dpi; 720x1280; '
+            'Samsung; Galaxy Nexus; maguro; qcom; en_US)' % Constants.APP_VERSION)
 
     # Compat Patch Tests
     def test_compat_media(self):
