@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.2.2
+- Bug fix ``configure_video()``
+
 ## 1.2.1
 - New helper method ``user_broadcast()`` to get a user's live broadcast
 - Add new filters to ``ClientCompatPatch``
