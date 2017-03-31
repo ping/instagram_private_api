@@ -666,8 +666,20 @@ class TestPrivateApi(unittest.TestCase):
         )
         self.assertEqual(
             custom_ua,
-            'Instagram %s Android (18/4.3; 320dpi; 720x1280; '
-            'Samsung; Galaxy Nexus; maguro; qcom; en_US)' % Constants.APP_VERSION)
+            'Instagram %s Android (%s/%s; %s; %s; '
+            '%s; %s; %s; %s; en_US)'
+            % (
+                Constants.APP_VERSION,
+                custom_device['android_version'],
+                custom_device['android_release'],
+                custom_device['dpi'],
+                custom_device['resolution'],
+                custom_device['manufacturer'],
+                custom_device['device'],
+                custom_device['model'],
+                custom_device['chipset'],
+            )
+        )
 
     # Compat Patch Tests
     def test_compat_media(self):
