@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.2.3
+- Update app version to 10.14.0
+
 ## 1.2.2
 - Bug fix ``configure_video()``
 
