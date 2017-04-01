@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.2.4
+- Fix the case when a cookie doesn't have an expiry date
+
 ## 1.2.3
 - Update app version to 10.14.0
 
