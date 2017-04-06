@@ -51,6 +51,11 @@ class TestPrivateApi(unittest.TestCase):
     def tearDown(self):
         time.sleep(5)   # sleep a bit between tests to avoid HTTP429 errors
 
+    @unittest.skip('Unwise to run frequently.')
+    def test_login(self):
+        new_client = Client(self.api.username, self.api.password)
+        self.assertEqual(new_client.authenticated_user_name, self.api.username)
+
     def test_sync(self):
         results = self.api.sync()
         self.assertEqual(results.get('status'), 'ok')
@@ -883,6 +888,10 @@ if __name__ == '__main__':
 
     suite = unittest.TestSuite()
     tests = [
+        {
+            'name': 'test_login',
+            'test': TestPrivateApi('test_login', api)
+        },
         {
             'name': 'test_sync',
             'test': TestPrivateApi('test_sync', api)

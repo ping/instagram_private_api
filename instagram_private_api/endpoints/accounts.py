@@ -24,6 +24,7 @@ class AccountsEndpointsMixin(object):
         login_params = {
             'device_id': self.device_id,
             'guid': self.uuid,
+            'adid': self.ad_id,
             'phone_id': self.phone_id,
             '_csrftoken': self.csrftoken,
             'username': self.username,

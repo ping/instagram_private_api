@@ -156,6 +156,12 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         opener.cookie_jar = cookie_jar
         self.opener = opener
 
+        # ad_id must be initialised after cookie_jar/opener because
+        # it relies on self.authenticated_user_name
+        self.ad_id = (
+            kwargs.pop('ad_id', None) or user_settings.get('ad_id') or
+            self.generate_adid())
+
         if not cookie_string:   # [TODO] There's probably a better way than to depend on cookie_string
             if not self.username or not self.password:
                 raise ClientLoginRequiredError('login_required', code=400)
@@ -168,6 +174,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         return {
             'uuid': self.uuid,
             'device_id': self.device_id,
+            'ad_id': self.ad_id,
             'signature_key': self.signature_key,
             'key_version': self.key_version,
             'ig_capabilities': self.ig_capabilities,
@@ -372,6 +379,21 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         :return:
         """
         return 'android-%s' % cls.generate_uuid(True, seed)[:16]
+
+    def generate_adid(self, seed=None):
+        """
+        Generate an Advertising ID based on the login username since
+        the Google Ad ID is a personally identifying but resettable ID.
+
+        :return:
+        """
+        modified_seed = seed or self.authenticated_user_name or self.username
+        if modified_seed:
+            # Do some trivial mangling of original seed
+            sha2 = hashlib.sha256()
+            sha2.update(modified_seed.encode('utf-8'))
+            modified_seed = sha2.hexdigest()
+        return self.generate_uuid(False, modified_seed)
 
     def _read_response(self, response):
         if response.info().get('Content-Encoding') == 'gzip':
