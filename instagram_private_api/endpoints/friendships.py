@@ -137,7 +137,7 @@ class FriendshipsEndpointsMixin(object):
                 }
         """
         endpoint = 'friendships/create/%(user_id)s/' % {'user_id': user_id}
-        params = {'user_id': user_id}
+        params = {'user_id': user_id, 'radio_type': self.radio_type}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
         return res
@@ -164,7 +164,7 @@ class FriendshipsEndpointsMixin(object):
                 }
         """
         endpoint = 'friendships/destroy/%(user_id)s/' % {'user_id': user_id}
-        params = {'user_id': user_id}
+        params = {'user_id': user_id, 'radio_type': self.radio_type}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
         return res

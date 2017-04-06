@@ -190,7 +190,8 @@ class MediaEndpointsMixin(object):
             'comment_text': comment_text,
             'user_breadcrumb': gen_user_breadcrumb(len(comment_text)),
             'idempotence_token': self.generate_uuid(),
-            'containermodule': 'comments_feed_timeline'
+            'containermodule': 'comments_feed_timeline',
+            'radio_type': self.radio_type,
         }
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -243,34 +244,45 @@ class MediaEndpointsMixin(object):
              for u in res.get('users', [])]
         return res
 
-    def post_like(self, media_id):
+    def post_like(self, media_id, module_name='feed_timeline'):
         """
         Like a post
 
         :param media_id: Media id
+        :param module_name: Example: 'feed_timeline', 'video_view', 'photo_view'
         :return:
             .. code-block:: javascript
 
                 {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/like/' % {'media_id': media_id}
-        params = {'media_id': media_id}
+        params = {
+            'media_id': media_id,
+            'module_name': module_name,
+            'radio_type': self.radio_type,
+        }
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        # d query param = flag for double tap
+        res = self._call_api(endpoint, params=params, query={'d': '1'})
         return res
 
-    def delete_like(self, media_id):
+    def delete_like(self, media_id, module_name='feed_timeline'):
         """
         Unlike a post
 
         :param media_id:
+        :param module_name: Example: 'feed_timeline', 'video_view', 'photo_view'
         :return:
             .. code-block:: javascript
 
                 {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/unlike/' % {'media_id': media_id}
-        params = {'media_id': media_id}
+        params = {
+            'media_id': media_id,
+            'module_name': module_name,
+            'radio_type': self.radio_type,
+        }
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
         return res

@@ -346,6 +346,11 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'X-IG-Connection-Speed': '%dkbps' % random.randint(1000, 5000),
         }
 
+    @property
+    def radio_type(self):
+        """For use in certain endpoints"""
+        return 'wifi-none'
+
     def _generate_signature(self, input):
         return hmac.new(
             self.signature_key.encode('ascii'), input.encode('ascii'),

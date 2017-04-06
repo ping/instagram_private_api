@@ -416,13 +416,39 @@ class TestPrivateApi(unittest.TestCase):
 
     @unittest.skip('Modifies data.')
     def test_edit_media(self):
-        results = self.api.edit_media(self.test_media_id, 'Hello')
+        results = self.api.self_feed()
+        items = results.get('items', [])
+        results = self.api.edit_media(items[0]['id'], 'Hello')
         self.assertEqual(results.get('status'), 'ok')
 
     @unittest.skip('Modifies data.')
     def test_delete_media(self):
-        results = self.api.delete_media(self.test_media_id)
+        results = self.api.self_feed()
+        items = results.get('items', [])
+        results = self.api.delete_media(items[0]['id'])
         self.assertEqual(results.get('status'), 'ok')
+
+    @unittest.skip('Modifies data.')
+    def test_post_like(self):
+        results = self.api.post_like('1486470123929723160_25025320')
+        self.assertEqual(results.get('status'), 'ok')
+
+    @unittest.skip('Modifies data.')
+    def test_delete_like(self):
+        results = self.api.delete_like('1486470123929723160_25025320')
+        self.assertEqual(results.get('status'), 'ok')
+
+    @unittest.skip('Modifies data.')
+    def test_friendships_create(self):
+        results = self.api.friendships_create('2958144170')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertEqual(results.get('friendship_status', {}).get('following'), True)
+
+    @unittest.skip('Modifies data.')
+    def test_friendships_destroy(self):
+        results = self.api.friendships_destroy('2958144170')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertEqual(results.get('friendship_status', {}).get('following'), False)
 
     @unittest.skip('Modifies data.')
     def test_save_photo(self):
@@ -1139,6 +1165,30 @@ if __name__ == '__main__':
         {
             'name': 'test_comment_likers',
             'test': TestPrivateApi('test_comment_likers', api)
+        },
+        {
+            'name': 'test_edit_media',
+            'test': TestPrivateApi('test_edit_media', api)
+        },
+        {
+            'name': 'test_delete_media',
+            'test': TestPrivateApi('test_delete_media', api)
+        },
+        {
+            'name': 'test_post_like',
+            'test': TestPrivateApi('test_post_like', api)
+        },
+        {
+            'name': 'test_delete_like',
+            'test': TestPrivateApi('test_delete_like', api)
+        },
+        {
+            'name': 'test_friendships_create',
+            'test': TestPrivateApi('test_friendships_create', api)
+        },
+        {
+            'name': 'test_friendships_destroy',
+            'test': TestPrivateApi('test_friendships_destroy', api)
         },
         {
             'name': 'test_save_photo',
