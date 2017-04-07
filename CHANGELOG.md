@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.2.5
+- Update app version to 10.15.0
+- New ad_id property for login
+- Update ``friendships_create()``, ``friendships_destroy()``, ``post_comment()``, ``post_like()``, ``delete_like()``.
+
 ## 1.2.4
 - Fix the case when a cookie doesn't have an expiry date
 
