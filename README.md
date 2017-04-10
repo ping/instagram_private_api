@@ -42,7 +42,7 @@ Documentation is available at https://instagram-private-api.readthedocs.io/en/la
 
 ## Install
 
-No 3rd-party libraries required. Just drop one of or both folders [``instagram_private_api/``](instagram_private_api/) and [``instagram_web_api/``](instagram_web_api/) into your project path or pip install with:
+Install with pip:
 
 ``pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.2.5``
 
