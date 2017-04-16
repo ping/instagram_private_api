@@ -6,14 +6,14 @@ class Constants:
     SIG_KEY_VERSION = '4'
 
     APP_VERSION = '10.15.0'
-    ANDROID_VERSION = 18
-    ANDROID_RELEASE = '4.3'
-    PHONE_MANUFACTURER = 'Xiaomi'
-    PHONE_DEVICE = 'HM 1SW'
-    PHONE_MODEL = 'armani'
-    PHONE_DPI = '320dpi'
-    PHONE_RESOLUTION = '720x1280'
-    PHONE_CHIPSET = 'qcom'
+    ANDROID_VERSION = 23
+    ANDROID_RELEASE = '6.0.1'
+    PHONE_MANUFACTURER = 'Samsung'
+    PHONE_DEVICE = 'SM-G930F'
+    PHONE_MODEL = 'herolte'
+    PHONE_DPI = '640dpi'
+    PHONE_RESOLUTION = '1440x2560'
+    PHONE_CHIPSET = 'samsungexynos8890'
 
     USER_AGENT_FORMAT = \
         'Instagram %(app_version)s Android (%(android_version)d/%(android_release)s; ' \
