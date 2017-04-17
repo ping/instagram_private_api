@@ -8,7 +8,7 @@ class Constants:
     APP_VERSION = '10.15.0'
     ANDROID_VERSION = 23
     ANDROID_RELEASE = '6.0.1'
-    PHONE_MANUFACTURER = 'Samsung'
+    PHONE_MANUFACTURER = 'samsung'
     PHONE_DEVICE = 'SM-G930F'
     PHONE_MODEL = 'herolte'
     PHONE_DPI = '640dpi'
