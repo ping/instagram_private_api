@@ -501,7 +501,7 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
 
-    @unittest.skip('Modifies data.')
+    # @unittest.skip('Modifies data.')
     def test_post_video(self):
         # Reposting from https://www.instagram.com/p/BL5hkEHDyd5/
         media_id = '1367271575733086073_2958144170'
@@ -560,12 +560,16 @@ class TestPrivateApi(unittest.TestCase):
 
     @unittest.skip('Modifies data.')
     def test_post_video_story(self):
-        video_url = 'https://cdn-e1.streamable.com/video/mp4/08ico.mp4' \
-                    '?token=1491915108_d9b57adee14177db6458eea586a6071f3e53bd38'
-        video_size = (612, 816)
-        thumbnail_url = 'https://cdn-e1.streamable.com/image/08ico_first.jpg' \
-                        '?token=1491915108_792590fd88f6c602e7fef32da17ad06fdee082da'
-        duration = 14.9
+        # Reposting https://streamable.com/08ico
+        video_info_res = urlopen('https://api.streamable.com/videos/08ico')
+        video_info = json.loads(video_info_res.read().decode('utf8'))
+        mp4_info = video_info['files']['mp4']
+
+        video_url = ('https:' if mp4_info['url'].startswith('//') else '') + mp4_info['url']
+        video_size = (mp4_info['width'], mp4_info['height'])
+        thumbnail_url = ('https:' if video_info['thumbnail_url'].startswith('//') else '') + video_info['thumbnail_url']
+        duration = mp4_info['duration']
+
         video_res = urlopen(video_url)
         video_data = video_res.read()
         thumb_res = urlopen(thumbnail_url)
@@ -573,6 +577,7 @@ class TestPrivateApi(unittest.TestCase):
         results = self.api.post_video_story(video_data, video_size, duration, thumb_data)
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
+        print(json.dumps(results.get('media')))
 
     @unittest.skip('Modifies data. Needs info setup.')
     def test_usertag_self_remove(self):
