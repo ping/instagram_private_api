@@ -147,6 +147,8 @@ class MiscEndpointsMixin(object):
         :param sticker_type: One of ['static_stickers']
         :param location: dict containing 'lat', 'lng', 'horizontalAccuracy'.
                          Example: {'lat': '', 'lng': '', 'horizontalAccuracy': ''}
+                         'horizontalAccuracy' is a float in meters representing the estimated horizontal accuracy
+                         https://developer.android.com/reference/android/location/Location.html#getAccuracy()
         :return:
         """
         if sticker_type not in ['static_stickers']:
