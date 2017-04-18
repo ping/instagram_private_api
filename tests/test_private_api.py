@@ -501,7 +501,7 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
 
-    # @unittest.skip('Modifies data.')
+    @unittest.skip('Modifies data.')
     def test_post_video(self):
         # Reposting from https://www.instagram.com/p/BL5hkEHDyd5/
         media_id = '1367271575733086073_2958144170'
@@ -577,7 +577,6 @@ class TestPrivateApi(unittest.TestCase):
         results = self.api.post_video_story(video_data, video_size, duration, thumb_data)
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
-        print(json.dumps(results.get('media')))
 
     @unittest.skip('Modifies data. Needs info setup.')
     def test_usertag_self_remove(self):
