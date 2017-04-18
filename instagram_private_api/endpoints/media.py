@@ -357,11 +357,12 @@ class MediaEndpointsMixin(object):
         params = self.authenticated_params
         return self._call_api(endpoint, params=params)
 
-    def save_photo(self, media_id):
+    def save_photo(self, media_id, added_collection_ids=None):
         """
         Save a photo
 
         :param media_id: Media id
+        :param added_collection_ids: optional list of collection IDs to add the media to
         :return:
             .. code-block:: javascript
 
@@ -369,14 +370,19 @@ class MediaEndpointsMixin(object):
         """
         endpoint = 'media/%(media_id)s/save/' % {'media_id': media_id}
         params = {'radio_type': 'WIFI'}
+        if added_collection_ids:
+            if isinstance(added_collection_ids, str):
+                added_collection_ids = [added_collection_ids]
+            params['added_collection_ids'] = json.dumps(added_collection_ids, separators=(',', ':'))
         params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
 
-    def unsave_photo(self, media_id):
+    def unsave_photo(self, media_id, removed_collection_ids=None):
         """
         Unsave a photo
 
         :param media_id:
+        :param removed_collection_ids: optional list of collection IDs to remove the media from
         :return:
             .. code-block:: javascript
 
@@ -384,6 +390,10 @@ class MediaEndpointsMixin(object):
         """
         endpoint = 'media/%(media_id)s/unsave/' % {'media_id': media_id}
         params = {'radio_type': 'WIFI'}
+        if removed_collection_ids:
+            if isinstance(removed_collection_ids, str):
+                removed_collection_ids = [removed_collection_ids]
+            params['removed_collection_ids'] = json.dumps(removed_collection_ids, separators=(',', ':'))
         params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
 

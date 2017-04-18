@@ -660,6 +660,43 @@ class TestPrivateApi(unittest.TestCase):
         self.assertIsNotNone(results.get('error'))
         self.assertIsNotNone(results.get('error_type'))
 
+    @unittest.skip('Modifies data.')
+    def test_create_collection(self):
+        name = 'A Collection'
+        results = self.api.create_collection(name)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('collection_id'))
+        self.assertEqual(results.get('collection_name'), name)
+
+    @unittest.skip('Modifies data.')
+    def test_edit_collection(self):
+        results = self.api.list_collections()
+        self.assertTrue(results.get('items'), 'No collections')
+
+        first_collection_id = results['items'][0]['collection_id']
+        results = self.api.edit_collection(first_collection_id, ['1495028858729943288_25025320'])
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIsNotNone(results.get('collection_id'))
+
+    @unittest.skip('Modifies data.')
+    def test_delete_collection(self):
+        results = self.api.list_collections()
+        self.assertTrue(results.get('items'), 'No collections')
+
+        first_collection_id = results['items'][0]['collection_id']
+        results = self.api.delete_collection(first_collection_id)
+        self.assertEqual(results.get('status'), 'ok')
+
+    def test_collection_feed(self):
+        results = self.api.list_collections()
+        self.assertTrue(results.get('items'), 'No collection')
+
+        first_collection_id = results['items'][0]['collection_id']
+        results = self.api.collection_feed(first_collection_id)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertEqual(str(results.get('collection_id', '')), first_collection_id)
+        self.assertIsNotNone(results.get('items'))
+
     def test_validate_useragent(self):
         ua = 'Instagram 9.2.0 Android (22/5.1.1; 480dpi; 1080x1920; Xiaomi; Redmi Note 3; kenzo; qcom; en_GB)'
         results = Client.validate_useragent(ua)
@@ -1293,6 +1330,22 @@ if __name__ == '__main__':
         {
             'name': 'test_check_username',
             'test': TestPrivateApi('test_check_username', api)
+        },
+        {
+            'name': 'test_create_collection',
+            'test': TestPrivateApi('test_create_collection', api)
+        },
+        {
+            'name': 'test_collection_feed',
+            'test': TestPrivateApi('test_collection_feed', api)
+        },
+        {
+            'name': 'test_edit_collection',
+            'test': TestPrivateApi('test_edit_collection', api)
+        },
+        {
+            'name': 'test_delete_collection',
+            'test': TestPrivateApi('test_delete_collection', api)
         },
         {
             'name': 'test_validate_useragent',

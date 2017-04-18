@@ -10,3 +10,4 @@ from .tags import TagsEndpointsMixin
 from .upload import UploadEndpointsMixin
 from .users import UsersEndpointsMixin
 from .usertags import UsertagsEndpointsMixin
+from .collections import CollectionsEndpointsMixin

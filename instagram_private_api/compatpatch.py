@@ -332,6 +332,7 @@ class ClientCompatPatch():
                     'pk',
                     'preview_comments',
                     'reel_mentions',
+                    'saved_collection_ids',
                     'taken_at',
                     'video_duration',
                     'video_versions',

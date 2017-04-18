@@ -24,7 +24,8 @@ from .endpoints import (
     AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     FriendshipsEndpointsMixin, LiveEndpointsMixin, MediaEndpointsMixin,
     MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
-    UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin
+    UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
+    CollectionsEndpointsMixin
 )
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
              FriendshipsEndpointsMixin, LiveEndpointsMixin, MediaEndpointsMixin,
              MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
              UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
-             object):
+             CollectionsEndpointsMixin, object):
 
     API_URL = 'https://i.instagram.com/api/v1/'
 
