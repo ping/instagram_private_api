@@ -560,11 +560,6 @@ class UploadEndpointsMixin(object):
                     self.logger.debug('RESPONSE: %d %s' % (res.code, post_response))
                     if res.info().get('Content-Type') == 'application/json':
                         # last chunk
-                        upload_res = json.loads(post_response)
-                        configure_delay = int(upload_res.get('configure_delay_ms', 0)) / 1000.0
-                        self.logger.debug('Configure delay: %s' % configure_delay)
-                        time.sleep(configure_delay)
-                        # all done
                         all_done = True
                         break
                     else:
