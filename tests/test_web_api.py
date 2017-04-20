@@ -168,6 +168,10 @@ class TestWebApi(unittest.TestCase):
         self.assertIsNone(media.get('created_time'))
         self.assertIsNotNone(media_patched.get('created_time'))
         self.assertIsNotNone(re.match(r'\d+_\d+', media_patched['id']))
+        media_dropped = copy.deepcopy(media)
+        ClientCompatPatch.media(media_dropped, drop_incompat_keys=True)
+        self.assertIsNone(media_dropped.get('code'))
+        self.assertIsNone(media_dropped.get('dimensions'))
 
     def test_compat_comment(self):
         self.api.auto_patch = False
@@ -179,6 +183,10 @@ class TestWebApi(unittest.TestCase):
         self.assertIsNotNone(comment_patched.get('created_time'))
         self.assertIsNone(comment.get('from'))
         self.assertIsNotNone(comment_patched.get('from'))
+        comment_dropped = copy.deepcopy(comment)
+        ClientCompatPatch.comment(comment_dropped, drop_incompat_keys=True)
+        self.assertIsNone(comment_dropped.get('created_at'))
+        self.assertIsNone(comment_dropped.get('user'))
 
     def test_compat_user(self):
         self.api.auto_patch = False
@@ -194,6 +202,10 @@ class TestWebApi(unittest.TestCase):
         self.assertIsNotNone(user_patched.get('website'))
         self.assertIsNone(user.get('counts'))
         self.assertIsNotNone(user_patched.get('counts'))
+        user_dropped = copy.deepcopy(user)
+        ClientCompatPatch.user(user_dropped, drop_incompat_keys=True)
+        self.assertIsNone(user_dropped.get('biography'))
+        self.assertIsNone(user_dropped.get('status'))
 
     def test_compat_user_list(self):
         self.api.auto_patch = False
@@ -203,6 +215,10 @@ class TestWebApi(unittest.TestCase):
         self.api.auto_patch = True
         self.assertIsNone(user.get('profile_picture'))
         self.assertIsNotNone(user_patched.get('profile_picture'))
+        user_dropped = copy.deepcopy(user)
+        ClientCompatPatch.list_user(user_dropped, drop_incompat_keys=True)
+        self.assertIsNone(user_dropped.get('followed_by_viewer'))
+        self.assertIsNone(user_dropped.get('requested_by_viewer'))
 
 
 if __name__ == '__main__':
@@ -376,8 +392,6 @@ if __name__ == '__main__':
         }
     ]
 
-    suite = unittest.TestSuite()
-
     def match_regex(test_name):
         for test_re in args.tests:
             test_re = r'%s' % test_re
@@ -391,10 +405,18 @@ if __name__ == '__main__':
     if not api.is_authenticated:
         tests = filter(lambda x: not x.get('require_auth', False), tests)
 
-    for test in tests:
-        suite.addTest(test['test'])
-
     try:
+        suite = unittest.TestSuite()
+        for test in tests:
+            suite.addTest(test['test'])
         unittest.TextTestRunner(verbosity=2).run(suite)
+
+        # # run with drop_incompat_keys = True
+        # suite2 = unittest.TestSuite()
+        # api.drop_incompat_keys = True
+        # for test in tests:
+        #     suite2.addTest(test['test'])
+        # unittest.TextTestRunner(verbosity=2).run(suite2)
+
     except ClientError as e:
         print('Unexpected ClientError %s (Code: %d)' % (e.msg, e.code))
