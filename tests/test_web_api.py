@@ -9,6 +9,11 @@ import logging
 import re
 import warnings
 try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
+try:
     from instagram_web_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
@@ -108,10 +113,27 @@ class TestWebApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('id'))
 
+    @mock.patch('instagram_web_api.Client._make_request')
+    def test_post_comment_mock(self, make_request):
+        make_request.return_value = {'status': 'ok', 'id': '12345678'}
+        self.api.post_comment(self.test_media_id, '<3')
+        make_request.assert_called_with(
+            'https://www.instagram.com/web/comments/%(media_id)s/add/' % {'media_id': self.test_media_id},
+            params={'comment_text': '<3'})
+
     @unittest.skip('Modifies data / Needs actual data.')
     def test_del_comment(self):
         results = self.api.delete_comment(self.test_media_id, self.test_comment_id)
         self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_web_api.Client._make_request')
+    def test_del_comment_mock(self, make_request):
+        make_request.return_value = {'status': 'ok'}
+        self.api.delete_comment(self.test_media_id, self.test_comment_id)
+        make_request.assert_called_with(
+            'https://www.instagram.com/web/comments/%(media_id)s/delete/%(comment_id)s/'
+            % {'media_id': self.test_media_id, 'comment_id': self.test_comment_id},
+            params='')
 
     def test_search(self):
         results = self.api.search('maru')
@@ -312,8 +334,18 @@ if __name__ == '__main__':
             'require_auth': True,
         },
         {
+            'name': 'test_post_comment_mock',
+            'test': TestWebApi('test_post_comment_mock', api),
+            'require_auth': True,
+        },
+        {
             'name': 'test_del_comment',
             'test': TestWebApi('test_del_comment', api),
+            'require_auth': True,
+        },
+        {
+            'name': 'test_del_comment_mock',
+            'test': TestWebApi('test_del_comment_mock', api),
             'require_auth': True,
         },
         {
