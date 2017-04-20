@@ -107,26 +107,27 @@ class Client(object):
     def cookie_jar(self):
         return self.opener.cookie_jar
 
-    @property
-    def csrftoken(self):
+    def get_cookie_value(self, key):
         for cookie in self.cookie_jar:
-            if cookie.name.lower() == 'csrftoken':
+            if cookie.name.lower() == key.lower():
                 return cookie.value
         return None
+
+    @property
+    def csrftoken(self):
+        """The client's current csrf token"""
+        return self.get_cookie_value('csrftoken')
 
     @property
     def authenticated_user_id(self):
-        for cookie in self.cookie_jar:
-            if cookie.name.lower() == 'ds_user_id':
-                return cookie.value
-        return None
+        """The current authenticated user id"""
+        return self.get_cookie_value('ds_user_id')
 
     @property
     def authenticated_user_name(self):
-        for cookie in self.cookie_jar:
-            if cookie.name.lower() == 'ds_user':
-                return cookie.value
-        return None
+        """The current authenticated user name. No longer available."""
+        warnings.warn('No longer available.', DeprecationWarning)
+        return self.get_cookie_value('ds_user')
 
     @property
     def is_authenticated(self):
@@ -330,7 +331,7 @@ class Client(object):
         info = self._make_request(
             'https://www.instagram.com/p/%s/?__a=1&__b=1' % short_code,
             headers=headers)
-        media = info.get('media', {})
+        media = info.get('graphql', {}).get('shortcode_media', {})
         if self.auto_patch:
             media = ClientCompatPatch.media(media, drop_incompat_keys=self.drop_incompat_keys)
         return media

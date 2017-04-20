@@ -40,7 +40,7 @@ class TestWebApi(unittest.TestCase):
         self.test_comment_id = '1234567890'
 
     def tearDown(self):
-        time.sleep(5)   # sleep a bit between tests to avoid HTTP429 errors
+        time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
 
     def test_user_info(self):
         results = self.api.user_info(self.test_user_id)
@@ -51,11 +51,23 @@ class TestWebApi(unittest.TestCase):
         results = self.api.user_feed(self.test_user_id)
         self.assertGreater(len(results), 0)
 
+    def test_notfound_user_feed(self):
+        self.assertRaises(ClientError, lambda: self.api.user_feed('1'))
+
+    def test_user_feed_extract(self, extract=True):
+        results = self.api.user_feed(self.test_user_id)
+        self.assertIsInstance(results, list)
+        self.assertGreater(len(results), 0)
+        self.assertIsInstance(results[0], dict)
+
     def test_media_info(self):
         results = self.api.media_info(self.test_media_shortcode)
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('link'))
         self.assertIsNotNone(results.get('images'))
+
+    def test_notfound_media_info(self):
+        self.assertRaises(ClientError, lambda: self.api.media_info('BSgmaRDg-xX'))
 
     def test_carousel_media_info(self):
         results = self.api.media_info2('BQ0eAlwhDrw')
@@ -67,9 +79,24 @@ class TestWebApi(unittest.TestCase):
         results = self.api.media_comments(self.test_media_shortcode, count=20)
         self.assertGreaterEqual(len(results), 0)
 
+    def test_notfound_media_comments(self):
+        self.assertRaises(ClientError, lambda: self.api.media_comments('BSgmaRDg-xX'))
+
+    def test_media_comments_extract(self):
+        results = self.api.media_comments(self.test_media_shortcode, count=20, extract=True)
+        self.assertGreaterEqual(len(results), 0)
+        self.assertIsInstance(results, list)
+        self.assertIsInstance(results[0], dict)
+
     def test_user_followers(self):
         results = self.api.user_followers(self.test_user_id)
         self.assertGreater(len(results), 0)
+
+    def test_user_followers_extract(self):
+        results = self.api.user_followers(self.test_user_id, extract=True)
+        self.assertGreater(len(results), 0)
+        self.assertIsInstance(results, list)
+        self.assertIsInstance(results[0], dict)
 
     def test_user_following(self):
         results = self.api.user_following(self.test_user_id)
@@ -90,6 +117,16 @@ class TestWebApi(unittest.TestCase):
         results = self.api.search('maru')
         self.assertGreaterEqual(len(results['users']), 0)
         self.assertGreaterEqual(len(results['hashtags']), 0)
+
+    def test_client_properties(self):
+        self.assertIsNotNone(self.api.csrftoken)
+        self.assertIsNotNone(self.api.authenticated_user_id)
+        self.assertIsNone(self.api.authenticated_user_name)
+        self.assertTrue(self.api.is_authenticated)
+        settings = self.api.settings
+        for k in ('user_agent', 'cookie', 'created_ts'):
+            self.assertIsNotNone(settings.get(k))
+        self.assertIsNotNone(self.api.cookie_jar.dump())
 
     # Compat Patch Tests
     def test_compat_media(self):
@@ -223,12 +260,32 @@ if __name__ == '__main__':
             'test': TestWebApi('test_user_feed', api),
         },
         {
+            'name': 'test_notfound_user_feed',
+            'test': TestWebApi('test_notfound_user_feed', api)
+        },
+        {
+            'name': 'test_user_feed_extract',
+            'test': TestWebApi('test_user_feed_extract', api)
+        },
+        {
             'name': 'test_media_info',
             'test': TestWebApi('test_media_info', api),
         },
         {
+            'name': 'test_notfound_media_info',
+            'test': TestWebApi('test_notfound_media_info', api)
+        },
+        {
             'name': 'test_media_comments',
             'test': TestWebApi('test_media_comments', api),
+        },
+        {
+            'name': 'test_notfound_media_comments',
+            'test': TestWebApi('test_notfound_media_comments', api)
+        },
+        {
+            'name': 'test_media_comments_extract',
+            'test': TestWebApi('test_media_comments_extract', api)
         },
         {
             'name': 'test_search',
@@ -240,18 +297,23 @@ if __name__ == '__main__':
             'require_auth': True,
         },
         {
+            'name': 'test_user_followers_extract',
+            'test': TestWebApi('test_user_followers_extract', api),
+            'require_auth': True,
+        },
+        {
             'name': 'test_user_following',
-            'test': TestWebApi('test_user_followers', api),
+            'test': TestWebApi('test_user_following', api),
             'require_auth': True,
         },
         {
             'name': 'test_post_comment',
-            'test': TestWebApi('test_user_followers', api),
+            'test': TestWebApi('test_post_comment', api),
             'require_auth': True,
         },
         {
             'name': 'test_del_comment',
-            'test': TestWebApi('test_user_followers', api),
+            'test': TestWebApi('test_del_comment', api),
             'require_auth': True,
         },
         {
@@ -274,6 +336,11 @@ if __name__ == '__main__':
         {
             'name': 'test_carousel_media_info',
             'test': TestWebApi('test_carousel_media_info', api),
+        },
+        {
+            'name': 'test_client_properties',
+            'test': TestWebApi('test_client_properties', api),
+            'require_auth': True,
         }
     ]
 

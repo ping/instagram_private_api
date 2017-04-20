@@ -29,7 +29,8 @@ class ClientCompatPatch():
     @classmethod
     def media(cls, media, drop_incompat_keys=False):
         """Patch a media object"""
-        media['link'] = 'https://www.instagram.com/p/%s/' % media['code']
+        media['link'] = 'https://www.instagram.com/p/%s/' % (
+            media.get('code') or media.get('shortcode'))   # for media_info2
         caption = media.get('caption')
         if not caption:
             media['caption'] = None
@@ -50,13 +51,14 @@ class ClientCompatPatch():
             'profile_picture': media['owner']['profile_pic_url'],
         }
         media['type'] = 'video' if media['is_video'] else 'image'
+        display_src = media.get('display_src') or media.get('display_url')  # for media_info2
         images = {
             'standard_resolution': {
-                'url': media['display_src'],
+                'url': display_src,
                 'width': media['dimensions']['width'],
                 'height': media['dimensions']['height']},
-            'low_resolution': {'url': cls._generate_image_url(media['display_src'], '320', 'p')},
-            'thumbnail': {'url': cls._generate_image_url(media['display_src'], '150', 's')},
+            'low_resolution': {'url': cls._generate_image_url(display_src, '320', 'p')},
+            'thumbnail': {'url': cls._generate_image_url(display_src, '150', 's')},
         }
         media['images'] = images
         if media['is_video']:
@@ -83,7 +85,7 @@ class ClientCompatPatch():
             media['location']['latitude'] = media['location']['lat']
             media['location']['longitude'] = media['location']['lng']
         media['id'] = '%s_%s' % (media['id'], media['owner']['id'])
-        media['created_time'] = str(media['date'])
+        media['created_time'] = str(media.get('date', '') or media.get('taken_at_timestamp', ''))
 
         usertags = media.get('usertags', {}).get('nodes', [])
         if not usertags:
