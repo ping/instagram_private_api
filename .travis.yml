@@ -8,7 +8,7 @@ install:
   - pip install flake8
 
 script:
-- flake8 --max-line-length=120 --exclude=./instagram_private_api/compat.py,./instagram_web_api/compat.py,./instagram_private_api/endpoints/__init__.py
+- flake8 --max-line-length=120 --exclude=./setup.py,./instagram_private_api/compat.py,./instagram_web_api/compat.py,./instagram_private_api/endpoints/__init__.py
 
 branches:
   only:
