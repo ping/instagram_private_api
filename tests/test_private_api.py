@@ -18,14 +18,20 @@ try:
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
-    from instagram_private_api.utils import InstagramID
+    from instagram_private_api.utils import (
+        InstagramID, gen_user_breadcrumb,
+        max_chunk_size_generator, max_chunk_count_generator
+    )
     from instagram_private_api.constants import Constants
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
-    from instagram_private_api.utils import InstagramID
+    from instagram_private_api.utils import (
+        InstagramID, gen_user_breadcrumb,
+        max_chunk_size_generator, max_chunk_count_generator
+    )
     from instagram_private_api.constants import Constants
 
 
@@ -49,7 +55,7 @@ class TestPrivateApi(unittest.TestCase):
         pass
 
     def tearDown(self):
-        time.sleep(5)   # sleep a bit between tests to avoid HTTP429 errors
+        time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
 
     @unittest.skip('Unwise to run frequently.')
     def test_login(self):
@@ -178,6 +184,11 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
 
+    def test_self_feed(self):
+        results = self.api.self_feed()
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
+
     def test_username_feed(self):
         results = self.api.username_feed(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
@@ -300,7 +311,7 @@ class TestPrivateApi(unittest.TestCase):
         self.assertIsNotNone(results.get('related'))
 
     def test_location_search(self):
-        results = self.api.location_search('40.7484445', '-73.9878531')
+        results = self.api.location_search('40.7484445', '-73.9878531', query='Empire')
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('venues', [])), 0, 'No venues returned.')
 
@@ -325,6 +336,14 @@ class TestPrivateApi(unittest.TestCase):
         results = self.api.top_live_status(broadcast_ids)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('broadcast_status_items', [])), 0, 'No broadcast_status_items returned.')
+
+        results = self.api.top_live_status(str(broadcast_ids[0]))
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('broadcast_status_items', [])), 0, 'No broadcast_status_items returned.')
+
+    def test_user_broadcast(self):
+        broadcast = self.api.user_broadcast('25025320')     # Instagram
+        self.assertIsNone(broadcast)
 
     def test_broadcast_info(self):
         top_live_results = self.api.discover_top_live()
@@ -649,9 +668,12 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
 
     def test_stickers(self):
-        results = self.api.stickers()
+        results = self.api.stickers(location={'lat': '40.7484445', 'lng': '-73.9878531', 'horizontalAccuracy': 5.8})
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('static_stickers'))
+
+        self.assertRaises(ValueError, lambda: self.api.stickers('x'))
+        self.assertRaises(ValueError, lambda: self.api.stickers(location={'x': 1}))
 
     def test_check_username(self):
         results = self.api.check_username('instagram')
@@ -824,6 +846,75 @@ class TestPrivateApi(unittest.TestCase):
         self.assertIsNotNone(user_patched.get('id'))
         self.assertIsNone(user.get('profile_picture'))
         self.assertIsNotNone(user_patched.get('profile_picture'))
+
+    def test_cookiejar_dump(self):
+        dump = self.api.cookie_jar.dump()
+        self.assertIsNotNone(dump)
+
+    def test_gen_user_breadcrumb(self):
+        output = gen_user_breadcrumb(15)
+        self.assertIsNotNone(output)
+
+    def test_max_chunk_size_generator(self):
+        chunk_data = 'abcdefghijklmnopqrstuvwxyz'
+        chunk_size = 5
+        chunk_count = 0
+        for chunk_info, data in max_chunk_size_generator(chunk_size, chunk_data):
+            chunk_count += 1
+            self.assertIsNotNone(data, 'Empty chunk.')
+            self.assertLessEqual(len(data), chunk_size, 'Chunk size is too big.')
+            self.assertEqual(len(data), chunk_info.length, 'Chunk length is wrong.')
+            self.assertEqual(chunk_info.is_first, chunk_count == 1)
+
+    def test_max_chunk_count_generator(self):
+        chunk_data = 'abcdefghijklmnopqrstuvwxyz'
+        expected_chunk_count = 5
+        chunk_count = 0
+        for chunk_info, data in max_chunk_count_generator(expected_chunk_count, chunk_data):
+            chunk_count += 1
+            self.assertIsNotNone(data, 'Empty chunk.')
+            self.assertEqual(len(data), chunk_info.length, 'Chunk length is wrong.')
+            self.assertEqual(chunk_info.is_first, chunk_count == 1)
+            self.assertEqual(chunk_info.is_last, chunk_count == expected_chunk_count)
+
+        self.assertEqual(chunk_count, expected_chunk_count, 'Chunk count is wrong.')
+
+    def test_settings(self):
+        results = self.api.settings
+        for k in ('uuid', 'device_id', 'ad_id', 'signature_key', 'key_version',
+                  'ig_capabilities', 'app_version', 'android_release', 'android_version',
+                  'phone_manufacturer', 'phone_device', 'phone_model', 'phone_dpi', 'phone_resolution',
+                  'phone_chipset', 'cookie', 'created_ts'):
+            self.assertIsNotNone(results.get(k))
+
+    def test_user_agent(self):
+        ua = self.api.user_agent
+        self.assertIsNotNone(ua)
+        self.api.user_agent = ua
+
+        def test_ua_setter():
+            self.api.user_agent = 'Agent X'
+        self.assertRaises(ValueError, test_ua_setter)
+
+        custom_ua = self.api.generate_useragent(phone_manufacturer='BrandX')
+        self.assertTrue('BrandX' in custom_ua)
+
+        results = self.api.validate_useragent(custom_ua)
+        self.assertEqual(results['parsed_params']['brand'], 'BrandX')
+
+    def test_client_properties(self):
+        results = self.api.get_cookie_value('non-existent-cookie-value')
+        self.assertIsNone(results)
+
+        self.assertIsNotNone(self.api.csrftoken)
+        self.assertIsNotNone(self.api.token)
+        self.assertIsNotNone(self.api.authenticated_user_id)
+        self.assertIsNotNone(self.api.authenticated_user_name)
+        self.assertIsNotNone(self.api.rank_token)
+        self.assertIsNotNone(self.api.phone_id)
+        self.assertIsNotNone(self.api.radio_type)
+        self.assertIsNotNone(self.api.generate_deviceid())
+        self.assertIsInstance(self.api.timezone_offset, int)
 
 
 class TestPrivateApiUtils(unittest.TestCase):
@@ -1056,6 +1147,10 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_media_likers_chrono', api, media_id='1206573574980690068_1497851591')
         },
         {
+            'name': 'test_self_feed',
+            'test': TestPrivateApi('test_self_feed', api)
+        },
+        {
             'name': 'test_user_feed',
             'test': TestPrivateApi('test_user_feed', api, user_id='124317')
         },
@@ -1170,6 +1265,10 @@ if __name__ == '__main__':
         {
             'name': 'test_top_live_status',
             'test': TestPrivateApi('test_top_live_status', api)
+        },
+        {
+            'name': 'test_user_broadcast',
+            'test': TestPrivateApi('test_user_broadcast', api)
         },
         {
             'name': 'test_broadcast_info',
@@ -1376,6 +1475,34 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_compat_user_list', api, user_id='124317')
         },
         {
+            'name': 'test_cookiejar_dump',
+            'test': TestPrivateApi('test_cookiejar_dump', api)
+        },
+        {
+            'name': 'test_gen_user_breadcrumb',
+            'test': TestPrivateApi('test_gen_user_breadcrumb', api)
+        },
+        {
+            'name': 'test_max_chunk_size_generator',
+            'test': TestPrivateApi('test_max_chunk_size_generator', api)
+        },
+        {
+            'name': 'test_max_chunk_count_generator',
+            'test': TestPrivateApi('test_max_chunk_count_generator', api)
+        },
+        {
+            'name': 'test_settings',
+            'test': TestPrivateApi('test_settings', api)
+        },
+        {
+            'name': 'test_user_agent',
+            'test': TestPrivateApi('test_user_agent', api)
+        },
+        {
+            'name': 'test_client_properties',
+            'test': TestPrivateApi('test_client_properties', api)
+        },
+        {
             'name': 'test_expand_code',
             'test': TestPrivateApiUtils('test_expand_code')
         },
@@ -1390,7 +1517,7 @@ if __name__ == '__main__':
         {
             'name': 'test_weblink_from_media_id',
             'test': TestPrivateApiUtils('test_weblink_from_media_id')
-        }
+        },
     ]
 
     def match_regex(test_name):
