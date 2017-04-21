@@ -17,11 +17,13 @@ try:
     from instagram_web_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
+    from instagram_web_api.compat import compat_urllib_error
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_web_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
+    from instagram_web_api.compat import compat_urllib_error
 
 
 class TestWebApi(unittest.TestCase):
@@ -45,7 +47,8 @@ class TestWebApi(unittest.TestCase):
         self.test_comment_id = '1234567890'
 
     def tearDown(self):
-        time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
+        if not self._testMethodName.endswith('_mock'):
+            time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
 
     def test_user_info(self):
         results = self.api.user_info(self.test_user_id)
@@ -135,6 +138,58 @@ class TestWebApi(unittest.TestCase):
             % {'media_id': self.test_media_id, 'comment_id': self.test_comment_id},
             params='')
 
+    @unittest.skip('Modifies data')
+    def test_post_like(self):
+        results = self.api.post_like(self.test_media_id)
+        self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_web_api.Client._make_request')
+    def test_post_like_mock(self, make_request):
+        make_request.return_value = {'status': 'ok'}
+        self.api.post_like(self.test_media_id)
+        make_request.assert_called_with(
+            'https://www.instagram.com/web/likes/%(media_id)s/like/' % {'media_id': self.test_media_id},
+            params='')
+
+    @unittest.skip('Modifies data')
+    def test_delete_like(self):
+        results = self.api.delete_like(self.test_media_id)
+        self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_web_api.Client._make_request')
+    def test_delete_like_mock(self, make_request):
+        make_request.return_value = {'status': 'ok'}
+        self.api.delete_like(self.test_media_id)
+        make_request.assert_called_with(
+            'https://www.instagram.com/web/likes/%(media_id)s/unlike/' % {'media_id': self.test_media_id},
+            params='')
+
+    @unittest.skip('Modifies data')
+    def test_friendships_create(self):
+        results = self.api.friendships_create(self.test_user_id)
+        self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_web_api.Client._make_request')
+    def test_friendships_create_mock(self, make_request):
+        make_request.return_value = {'status': 'ok'}
+        self.api.friendships_create(self.test_user_id)
+        make_request.assert_called_with(
+            'https://www.instagram.com/web/friendships/%(user_id)s/follow/' % {'user_id': self.test_user_id},
+            params='')
+
+    @unittest.skip('Modifies data')
+    def test_friendships_destroy(self):
+        results = self.api.friendships_destroy(self.test_user_id)
+        self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_web_api.Client._make_request')
+    def test_friendships_destroy_mock(self, make_request):
+        make_request.return_value = {'status': 'ok'}
+        self.api.friendships_destroy(self.test_user_id)
+        make_request.assert_called_with(
+            'https://www.instagram.com/web/friendships/%(user_id)s/unfollow/' % {'user_id': self.test_user_id},
+            params='')
+
     def test_search(self):
         results = self.api.search('maru')
         self.assertGreaterEqual(len(results['users']), 0)
@@ -149,6 +204,37 @@ class TestWebApi(unittest.TestCase):
         for k in ('user_agent', 'cookie', 'created_ts'):
             self.assertIsNotNone(settings.get(k))
         self.assertIsNotNone(self.api.cookie_jar.dump())
+
+    @mock.patch('instagram_web_api.client.compat_urllib_request.OpenerDirector.open')
+    def test_client_errors(self, open_mock):
+        open_mock.side_effect = [
+            compat_urllib_error.HTTPError('', 404, 'Not Found', None, None),
+            compat_urllib_error.URLError('No route to host')]
+
+        with self.assertRaises(ClientError):
+            self.api.search('maru')
+
+        with self.assertRaises(ClientError):
+            self.api.search('maru')
+
+    @mock.patch('instagram_web_api.Client.csrftoken',
+                new_callable=mock.PropertyMock, return_value=None)
+    def test_client_init(self, csrftoken):
+        with self.assertRaises(ClientError):
+            self.api.init()
+
+    @mock.patch('instagram_web_api.Client._make_request')
+    def test_login(self, make_request):
+        make_request.side_effect = [
+            {'status': 'ok', 'authenticated': 'x'},
+            {'status': 'fail'}
+        ]
+        self.api.login()
+        make_request.assert_called_with(
+            'https://www.instagram.com/accounts/login/ajax/',
+            params={'username': self.api.username, 'password': self.api.password})
+        with self.assertRaises(ClientLoginError):
+            self.api.login()
 
     # Compat Patch Tests
     def test_compat_media(self):
@@ -365,6 +451,42 @@ if __name__ == '__main__':
             'require_auth': True,
         },
         {
+            'name': 'test_post_like',
+            'test': TestWebApi('test_post_like', api),
+            'require_auth': True,
+        },
+        {
+            'name': 'test_post_like_mock',
+            'test': TestWebApi('test_post_like_mock', api),
+        },
+        {
+            'name': 'test_delete_like',
+            'test': TestWebApi('test_delete_like', api),
+            'require_auth': True,
+        },
+        {
+            'name': 'test_delete_like_mock',
+            'test': TestWebApi('test_post_like_mock', api),
+        },
+        {
+            'name': 'test_friendships_create',
+            'test': TestWebApi('test_friendships_create', api),
+            'require_auth': True,
+        },
+        {
+            'name': 'test_friendships_create_mock',
+            'test': TestWebApi('test_friendships_create_mock', api),
+        },
+        {
+            'name': 'test_friendships_destroy',
+            'test': TestWebApi('test_friendships_destroy', api),
+            'require_auth': True,
+        },
+        {
+            'name': 'test_friendships_destroy_mock',
+            'test': TestWebApi('test_friendships_destroy_mock', api),
+        },
+        {
             'name': 'test_compat_media',
             'test': TestWebApi('test_compat_media', api),
         },
@@ -389,7 +511,19 @@ if __name__ == '__main__':
             'name': 'test_client_properties',
             'test': TestWebApi('test_client_properties', api),
             'require_auth': True,
-        }
+        },
+        {
+            'name': 'test_client_errors',
+            'test': TestWebApi('test_client_errors', api)
+        },
+        {
+            'name': 'test_client_init',
+            'test': TestWebApi('test_client_init', api)
+        },
+        {
+            'name': 'test_login',
+            'test': TestWebApi('test_login', api)
+        },
     ]
 
     def match_regex(test_name):
