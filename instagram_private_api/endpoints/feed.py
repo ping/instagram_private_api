@@ -190,6 +190,8 @@ class FeedEndpointsMixin(object):
         """
         Get saved photo feed
 
+        :param kwargs:
+            - **count**: Limit the number of items returned
         :return:
         """
         res = self._call_api('feed/saved/', query=kwargs)

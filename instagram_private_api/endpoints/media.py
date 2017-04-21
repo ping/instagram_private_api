@@ -1,5 +1,6 @@
 import json
 import re
+import warnings
 
 from ..utils import gen_user_breadcrumb
 from ..compatpatch import ClientCompatPatch
@@ -233,11 +234,13 @@ class MediaEndpointsMixin(object):
 
     def media_likers_chrono(self, media_id):
         """
+        EXPERIMENTAL ENDPOINT, INADVISABLE TO USE.
         Get users who have liked a post in chronological order
 
         :param media_id:
         :return:
         """
+        warnings.warn('This endpoint is experimental. Do not use.', UserWarning)
         res = self._call_api('media/%(media_id)s/likers_chrono/' % {'media_id': media_id})
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
@@ -369,7 +372,7 @@ class MediaEndpointsMixin(object):
                 {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/save/' % {'media_id': media_id}
-        params = {'radio_type': 'WIFI'}
+        params = {'radio_type': self.radio_type}
         if added_collection_ids:
             if isinstance(added_collection_ids, str):
                 added_collection_ids = [added_collection_ids]
@@ -389,7 +392,7 @@ class MediaEndpointsMixin(object):
                 {"status": "ok"}
         """
         endpoint = 'media/%(media_id)s/unsave/' % {'media_id': media_id}
-        params = {'radio_type': 'WIFI'}
+        params = {'radio_type': self.radio_type}
         if removed_collection_ids:
             if isinstance(removed_collection_ids, str):
                 removed_collection_ids = [removed_collection_ids]
