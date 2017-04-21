@@ -15,6 +15,11 @@ except ImportError:
     # python 3.x
     from urllib.request import urlopen
 try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
+try:
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientCompatPatch)
@@ -55,12 +60,71 @@ class TestPrivateApi(unittest.TestCase):
         pass
 
     def tearDown(self):
-        time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
+        if not self._testMethodName.endswith('_mock'):
+            time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
 
     @unittest.skip('Unwise to run frequently.')
     def test_login(self):
         new_client = Client(self.api.username, self.api.password)
         self.assertEqual(new_client.authenticated_user_name, self.api.username)
+
+    @mock.patch('instagram_private_api.Client.csrftoken',
+                new_callable=mock.PropertyMock, return_value='abcde')
+    def test_login_mock(self, csrftoken):
+        generated_uuid = Client.generate_uuid(True)
+        query = {'challenge_type': 'signup', 'guid': generated_uuid}
+        with mock.patch('instagram_private_api.Client.generate_uuid') as generate_uuid_mock, \
+                mock.patch('instagram_private_api.Client._call_api') as call_api, \
+                mock.patch('instagram_private_api.Client._read_response') as read_response:
+            generate_uuid_mock.return_value = generated_uuid
+            call_api.return_value = ''
+            read_response.return_value = json.dumps({'status': 'ok', 'logged_in_user': {'pk': 123}})
+            self.api.login()
+
+            call_api.assert_any_call(
+                'si/fetch_headers/', params='', query=query, return_response=True)
+
+            login_params = {
+                'device_id': self.api.device_id,
+                'guid': self.api.uuid,
+                'adid': self.api.ad_id,
+                'phone_id': self.api.phone_id,
+                '_csrftoken': self.api.csrftoken,
+                'username': self.api.username,
+                'password': self.api.password,
+                'login_attempt_count': '0',
+            }
+            call_api.assert_called_with(
+                'accounts/login/', params=login_params, return_response=True)
+
+    @mock.patch('instagram_private_api.Client.csrftoken',
+                new_callable=mock.PropertyMock, return_value=None)
+    def test_login_failcsrf_mock(self, csrftoken):
+        generated_uuid = Client.generate_uuid(True)
+        with mock.patch('instagram_private_api.Client.generate_uuid') as generate_uuid_mock, \
+                mock.patch('instagram_private_api.Client._call_api') as call_api, \
+                mock.patch('instagram_private_api.Client._read_response') as read_response:
+            generate_uuid_mock.return_value = generated_uuid
+            call_api.return_value = ''
+            read_response.return_value = ''
+            with self.assertRaises(ClientError) as tc:
+                self.api.login()
+            self.assertEqual(tc.exception.message, 'Unable to get csrf from login challenge.')
+
+    @mock.patch('instagram_private_api.Client.csrftoken',
+                new_callable=mock.PropertyMock, return_value='abcde')
+    def test_login_fail_mock(self, csrftoken):
+        generated_uuid = Client.generate_uuid(True)
+        with mock.patch('instagram_private_api.Client.generate_uuid') as generate_uuid_mock, \
+                mock.patch('instagram_private_api.Client._call_api') as call_api, \
+                mock.patch('instagram_private_api.Client._read_response') as read_response:
+            generate_uuid_mock.return_value = generated_uuid
+            call_api.return_value = ''
+            read_response.return_value = json.dumps({'status': 'fail'})
+
+            with self.assertRaises(ClientError) as tc:
+                self.api.login()
+            self.assertEqual(tc.exception.message, 'Unable to login.')
 
     def test_sync(self):
         results = self.api.sync()
@@ -406,6 +470,19 @@ class TestPrivateApi(unittest.TestCase):
             self.assertIsNotNone(results.get('likes'))
             break
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_broadcast_like_mock(self, call_api):
+        broadcast_id = 123
+        call_api.return_value = {'status': 'ok'}
+
+        like_count = 2
+        params = {'user_like_count': str(like_count)}
+        params.update(self.api.authenticated_params)
+        self.api.broadcast_like(broadcast_id, like_count)
+        call_api.assert_called_with(
+            'live/%(broadcast_id)s/like/' % {'broadcast_id': broadcast_id},
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_broadcast_comment(self):
         top_live_results = self.api.discover_top_live()
@@ -418,15 +495,58 @@ class TestPrivateApi(unittest.TestCase):
             self.assertIsNotNone(results.get('comment'))
             break
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_broadcast_comment_mock(self, call_api):
+        broadcast_id = 123
+        call_api.return_value = {'status': 'ok'}
+
+        comment_text = '<3'
+        breadcrumb = gen_user_breadcrumb(len(comment_text))
+        generated_uuid = self.api.generate_uuid()
+        with mock.patch('instagram_private_api.endpoints.live.gen_user_breadcrumb') as gen_user_breadcrumb_mock, \
+                mock.patch('instagram_private_api.Client.generate_uuid') as generate_uuid_mock:
+            gen_user_breadcrumb_mock.return_value = breadcrumb
+            generate_uuid_mock.return_value = generated_uuid
+            params = {
+                'live_or_vod': '1',
+                'offset_to_video_start': '0',
+                'comment_text': comment_text,
+                'user_breadcrumb': breadcrumb,
+                'idempotence_token': generated_uuid,
+            }
+            params.update(self.api.authenticated_params)
+            self.api.broadcast_comment(broadcast_id, comment_text)
+            call_api.assert_called_with(
+                'live/%(broadcast_id)s/comment/' % {'broadcast_id': broadcast_id},
+                params=params)
+
     @unittest.skip('Modifies data.')
     def test_comment_like(self):
         results = self.api.comment_like('17852927593096945')
         self.assertEqual(results.get('status'), 'ok')
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_comment_like_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        comment_id = '1785000000000'
+        self.api.comment_like(comment_id)
+        call_api.assert_called_with(
+            'media/%(comment_id)s/comment_like/' % {'comment_id': comment_id},
+            params=self.api.authenticated_params)
+
     @unittest.skip('Modifies data.')
     def test_comment_unlike(self):
         results = self.api.comment_unlike('17852927593096945')
         self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_comment_unlike_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        comment_id = '1785000000000'
+        self.api.comment_unlike(comment_id)
+        call_api.assert_called_with(
+            'media/%(comment_id)s/comment_unlike/' % {'comment_id': comment_id},
+            params=self.api.authenticated_params)
 
     def test_comment_likers(self):
         results = self.api.comment_likers('17852927593096945')
@@ -440,6 +560,29 @@ class TestPrivateApi(unittest.TestCase):
         results = self.api.edit_media(items[0]['id'], 'Hello')
         self.assertEqual(results.get('status'), 'ok')
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_edit_media_mock(self, call_api):
+        call_api.return_value = {
+            'status': 'ok',
+            'media': {
+                'pk': 123, 'code': 'abc', 'taken_at': 1234567890,
+                'media_type': 1, 'caption': None,
+                'user': {
+                    'pk': 123, 'biography': '',
+                    'profile_pic_url': 'https://example.com/x.jpg',
+                    'external_url': ''
+                }
+            }
+        }
+        media_id = '123_123'
+        caption = 'Hello'
+        params = {'caption_text': caption}
+        params.update(self.api.authenticated_params)
+        self.api.edit_media(media_id, 'Hello')
+        call_api.assert_called_with(
+            'media/%(media_id)s/edit_media/' % {'media_id': media_id},
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_delete_media(self):
         results = self.api.self_feed()
@@ -447,15 +590,95 @@ class TestPrivateApi(unittest.TestCase):
         results = self.api.delete_media(items[0]['id'])
         self.assertEqual(results.get('status'), 'ok')
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_delete_media_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        media_id = '123_123'
+        params = {'media_id': media_id}
+        params.update(self.api.authenticated_params)
+        self.api.delete_media(media_id)
+        call_api.assert_called_with(
+            'media/%(media_id)s/delete/' % {'media_id': media_id},
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_post_like(self):
         results = self.api.post_like('1486470123929723160_25025320')
         self.assertEqual(results.get('status'), 'ok')
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_post_like_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        media_id = '123_123'
+        params = {
+            'media_id': media_id,
+            'module_name': 'x',
+            'radio_type': self.api.radio_type,
+        }
+        params.update(self.api.authenticated_params)
+        self.api.post_like(media_id, params['module_name'])
+        call_api.assert_called_with(
+            'media/%(media_id)s/like/' % {'media_id': media_id},
+            query={'d': '1'},
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_delete_like(self):
         results = self.api.delete_like('1486470123929723160_25025320')
         self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_delete_like_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        media_id = '123_123'
+        params = {
+            'media_id': media_id,
+            'module_name': 'x',
+            'radio_type': self.api.radio_type,
+        }
+        params.update(self.api.authenticated_params)
+        self.api.delete_like(media_id, params['module_name'])
+        call_api.assert_called_with(
+            'media/%(media_id)s/unlike/' % {'media_id': media_id},
+            params=params)
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_post_comment_mock(self, call_api):
+        call_api.return_value = {
+            'status': 'ok',
+            'comment': {'created_at': '1234567890', 'pk': 100000,
+                        'user': {'pk': 123, 'username': 'x', 'full_name': 'X', 'profile_pic_url': 'x.jpg'}}}
+        media_id = '123_123'
+        comment_text = '<3'
+        breadcrumb = gen_user_breadcrumb(len(comment_text))
+        generated_uuid = self.api.generate_uuid()
+        with mock.patch('instagram_private_api.endpoints.media.gen_user_breadcrumb') as gen_user_breadcrumb_mock, \
+                mock.patch('instagram_private_api.Client.generate_uuid') as generate_uuid_mock:
+            gen_user_breadcrumb_mock.return_value = breadcrumb
+            generate_uuid_mock.return_value = generated_uuid
+            params = {
+                'comment_text': comment_text,
+                'user_breadcrumb': breadcrumb,
+                'idempotence_token': generated_uuid,
+                'containermodule': 'comments_feed_timeline',
+                'radio_type': self.api.radio_type,
+            }
+            params.update(self.api.authenticated_params)
+            self.api.post_comment(media_id, comment_text)
+            call_api.assert_called_with(
+                'media/%(media_id)s/comment/' % {'media_id': media_id},
+                params=params)
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_delete_comment_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        media_id = '123_123'
+        comment_id = '123456'
+        self.api.delete_comment(media_id, comment_id)
+        call_api.assert_called_with(
+            'media/%(media_id)s/comment/%(comment_id)s/delete/'
+            % {'media_id': media_id, 'comment_id': comment_id},
+            params=self.api.authenticated_params)
 
     @unittest.skip('Modifies data.')
     def test_friendships_create(self):
@@ -463,21 +686,73 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertEqual(results.get('friendship_status', {}).get('following'), True)
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_friendships_create_mock(self, call_api):
+        call_api.return_value = {
+            'status': 'ok',
+            'friendship_status': {'following': True}}
+        user_id = '2958144170'
+        params = {'user_id': user_id, 'radio_type': self.api.radio_type}
+        params.update(self.api.authenticated_params)
+        self.api.friendships_create(user_id)
+        call_api.assert_called_with(
+            'friendships/create/%(user_id)s/' % {'user_id': user_id},
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_friendships_destroy(self):
         results = self.api.friendships_destroy('2958144170')
         self.assertEqual(results.get('status'), 'ok')
         self.assertEqual(results.get('friendship_status', {}).get('following'), False)
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_friendships_destroy_mock(self, call_api):
+        call_api.return_value = {'status': 'ok', 'following': False}
+        user_id = '2958144170'
+        params = {'user_id': user_id, 'radio_type': self.api.radio_type}
+        params.update(self.api.authenticated_params)
+        self.api.friendships_destroy(user_id)
+        call_api.assert_called_with(
+            'friendships/destroy/%(user_id)s/' % {'user_id': user_id},
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_save_photo(self):
         results = self.api.save_photo(self.test_media_id)
         self.assertEqual(results.get('status'), 'ok')
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_save_photo_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        added_collection_ids = ['1234567890']
+        params = {
+            'radio_type': self.api.radio_type,
+            'added_collection_ids': json.dumps(added_collection_ids, separators=(',', ':'))
+        }
+        params.update(self.api.authenticated_params)
+        self.api.save_photo(self.test_media_id, added_collection_ids=added_collection_ids)
+        call_api.assert_called_with(
+            'media/%(media_id)s/save/' % {'media_id': self.test_media_id},
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_unsave_photo(self):
         results = self.api.unsave_photo(self.test_media_id)
         self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_unsave_photo_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        removed_collection_ids = ['1234567890']
+        params = {
+            'radio_type': self.api.radio_type,
+            'removed_collection_ids': json.dumps(removed_collection_ids, separators=(',', ':'))
+        }
+        params.update(self.api.authenticated_params)
+        self.api.unsave_photo(self.test_media_id, removed_collection_ids=removed_collection_ids)
+        call_api.assert_called_with(
+            'media/%(media_id)s/unsave/' % {'media_id': self.test_media_id},
+            params=params)
 
     def test_saved_feed(self):
         results = self.api.saved_feed()
@@ -489,17 +764,47 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('user'))
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_remove_profile_picture_mock(self, call_api):
+        call_api.return_value = {
+            'status': 'ok',
+            'user': {'pk': 123, 'biography': '', 'profile_pic_url': 'https://example.com/x.jpg', 'external_url': ''}}
+        self.api.remove_profile_picture()
+        call_api.assert_called_with(
+            'accounts/remove_profile_picture/',
+            params=self.api.authenticated_params)
+
     @unittest.skip('Modifies data.')
     def test_set_account_public(self):
         results = self.api.set_account_public()
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('user'))
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_set_account_public_mock(self, call_api):
+        call_api.return_value = {
+            'status': 'ok',
+            'user': {'pk': 123, 'biography': '', 'profile_pic_url': 'https://example.com/x.jpg', 'external_url': ''}}
+        self.api.set_account_public()
+        call_api.assert_called_with(
+            'accounts/set_public/',
+            params=self.api.authenticated_params)
+
     @unittest.skip('Modifies data.')
     def test_set_account_private(self):
         results = self.api.set_account_private()
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('user'))
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_set_account_private_mock(self, call_api):
+        call_api.return_value = {
+            'status': 'ok',
+            'user': {'pk': 123, 'biography': '', 'profile_pic_url': 'https://example.com/x.jpg', 'external_url': ''}}
+        self.api.set_account_private()
+        call_api.assert_called_with(
+            'accounts/set_private/',
+            params=self.api.authenticated_params)
 
     @unittest.skip('Modifies data.')
     def test_change_profile_picture(self):
@@ -603,6 +908,26 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_usertag_self_remove_mock(self, call_api):
+        media_id = '123'
+        call_api.return_value = {
+            'status': 'ok',
+            'media': {
+                'pk': 123, 'code': 'abc', 'taken_at': 1234567890,
+                'media_type': 1, 'caption': None,
+                'user': {
+                    'pk': 123, 'biography': '',
+                    'profile_pic_url': 'https://example.com/x.jpg',
+                    'external_url': ''
+                }
+            }
+        }
+        self.api.usertag_self_remove(media_id)
+        call_api.assert_called_with(
+            'usertags/%(media_id)s/remove/' % {'media_id': media_id},
+            params=self.api.authenticated_params)
+
     def test_user_map(self):
         results = self.api.user_map(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
@@ -613,6 +938,17 @@ class TestPrivateApi(unittest.TestCase):
         results = self.api.friendships_block(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
         self.assertTrue(results.get('blocking'))
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_friendships_block_mock(self, call_api):
+        call_api.return_value = {'status': 'ok', 'blocking': True}
+        user_id = '2958144170'
+        params = {'user_id': user_id}
+        params.update(self.api.authenticated_params)
+        self.api.friendships_block(user_id)
+        call_api.assert_called_with(
+            'friendships/block/%(user_id)s/' % {'user_id': user_id},
+            params=params)
 
     def test_feed_popular(self):
         results = self.api.feed_popular()
@@ -658,10 +994,53 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(returned_user['phone_number'], user['phone_number'])
         self.assertEqual(returned_user['gender'], user['gender'])
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_edit_profile_mock(self, call_api):
+        call_api.return_value = {
+            'status': 'ok',
+            'user': {'pk': 123, 'biography': '', 'profile_pic_url': 'https://example.com/x.jpg', 'external_url': ''}}
+
+        params = {
+            'username': self.api.authenticated_user_name,
+            'gender': 1,
+            'phone_number': '',
+            'first_name': '',
+            'biography': '',
+            'external_url': '',
+            'email': 'john@example.com',
+        }
+        params.update(self.api.authenticated_params)
+        self.api.edit_profile(
+            first_name=params['first_name'],
+            biography=params['biography'],
+            external_url=params['external_url'],
+            email=params['email'],
+            phone_number=params['phone_number'],
+            gender=params['gender']
+        )
+        call_api.assert_called_with(
+            'accounts/edit_profile/',
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_logout(self):
         results = self.api.logout()
         self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_logout_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        self.api.logout()
+        call_api.assert_called_with(
+            'accounts/logout/',
+            params={
+                'phone_id': self.api.phone_id,
+                '_csrftoken': self.api.csrftoken,
+                'guid': self.api.uuid,
+                'device_id': self.api.device_id,
+                '_uuid': self.api.uuid
+            },
+            unsigned=True)
 
     def test_top_search(self):
         results = self.api.top_search('cats')
@@ -690,6 +1069,20 @@ class TestPrivateApi(unittest.TestCase):
         self.assertIsNotNone(results.get('collection_id'))
         self.assertEqual(results.get('collection_name'), name)
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_create_collection_mock(self, call_api):
+        name = 'A Collection'
+        call_api.return_value = {
+            'status': 'ok',
+            'collection_id': 123, 'collection_name': name}
+
+        params = {'name': name}
+        params.update(self.api.authenticated_params)
+        self.api.create_collection(name)
+        call_api.assert_called_with(
+            'collections/create/',
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_edit_collection(self):
         results = self.api.list_collections()
@@ -700,6 +1093,22 @@ class TestPrivateApi(unittest.TestCase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('collection_id'))
 
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_edit_collection_mock(self, call_api):
+        collection_id = 123
+        call_api.return_value = {
+            'status': 'ok',
+            'collection_id': collection_id, 'collection_name': 'A Collection'}
+
+        media_ids = ['1495028858729943288_25025320']
+        params = {'added_media_ids': json.dumps(media_ids, separators=(',', ':'))}
+        params.update(self.api.authenticated_params)
+
+        self.api.edit_collection(collection_id, media_ids)
+        call_api.assert_called_with(
+            'collections/%(collection_id)s/edit/' % {'collection_id': collection_id},
+            params=params)
+
     @unittest.skip('Modifies data.')
     def test_delete_collection(self):
         results = self.api.list_collections()
@@ -708,6 +1117,16 @@ class TestPrivateApi(unittest.TestCase):
         first_collection_id = results['items'][0]['collection_id']
         results = self.api.delete_collection(first_collection_id)
         self.assertEqual(results.get('status'), 'ok')
+
+    @mock.patch('instagram_private_api.Client._call_api')
+    def test_delete_collection_mock(self, call_api):
+        collection_id = 123
+        call_api.return_value = {'status': 'ok'}
+
+        self.api.delete_collection(collection_id)
+        call_api.assert_called_with(
+            'collections/%(collection_id)s/delete/' % {'collection_id': collection_id},
+            params=self.api.authenticated_params)
 
     def test_collection_feed(self):
         results = self.api.list_collections()
@@ -1044,11 +1463,22 @@ if __name__ == '__main__':
             print('Cookie Expired. Please discard cached auth and login again.')
             sys.exit(99)
 
-    suite = unittest.TestSuite()
     tests = [
         {
             'name': 'test_login',
             'test': TestPrivateApi('test_login', api)
+        },
+        {
+            'name': 'test_login_mock',
+            'test': TestPrivateApi('test_login_mock', api)
+        },
+        {
+            'name': 'test_login_failcsrf_mock',
+            'test': TestPrivateApi('test_login_failcsrf_mock', api)
+        },
+        {
+            'name': 'test_login_fail_mock',
+            'test': TestPrivateApi('test_login_fail_mock', api)
         },
         {
             'name': 'test_sync',
@@ -1284,23 +1714,39 @@ if __name__ == '__main__':
         },
         {
             'name': 'test_broadcast_like_count',
-            'test': TestPrivateApi('test_broadcast_like', api)
+            'test': TestPrivateApi('test_broadcast_like_count', api)
         },
         {
             'name': 'test_broadcast_like',
             'test': TestPrivateApi('test_broadcast_like', api)
         },
         {
+            'name': 'test_broadcast_like_mock',
+            'test': TestPrivateApi('test_broadcast_like_mock', api)
+        },
+        {
             'name': 'test_broadcast_comment',
             'test': TestPrivateApi('test_broadcast_comment', api)
+        },
+        {
+            'name': 'test_broadcast_comment_mock',
+            'test': TestPrivateApi('test_broadcast_comment_mock', api)
         },
         {
             'name': 'test_comment_like',
             'test': TestPrivateApi('test_comment_like', api)
         },
         {
+            'name': 'test_comment_like_mock',
+            'test': TestPrivateApi('test_comment_like_mock', api)
+        },
+        {
             'name': 'test_comment_unlike',
             'test': TestPrivateApi('test_comment_unlike', api)
+        },
+        {
+            'name': 'test_comment_unlike_mock',
+            'test': TestPrivateApi('test_comment_unlike_mock', api)
         },
         {
             'name': 'test_comment_likers',
@@ -1311,32 +1757,72 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_edit_media', api)
         },
         {
+            'name': 'test_edit_media_mock',
+            'test': TestPrivateApi('test_edit_media_mock', api)
+        },
+        {
             'name': 'test_delete_media',
             'test': TestPrivateApi('test_delete_media', api)
+        },
+        {
+            'name': 'test_delete_media_mock',
+            'test': TestPrivateApi('test_delete_media_mock', api)
         },
         {
             'name': 'test_post_like',
             'test': TestPrivateApi('test_post_like', api)
         },
         {
+            'name': 'test_post_like_mock',
+            'test': TestPrivateApi('test_post_like_mock', api)
+        },
+        {
             'name': 'test_delete_like',
             'test': TestPrivateApi('test_delete_like', api)
+        },
+        {
+            'name': 'test_delete_like_mock',
+            'test': TestPrivateApi('test_delete_like_mock', api)
+        },
+        {
+            'name': 'test_post_comment_mock',
+            'test': TestPrivateApi('test_post_comment_mock', api)
+        },
+        {
+            'name': 'test_delete_comment_mock',
+            'test': TestPrivateApi('test_delete_comment_mock', api)
         },
         {
             'name': 'test_friendships_create',
             'test': TestPrivateApi('test_friendships_create', api)
         },
         {
+            'name': 'test_friendships_create_mock',
+            'test': TestPrivateApi('test_friendships_create_mock', api)
+        },
+        {
             'name': 'test_friendships_destroy',
             'test': TestPrivateApi('test_friendships_destroy', api)
+        },
+        {
+            'name': 'test_friendships_destroy_mock',
+            'test': TestPrivateApi('test_friendships_destroy_mock', api)
         },
         {
             'name': 'test_save_photo',
             'test': TestPrivateApi('test_save_photo', api, media_id='1206573574980690068_1497851591')
         },
         {
+            'name': 'test_save_photo_mock',
+            'test': TestPrivateApi('test_save_photo_mock', api, media_id='1206573574980690068_1497851591')
+        },
+        {
             'name': 'test_unsave_photo',
             'test': TestPrivateApi('test_unsave_photo', api, media_id='1206573574980690068_1497851591')
+        },
+        {
+            'name': 'test_unsave_photo_mock',
+            'test': TestPrivateApi('test_unsave_photo_mock', api, media_id='1206573574980690068_1497851591')
         },
         {
             'name': 'test_saved_feed',
@@ -1347,12 +1833,24 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_remove_profile_picture', api)
         },
         {
+            'name': 'test_remove_profile_picture_mock',
+            'test': TestPrivateApi('test_remove_profile_picture_mock', api)
+        },
+        {
             'name': 'test_set_account_public',
             'test': TestPrivateApi('test_set_account_public', api)
         },
         {
+            'name': 'test_set_account_public_mock',
+            'test': TestPrivateApi('test_set_account_public_mock', api)
+        },
+        {
             'name': 'test_set_account_private',
             'test': TestPrivateApi('test_set_account_private', api)
+        },
+        {
+            'name': 'test_set_account_private_mock',
+            'test': TestPrivateApi('test_set_account_private_mock', api)
         },
         {
             'name': 'test_change_profile_picture',
@@ -1383,12 +1881,20 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_usertag_self_remove', api, media_id='???')
         },
         {
+            'name': 'test_usertag_self_remove_mock',
+            'test': TestPrivateApi('test_usertag_self_remove_mock', api, media_id='???')
+        },
+        {
             'name': 'test_user_map',
             'test': TestPrivateApi('test_user_map', api, user_id='2958144170')
         },
         {
             'name': 'test_friendships_block',
             'test': TestPrivateApi('test_friendships_block', api, user_id='2958144170')
+        },
+        {
+            'name': 'test_friendships_block_mock',
+            'test': TestPrivateApi('test_friendships_block_mock', api, user_id='2958144170')
         },
         {
             'name': 'test_feed_popular',
@@ -1415,8 +1921,16 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_edit_profile', api)
         },
         {
+            'name': 'test_edit_profile_mock',
+            'test': TestPrivateApi('test_edit_profile_mock', api)
+        },
+        {
             'name': 'test_logout',
             'test': TestPrivateApi('test_logout', api)
+        },
+        {
+            'name': 'test_logout_mock',
+            'test': TestPrivateApi('test_logout_mock', api)
         },
         {
             'name': 'test_top_search',
@@ -1435,6 +1949,10 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_create_collection', api)
         },
         {
+            'name': 'test_create_collection_mock',
+            'test': TestPrivateApi('test_create_collection_mock', api)
+        },
+        {
             'name': 'test_collection_feed',
             'test': TestPrivateApi('test_collection_feed', api)
         },
@@ -1443,8 +1961,16 @@ if __name__ == '__main__':
             'test': TestPrivateApi('test_edit_collection', api)
         },
         {
+            'name': 'test_edit_collection_mock',
+            'test': TestPrivateApi('test_edit_collection_mock', api)
+        },
+        {
             'name': 'test_delete_collection',
             'test': TestPrivateApi('test_delete_collection', api)
+        },
+        {
+            'name': 'test_delete_collection_mock',
+            'test': TestPrivateApi('test_delete_collection_mock', api)
         },
         {
             'name': 'test_validate_useragent',
@@ -1530,10 +2056,11 @@ if __name__ == '__main__':
     if args.tests:
         tests = filter(lambda x: match_regex(x['name']), tests)
 
-    for test in tests:
-        suite.addTest(test['test'])
-
     try:
+        suite = unittest.TestSuite()
+        for test in tests:
+            suite.addTest(test['test'])
         unittest.TextTestRunner(verbosity=2).run(suite)
+
     except ClientError as e:
         print('Unexpected ClientError %s (Code: %d, Response: %s)' % (e.msg, e.code, e.error_response))
