@@ -124,6 +124,18 @@ class MediaTests(ApiTestBase):
                 'name': 'test_unsave_photo_mock',
                 'test': MediaTests('test_unsave_photo_mock', api, media_id='1206573574980690068_1497851591')
             },
+            {
+                'name': 'test_disable_comments_mock',
+                'test': MediaTests('test_disable_comments_mock', api)
+            },
+            {
+                'name': 'test_enable_comments_mock',
+                'test': MediaTests('test_enable_comments_mock', api)
+            },
+            {
+                'name': 'test_media_seen_mock',
+                'test': MediaTests('test_media_seen_mock', api)
+            },
         ]
 
     def test_media_info(self):
@@ -382,7 +394,7 @@ class MediaTests(ApiTestBase):
             params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
-    def test_disable_comment_mock(self, call_api):
+    def test_disable_comments_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         params = {
             '_csrftoken': self.api.csrftoken,
@@ -391,16 +403,30 @@ class MediaTests(ApiTestBase):
         self.api.disable_comments(self.test_media_id)
         call_api.assert_called_with(
             'media/%(media_id)s/disable_comments/' % {'media_id': self.test_media_id},
-            params=params)
+            params=params, unsigned=True)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
-    def test_enable_comment_mock(self, call_api):
+    def test_enable_comments_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         params = {
             '_csrftoken': self.api.csrftoken,
             '_uuid': self.api.uuid
         }
-        self.api.disable_comments(self.test_media_id)
+        self.api.enable_comments(self.test_media_id)
         call_api.assert_called_with(
             'media/%(media_id)s/enable_comments/' % {'media_id': self.test_media_id},
-            params=params)
+            params=params, unsigned=True)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_media_seen_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        params = {
+            'reels': {
+                '1309764653429046112_124317': '1470356135_1470372049',
+                '1309209597843679372_124317': '1470289967_1470372013'},
+            'nuxes': {}
+        }
+        params.update(self.api.authenticated_params)
+        self.api.media_seen(params['reels'])
+        call_api.assert_called_with(
+            'media/seen/', params=params)
