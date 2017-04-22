@@ -72,9 +72,9 @@ class CompatPatchTests(ApiTestBase):
         self.assertIsNone(comment.get('from'))
         self.assertIsNotNone(comment_patched.get('from'))
 
-        comment_patched = copy.deepcopy(comment)
-        ClientCompatPatch.comment(comment_patched, drop_incompat_keys=True)
-        self.assertIsNone(comment_patched.get('pk'))
+        comment_dropped = copy.deepcopy(comment)
+        ClientCompatPatch.comment(comment_dropped, drop_incompat_keys=True)
+        self.assertIsNone(comment_dropped.get('pk'))
 
     def test_compat_user(self):
         self.api.auto_patch = False
@@ -92,9 +92,9 @@ class CompatPatchTests(ApiTestBase):
         self.assertIsNone(user.get('website'))
         self.assertIsNotNone(user_patched.get('website'))
 
-        user_patched = copy.deepcopy(user)
-        ClientCompatPatch.user(user_patched, drop_incompat_keys=True)
-        self.assertIsNone(user_patched.get('pk'))
+        user_dropped = copy.deepcopy(user)
+        ClientCompatPatch.user(user_dropped, drop_incompat_keys=True)
+        self.assertIsNone(user_dropped.get('pk'))
 
     def test_compat_user_list(self):
         self.api.auto_patch = False
@@ -108,6 +108,6 @@ class CompatPatchTests(ApiTestBase):
         self.assertIsNone(user.get('profile_picture'))
         self.assertIsNotNone(user_patched.get('profile_picture'))
 
-        user_patched = copy.deepcopy(user)
-        ClientCompatPatch.user(user_patched, drop_incompat_keys=True)
-        self.assertIsNone(user_patched.get('pk'))
+        user_dropped = copy.deepcopy(user)
+        ClientCompatPatch.list_user(user_dropped, drop_incompat_keys=True)
+        self.assertIsNone(user_dropped.get('pk'))
