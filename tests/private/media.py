@@ -132,7 +132,7 @@ class MediaTests(ApiTestBase):
         self.assertEqual(results.get('items', [])[0].get('id'), self.test_media_id)
 
     def test_medias_info(self):
-        results = self.api.media_info(self.test_media_id)
+        results = self.api.medias_info([self.test_media_id])
         self.assertEqual(results.get('status'), 'ok')
         self.assertEqual(results.get('items', [])[0].get('id'), self.test_media_id)
 
@@ -379,4 +379,28 @@ class MediaTests(ApiTestBase):
         self.api.unsave_photo(self.test_media_id, removed_collection_ids=removed_collection_ids)
         call_api.assert_called_with(
             'media/%(media_id)s/unsave/' % {'media_id': self.test_media_id},
+            params=params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_disable_comment_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        params = {
+            '_csrftoken': self.api.csrftoken,
+            '_uuid': self.api.uuid
+        }
+        self.api.disable_comments(self.test_media_id)
+        call_api.assert_called_with(
+            'media/%(media_id)s/disable_comments/' % {'media_id': self.test_media_id},
+            params=params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_enable_comment_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        params = {
+            '_csrftoken': self.api.csrftoken,
+            '_uuid': self.api.uuid
+        }
+        self.api.disable_comments(self.test_media_id)
+        call_api.assert_called_with(
+            'media/%(media_id)s/enable_comments/' % {'media_id': self.test_media_id},
             params=params)
