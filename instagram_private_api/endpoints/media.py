@@ -29,6 +29,7 @@ class MediaEndpointsMixin(object):
         :param media_ids: list of media ids
         :return:
         """
+
         if isinstance(media_ids, str):
             media_ids = [media_ids]
 
@@ -36,9 +37,10 @@ class MediaEndpointsMixin(object):
             '_uuid': self.uuid,
             '_csrftoken': self.csrftoken,
             'media_ids': ','.join(media_ids),
-            'ranked_content': 'true'
+            'ranked_content': 'true',
+            'include_inactive_reel': 'true',
         }
-        res = self._call_api('media/infos/', params=params, unsigned=True)
+        res = self._call_api('media/infos/', query=params)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
