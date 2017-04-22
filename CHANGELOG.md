@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.2.6 (pending)
+- Change default user agent constants
+- Video: implement chunks upload retry, remove configure delay
+- Implement collections
+- Update app version to 10.16.0
+- Other minor fixes
+
 ## 1.2.5
 - Update app version to 10.15.0
 - New ad_id property for login
