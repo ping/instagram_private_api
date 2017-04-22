@@ -454,7 +454,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                         error_response=json.dumps(error_obj))
                 elif error_obj.get('message'):
                     error_msg = '%s: %s' % (e.reason, error_obj['message'])
-            except (ClientLoginError, ClientLoginRequiredError):
+            except (ClientLoginError, ClientLoginRequiredError, ClientThrottledError):
                 raise
             except:
                 # do nothing, prob can't parse json
