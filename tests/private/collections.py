@@ -66,9 +66,14 @@ class CollectionsTests(ApiTestBase):
             'status': 'ok',
             'collection_id': 123, 'collection_name': name}
 
-        params = {'name': name}
+        media_ids = ['1495028858729943288_25025320']
+        params = {'name': name, 'added_media_ids': json.dumps(media_ids, separators=(',', ':'))}
         params.update(self.api.authenticated_params)
-        self.api.create_collection(name)
+        self.api.create_collection(name, media_ids)
+        call_api.assert_called_with(
+            'collections/create/',
+            params=params)
+        self.api.create_collection(name, media_ids[0])
         call_api.assert_called_with(
             'collections/create/',
             params=params)
@@ -95,6 +100,10 @@ class CollectionsTests(ApiTestBase):
         params.update(self.api.authenticated_params)
 
         self.api.edit_collection(collection_id, media_ids)
+        call_api.assert_called_with(
+            'collections/%(collection_id)s/edit/' % {'collection_id': collection_id},
+            params=params)
+        self.api.edit_collection(collection_id, media_ids[0])
         call_api.assert_called_with(
             'collections/%(collection_id)s/edit/' % {'collection_id': collection_id},
             params=params)
