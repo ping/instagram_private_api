@@ -100,6 +100,8 @@ class AccountTests(ApiTestBase):
             generate_uuid_mock.return_value = generated_uuid
             call_api.return_value = ''
             read_response.return_value = json.dumps({'status': 'ok', 'logged_in_user': {'pk': 123}})
+
+            self.api.on_login = lambda x: self.assertIsNotNone(x)
             self.api.login()
 
             call_api.assert_any_call(
@@ -171,6 +173,25 @@ class AccountTests(ApiTestBase):
         self.assertEqual(returned_user['email'], user['email'])
         self.assertEqual(returned_user['phone_number'], user['phone_number'])
         self.assertEqual(returned_user['gender'], user['gender'])
+
+        with self.assertRaises(ValueError):
+            self.api.edit_profile(
+                first_name='',
+                biography='',
+                external_url='',
+                email='x@example.com',
+                gender='9',
+                phone_number=''
+            )
+        with self.assertRaises(ValueError):
+            self.api.edit_profile(
+                first_name='',
+                biography='',
+                external_url='',
+                email='',
+                gender='1',
+                phone_number=''
+            )
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
     def test_edit_profile_mock(self, call_api):
