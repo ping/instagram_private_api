@@ -62,3 +62,14 @@ class LocationsEndpointsMixin(object):
             query_params['search_query'] = query
         query_params.update(kwargs)
         return self._call_api('location_search/', query=query_params)
+
+    def location_fb_search(self, query):
+        """
+        Search for locations by query text
+
+        :param query: search terms
+        :return:
+        """
+        return self._call_api(
+            'fbsearch/places/',
+            query={'ranked_token': self.rank_token, 'query': query})

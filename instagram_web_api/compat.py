@@ -1,3 +1,4 @@
+# flake8: noqa
 try:
     import urllib.request as compat_urllib_request
 except ImportError:  # Python 2

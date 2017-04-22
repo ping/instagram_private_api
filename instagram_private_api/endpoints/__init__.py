@@ -1,3 +1,4 @@
+# flake8: noqa
 from .accounts import AccountsEndpointsMixin
 from .discover import DiscoverEndpointsMixin
 from .feed import FeedEndpointsMixin
