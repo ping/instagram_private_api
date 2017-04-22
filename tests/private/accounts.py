@@ -133,6 +133,7 @@ class AccountTests(ApiTestBase):
             with self.assertRaises(ClientError) as tc:
                 self.api.login()
             self.assertEqual(tc.exception.message, 'Unable to get csrf from login challenge.')
+            self.assertEqual(tc.exception.msg, tc.exception.message)
 
     @compat_mock.patch('instagram_private_api.Client.csrftoken',
                        new_callable=compat_mock.PropertyMock, return_value='abcde')

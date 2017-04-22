@@ -1,7 +1,8 @@
 
 from ..common import (
-    ApiTestBase, Client, Constants,
-    gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator
+    ApiTestBase, Client, ClientLoginRequiredError, Constants,
+    gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator,
+    compat_mock
 )
 
 
@@ -49,6 +50,10 @@ class ClientTests(ApiTestBase):
             {
                 'name': 'test_client_properties',
                 'test': ClientTests('test_client_properties', api)
+            },
+            {
+                'name': 'test_client_loginrequired',
+                'test': ClientTests('test_client_loginrequired', api)
             },
         ]
 
@@ -176,3 +181,7 @@ class ClientTests(ApiTestBase):
         self.assertIsNotNone(self.api.radio_type)
         self.assertIsNotNone(self.api.generate_deviceid())
         self.assertIsInstance(self.api.timezone_offset, int)
+
+    def test_client_loginrequired(self):
+        with self.assertRaises(ClientLoginRequiredError):
+            Client('', '')

@@ -53,6 +53,9 @@ class CompatPatchTests(ApiTestBase):
             self.assertIsNotNone(media_patched['caption']['id'])
             self.assertIsNone(media.get('caption', {}).get('from'))
             self.assertIsNotNone(media_patched['caption']['from'])
+        media_dropped = copy.deepcopy(media)
+        ClientCompatPatch.media(media_dropped, drop_incompat_keys=True)
+        self.assertIsNone(media_dropped.get('pk'))
 
     def test_compat_comment(self):
         self.api.auto_patch = False
@@ -68,6 +71,10 @@ class CompatPatchTests(ApiTestBase):
         self.assertIsNotNone(comment_patched.get('created_time'))
         self.assertIsNone(comment.get('from'))
         self.assertIsNotNone(comment_patched.get('from'))
+
+        comment_patched = copy.deepcopy(comment)
+        ClientCompatPatch.comment(comment_patched, drop_incompat_keys=True)
+        self.assertIsNone(comment_patched.get('pk'))
 
     def test_compat_user(self):
         self.api.auto_patch = False
@@ -85,6 +92,10 @@ class CompatPatchTests(ApiTestBase):
         self.assertIsNone(user.get('website'))
         self.assertIsNotNone(user_patched.get('website'))
 
+        user_patched = copy.deepcopy(user)
+        ClientCompatPatch.user(user_patched, drop_incompat_keys=True)
+        self.assertIsNone(user_patched.get('pk'))
+
     def test_compat_user_list(self):
         self.api.auto_patch = False
         results = self.api.user_following(self.test_user_id)
@@ -96,3 +107,7 @@ class CompatPatchTests(ApiTestBase):
         self.assertIsNotNone(user_patched.get('id'))
         self.assertIsNone(user.get('profile_picture'))
         self.assertIsNotNone(user_patched.get('profile_picture'))
+
+        user_patched = copy.deepcopy(user)
+        ClientCompatPatch.user(user_patched, drop_incompat_keys=True)
+        self.assertIsNone(user_patched.get('pk'))

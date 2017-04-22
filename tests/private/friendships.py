@@ -28,6 +28,10 @@ class FriendshipTests(ApiTestBase):
             },
             {
                 'name': 'test_friendships_show_many',
+                'test': FriendshipTests('test_friendships_show_many', api, user_id='329452045')
+            },
+            {
+                'name': 'test_friendships_show_many2',
                 'test': FriendshipTests('test_friendships_show_many', api, user_id=['329452045', '124317'])
             },
             {
