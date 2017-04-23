@@ -9,6 +9,7 @@ import warnings
 
 from .common import (
     __webversion__ as __version__,
+    to_json, from_json,
     WebClient as Client,
     WebClientError as ClientError,
     WebClientLoginError as ClientLoginError,
@@ -44,7 +45,7 @@ if __name__ == '__main__':
     cached_auth = None
     if args.settings_file_path and os.path.isfile(args.settings_file_path):
         with open(args.settings_file_path) as file_data:
-            cached_auth = json.load(file_data)
+            cached_auth = json.load(file_data, object_hook=from_json)
 
     api = None
     if not cached_auth and args.username and args.password:
@@ -62,7 +63,7 @@ if __name__ == '__main__':
         if args.save:
             # this auth cache can be re-used for up to 90 days
             with open(args.settings_file_path, 'w') as outfile:
-                json.dump(cached_auth, outfile)
+                json.dump(cached_auth, outfile, default=to_json)
 
     elif cached_auth and args.username and args.password:
         try:
