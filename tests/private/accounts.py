@@ -136,8 +136,7 @@ class AccountTests(ApiTestBase):
             read_response.return_value = ''
             with self.assertRaises(ClientError) as tc:
                 self.api.login()
-            self.assertEqual(tc.exception.message, 'Unable to get csrf from login challenge.')
-            self.assertEqual(tc.exception.msg, tc.exception.message)
+            self.assertEqual(tc.exception.msg, 'Unable to get csrf from login challenge.')
 
     @compat_mock.patch('instagram_private_api.Client.csrftoken',
                        new_callable=compat_mock.PropertyMock, return_value='abcde')
@@ -152,7 +151,7 @@ class AccountTests(ApiTestBase):
 
             with self.assertRaises(ClientError) as tc:
                 self.api.login()
-            self.assertEqual(tc.exception.message, 'Unable to login.')
+            self.assertEqual(tc.exception.msg, 'Unable to login.')
 
     def test_current_user(self):
         results = self.api.current_user()
@@ -314,7 +313,7 @@ class AccountTests(ApiTestBase):
                 {'status': 'ok',
                  'user': {'pk': 123, 'biography': '', 'profile_pic_url': '', 'external_url': ''}})
 
-            photo_data = '...'
+            photo_data = '...'.encode('ascii')
             json_params = json.dumps(self.api.authenticated_params)
             hash_sig = self.api._generate_signature(json_params)
             signed_body = hash_sig + '.' + json_params
@@ -340,4 +339,4 @@ class AccountTests(ApiTestBase):
             self.api.change_profile_picture(photo_data)
             request.assert_called_with(
                 self.api.api_url + 'accounts/change_profile_picture/',
-                body, headers=headers)
+                body.encode('ascii'), headers=headers)

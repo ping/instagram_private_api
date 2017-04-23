@@ -168,7 +168,7 @@ class UploadTests(ApiTestBase):
             # for configure
             call_api.return_value = {'status': 'ok'}
 
-            photo_data = '...'
+            photo_data = '...'.encode('ascii')
             headers = self.api.default_headers
             headers.update({
                 'Content-Type': 'multipart/form-data; boundary=%s' % self.api.uuid,
@@ -220,7 +220,7 @@ class UploadTests(ApiTestBase):
 
             request.assert_called_with(
                 self.api.api_url + 'upload/photo/',
-                body, headers=headers)
+                body.encode('utf-8'), headers=headers)
 
             if not is_reel:
                 configure_params = {
@@ -300,26 +300,26 @@ class UploadTests(ApiTestBase):
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_photo_base(size=(3000, 3000))
-        self.assertEqual(ve.exception.message, 'Invalid image width.')
+        self.assertEqual(str(ve.exception), 'Invalid image width.')
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_photo_base(size=(1080, 300))
-        self.assertEqual(ve.exception.message, 'Incompatible aspect ratio.')
+        self.assertEqual(str(ve.exception), 'Incompatible aspect ratio.')
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_photo_base(location='X')
-        self.assertEqual(ve.exception.message, 'Location must be a dict.')
+        self.assertEqual(str(ve.exception), 'Location must be a dict.')
 
         with self.assertRaises(ValueError) as ve:
             location.pop('address', None)
             self.test_post_photo_base(location=location)
-        self.assertEqual(ve.exception.message, 'Location dict must contain "address".')
+        self.assertEqual(str(ve.exception), 'Location dict must contain "address".')
 
         # Stories
         self.test_post_photo_base(size=(608, 1080), is_reel=True)
         with self.assertRaises(ValueError) as ve:
             self.test_post_photo_base(size=(1080, 1080), is_reel=True)
-        self.assertEqual(ve.exception.message, 'Incompatible reel aspect ratio.')
+        self.assertEqual(str(ve.exception), 'Incompatible reel aspect ratio.')
 
         # Test album
         self.test_post_photo_base(is_sidecar=True)
@@ -340,8 +340,8 @@ class UploadTests(ApiTestBase):
             time_mock.return_value = ts_now
             randint_mock.return_value = 0
             default_headers.return_value = {'Header': 'X'}
-            video_data = '.' * 16
-            thumbnail_data = '....'
+            video_data = ('.' * 16).encode('ascii')
+            thumbnail_data = '....'.encode('ascii')
             upload_id = str(int(ts_now * 1000))
 
             class MockResponse(object):
@@ -498,22 +498,22 @@ class UploadTests(ApiTestBase):
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_video_base((600, 600), 15, 'HEY')
-        self.assertEqual(ve.exception.message, 'Invalid video width.')
+        self.assertEqual(str(ve.exception), 'Invalid video width.')
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_video_base((800, 800), 2, 'HEY')
-        self.assertEqual(ve.exception.message, 'Duration is less than 3s.')
+        self.assertEqual(str(ve.exception), 'Duration is less than 3s.')
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_video_base((800, 800), 61, 'HEY')
-        self.assertEqual(ve.exception.message, 'Duration is more than 60s.')
+        self.assertEqual(str(ve.exception), 'Duration is more than 60s.')
 
         # Stories
         self.test_post_video_base(size=(612, 1080), duration=15, to_reel=True)
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_video_base(size=(612, 1080), duration=16, to_reel=True)
-        self.assertEqual(ve.exception.message, 'Duration is more than 15s.')
+        self.assertEqual(str(ve.exception), 'Duration is more than 15s.')
 
         # Album
         self.test_post_video_base(

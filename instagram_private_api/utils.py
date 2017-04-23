@@ -19,7 +19,7 @@ def gen_user_breadcrumb(size):
     }
     return '%s\n%s\n' % (
         base64.b64encode(hmac.new(key.encode('ascii'), data.encode('ascii'), digestmod=hashlib.sha256).digest()),
-        base64.b64encode(data))
+        base64.b64encode(data.encode('ascii')))
 
 
 class Chunk(object):
