@@ -81,6 +81,10 @@ class AccountTests(ApiTestBase):
             {
                 'name': 'test_logout_mock',
                 'test': AccountTests('test_logout_mock', api)
+            },
+            {
+                'name': 'test_change_profile_picture_mock',
+                'test': AccountTests('test_change_profile_picture_mock', api)
             }
         ]
 
@@ -175,25 +179,6 @@ class AccountTests(ApiTestBase):
         self.assertEqual(returned_user['phone_number'], user['phone_number'])
         self.assertEqual(returned_user['gender'], user['gender'])
 
-        with self.assertRaises(ValueError):
-            self.api.edit_profile(
-                first_name='',
-                biography='',
-                external_url='',
-                email='x@example.com',
-                gender='9',
-                phone_number=''
-            )
-        with self.assertRaises(ValueError):
-            self.api.edit_profile(
-                first_name='',
-                biography='',
-                external_url='',
-                email='',
-                gender='1',
-                phone_number=''
-            )
-
     @compat_mock.patch('instagram_private_api.Client._call_api')
     def test_edit_profile_mock(self, call_api):
         call_api.return_value = {
@@ -221,6 +206,25 @@ class AccountTests(ApiTestBase):
         call_api.assert_called_with(
             'accounts/edit_profile/',
             params=params)
+
+        with self.assertRaises(ValueError):
+            self.api.edit_profile(
+                first_name='',
+                biography='',
+                external_url='',
+                email='x@example.com',
+                gender='9',
+                phone_number=''
+            )
+        with self.assertRaises(ValueError):
+            self.api.edit_profile(
+                first_name='',
+                biography='',
+                external_url='',
+                email='',
+                gender='1',
+                phone_number=''
+            )
 
     @unittest.skip('Modifies data.')
     def test_remove_profile_picture(self):
@@ -298,3 +302,42 @@ class AccountTests(ApiTestBase):
                 '_uuid': self.api.uuid
             },
             unsigned=True)
+
+    @compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open')
+    def test_change_profile_picture_mock(self, opener):
+        opener.return_value = ''
+        with compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
+                compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
+                compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.Request') as request:
+            default_headers.return_value = {'Header': 'X'}
+            read_response.return_value = json.dumps(
+                {'status': 'ok',
+                 'user': {'pk': 123, 'biography': '', 'profile_pic_url': '', 'external_url': ''}})
+
+            photo_data = '...'
+            json_params = json.dumps(self.api.authenticated_params)
+            hash_sig = self.api._generate_signature(json_params)
+            signed_body = hash_sig + '.' + json_params
+            headers = self.api.default_headers
+            headers.update({
+                'Content-Type': 'multipart/form-data; boundary=%s' % self.api.uuid,
+                'Content-Length': len(photo_data)
+            })
+            body = '--%(uuid)s\r\n' \
+                   'Content-Disposition: form-data; name="ig_sig_key_version"\r\n\r\n' \
+                   '%(sig_version)s\r\n' \
+                   '--%(uuid)s\r\n' \
+                   'Content-Disposition: form-data; name="signed_body"\r\n\r\n' \
+                   '%(signed_body)s\r\n' \
+                   '--%(uuid)s\r\n' \
+                   'Content-Disposition: form-data; name="profile_pic"; filename="profile_pic"\r\n' \
+                   'Content-Type: application/octet-stream\r\n' \
+                   'Content-Transfer-Encoding: binary\r\n\r\n...\r\n' \
+                   '--%(uuid)s--\r\n' % {'uuid': self.api.uuid,
+                                         'signed_body': signed_body,
+                                         'sig_version': self.api.key_version}
+
+            self.api.change_profile_picture(photo_data)
+            request.assert_called_with(
+                self.api.api_url + 'accounts/change_profile_picture/',
+                body, headers=headers)

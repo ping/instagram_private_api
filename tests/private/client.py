@@ -1,8 +1,7 @@
 
 from ..common import (
     ApiTestBase, Client, ClientLoginRequiredError, Constants,
-    gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator,
-    compat_mock
+    gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator
 )
 
 

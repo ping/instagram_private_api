@@ -1,5 +1,6 @@
 import unittest
 import json
+import time
 try:
     # python 2.x
     from urllib2 import urlopen
@@ -7,7 +8,7 @@ except ImportError:
     # python 3.x
     from urllib.request import urlopen
 
-from ..common import ApiTestBase
+from ..common import ApiTestBase, compat_mock
 
 
 class UploadTests(ApiTestBase):
@@ -34,6 +35,10 @@ class UploadTests(ApiTestBase):
             {
                 'name': 'test_post_video_story',
                 'test': UploadTests('test_post_video_story', api)
+            },
+            {
+                'name': 'test_post_photo_mock',
+                'test': UploadTests('test_post_photo_mock', api)
             },
         ]
 
@@ -123,3 +128,88 @@ class UploadTests(ApiTestBase):
         results = self.api.post_album(medias, caption='Testing...')
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
+
+    @compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open')
+    def test_post_photo_mock(self, opener):
+
+        ts_now = time.time()
+        with compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
+                compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
+                compat_mock.patch(
+                    'instagram_private_api.endpoints.accounts.compat_urllib_request.Request') as request, \
+                compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
+                compat_mock.patch('instagram_private_api.endpoints.upload.time.time') as time_mock:
+
+            time_mock.return_value = ts_now
+            # for photo posting
+            default_headers.return_value = {'Header': 'X'}
+
+            class MockResponse(object):
+                def __init__(self):
+                    self.code = 200
+            opener.return_value = MockResponse()
+
+            upload_id = str(int(ts_now * 1000))
+            read_response.return_value = json.dumps({'status': 'ok', 'upload_id': upload_id})
+            # for configure
+            call_api.return_value = {'status': 'ok'}
+
+            photo_data = '...'
+            size = (800, 800)
+            headers = self.api.default_headers
+            headers.update({
+                'Content-Type': 'multipart/form-data; boundary=%s' % self.api.uuid,
+                'Content-Length': len(photo_data)
+            })
+            body = '--%(uuid)s\r\n' \
+                   'Content-Disposition: form-data; name="upload_id"\r\n\r\n' \
+                   '%(upload_id)s\r\n' \
+                   '--%(uuid)s\r\n' \
+                   'Content-Disposition: form-data; name="_uuid"\r\n\r\n' \
+                   '%(uuid)s\r\n' \
+                   '--%(uuid)s\r\n' \
+                   'Content-Disposition: form-data; name="_csrftoken"\r\n\r\n' \
+                   '%(csrftoken)s\r\n' \
+                   '--%(uuid)s\r\n' \
+                   'Content-Disposition: form-data; name="image_compression"\r\n\r\n' \
+                   '{"lib_name":"jt","lib_version":"1.3.0","quality":"87"}\r\n' \
+                   '--%(uuid)s\r\n' \
+                   'Content-Disposition: form-data; name="photo"; filename="pending_media_%(ts)s.jpg"\r\n' \
+                   'Content-Type: application/octet-stream\r\n' \
+                   'Content-Transfer-Encoding: binary\r\n\r\n...\r\n' \
+                   '--%(uuid)s--\r\n' % {'uuid': self.api.uuid,
+                                         'csrftoken': self.api.csrftoken,
+                                         'upload_id': upload_id,
+                                         'ts': str(int(ts_now * 1000))}
+
+            caption = 'HEY'
+            self.api.post_photo(photo_data, size, caption=caption)
+            request.assert_called_with(
+                self.api.api_url + 'upload/photo/',
+                body, headers=headers)
+
+            configure_params = {
+                'caption': caption,
+                'media_folder': 'Instagram',
+                'source_type': '4',
+                'upload_id': upload_id,
+                'device': {
+                    'manufacturer': self.api.phone_manufacturer,
+                    'model': self.api.phone_device,
+                    'android_version': self.api.android_version,
+                    'android_release': self.api.android_release
+                },
+                'edits': {
+                    'crop_original_size': [size[0] * 1.0, size[1] * 1.0],
+                    'crop_center': [0.0, -0.0],
+                    'crop_zoom': 1.0
+                },
+                'extra': {
+                    'source_width': size[0],
+                    'source_height': size[1],
+                }
+            }
+            configure_params.update(self.api.authenticated_params)
+            call_api.assert_called_with(
+                'media/configure/', params=configure_params
+            )
