@@ -587,7 +587,7 @@ class ClientCookieJar(compat_cookiejar.CookieJar):
     @property
     def expires_earliest(self):
         if len(self) > 0:
-            return min([cookie.expires for cookie in self])
+            return min([cookie.expires for cookie in self if cookie.expires])
         return None
 
     def dump(self):
