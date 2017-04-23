@@ -22,7 +22,7 @@ class UploadEndpointsMixin(object):
     def _validate_location(self, location):
         location_keys = ['external_source', 'name', 'address']
         if type(location) != dict:
-            raise ValueError('Location must be a dict')
+            raise ValueError('Location must be a dict.')
 
         # patch location object returned from location_search
         if 'external_source' not in location and 'external_id_source' in location and 'external_id' in location:
@@ -32,10 +32,10 @@ class UploadEndpointsMixin(object):
                 location[self.EXTERNAL_LOC_SOURCES[external_source]] = location['external_id']
         for k in location_keys:
             if not location.get(k):
-                raise ValueError('Location dict must contain "%s"' % k)
+                raise ValueError('Location dict must contain "%s".' % k)
         for k, val in self.EXTERNAL_LOC_SOURCES.items():
             if location['external_source'] == k and not location.get(val):
-                raise ValueError('Location dict must contain "%s"' % val)
+                raise ValueError('Location dict must contain "%s".' % val)
 
         media_loc = {
             'name': location['name'],
@@ -466,16 +466,16 @@ class UploadEndpointsMixin(object):
             raise ValueError('Invalid video width.')
 
         if duration < 3.0:
-            raise ValueError('Duration is less than 3s')
+            raise ValueError('Duration is less than 3s.')
 
         if not to_reel and duration > 60.0:
-            raise ValueError('Duration is more than 60s')
+            raise ValueError('Duration is more than 60s.')
 
         if to_reel and duration > 15.0:
-            raise ValueError('Duration is more than 15s')
+            raise ValueError('Duration is more than 15s.')
 
         if len(video_data) > 50 * 1024 * 1000:
-            raise ValueError('Video file is too big')
+            raise ValueError('Video file is too big.')
 
         location = kwargs.pop('location', None)
         if location:
