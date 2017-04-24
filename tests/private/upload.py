@@ -8,7 +8,7 @@ except ImportError:
     # python 3.x
     from urllib.request import urlopen
 
-from ..common import ApiTestBase, compat_mock
+from ..common import ApiTestBase, compat_mock, MockResponse
 
 
 class UploadTests(ApiTestBase):
@@ -47,6 +47,10 @@ class UploadTests(ApiTestBase):
             {
                 'name': 'test_post_album_mock',
                 'test': UploadTests('test_post_album_mock', api)
+            },
+            {
+                'name': 'test_post_album_validation_mock',
+                'test': UploadTests('test_post_album_validation_mock', api)
             },
         ]
 
@@ -154,9 +158,6 @@ class UploadTests(ApiTestBase):
             # for photo posting
             default_headers.return_value = {'Header': 'X'}
 
-            class MockResponse(object):
-                def __init__(self):
-                    self.code = 200
             opener.return_value = MockResponse()
 
             if upload_id:
@@ -344,19 +345,11 @@ class UploadTests(ApiTestBase):
             thumbnail_data = '....'.encode('ascii')
             upload_id = str(int(ts_now * 1000))
 
-            class MockResponse(object):
-                def __init__(self, content_type=''):
-                    self.code = 200
-                    self.content_type = content_type
-
-                def info(self):
-                    return {'Content-Type': self.content_type}
-
             opener.side_effect = [
                 MockResponse(),     # chunk 1
                 MockResponse(),     # chunk 2
                 MockResponse(),     # chunk 3
-                MockResponse('application/json'),
+                MockResponse(content_type='application/json'),
                 MockResponse(),     # For uploading thmbnail
             ]
 
@@ -530,8 +523,15 @@ class UploadTests(ApiTestBase):
             post_photo.side_effect = [{'status': 'ok'}, {'status': 'ok'}]
             post_video.side_effect = [{'status': 'ok'}]
             call_api.return_value = {'status': 'ok'}
-            location_results = self.api.location_search('40.7484445', '-73.9878531', query='Empire')
-            location = location_results.get('venues', [{}])[0] or None
+
+            location = {
+                'name': 'Empire State Building',
+                'external_id_source': 'facebook_places',
+                'address': "New York",
+                'lat': 40.749003253823,
+                'lng': -73.985594775582,
+                'external_id': '153817204635459'
+            }
 
             album_upload_id = str(int(ts_now * 1000))
             disable_comments = True
@@ -575,3 +575,54 @@ class UploadTests(ApiTestBase):
                 params['disable_comments'] = '1'
             params.update(self.api.authenticated_params)
             call_api.assert_called_with('media/configure_sidecar/', params=params)
+
+    def test_post_album_validation_mock(self):
+        disable_comments = True
+        caption = 'HEY'
+        medias = [
+            {'type': 'imagex', 'size': (800, 800), 'data': '...'},
+            {'type': 'image', 'size': (800, 800), 'data': '...'},
+        ]
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_album(medias, caption=caption, disable_comments=disable_comments)
+        self.assertEqual(str(ve.exception), 'Invalid media type: imagex')
+
+        medias = [
+            {'type': 'image', 'size': (800, 800)},
+            {'type': 'image', 'data': '...'},
+        ]
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_album(medias, caption=caption, disable_comments=disable_comments)
+        self.assertEqual(str(ve.exception), 'Data not specified.')
+
+        medias = [
+            {'type': 'image', 'data': '...'},
+            {'type': 'image', 'size': (800, 800), 'data': '...'},
+        ]
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_album(medias, caption=caption, disable_comments=disable_comments)
+        self.assertEqual(str(ve.exception), 'Size not specified.')
+
+        medias = [
+            {'type': 'video', 'size': (720, 720), 'thumbnail': '...', 'data': '...'},
+            {'type': 'image', 'size': (800, 800), 'data': '...'},
+        ]
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_album(medias, caption=caption, disable_comments=disable_comments)
+        self.assertEqual(str(ve.exception), 'Duration not specified.')
+
+        medias = [
+            {'type': 'video', 'size': (720, 720), 'duration': 12.4, 'data': '...'},
+            {'type': 'image', 'size': (800, 800), 'data': '...'},
+        ]
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_album(medias, caption=caption, disable_comments=disable_comments)
+        self.assertEqual(str(ve.exception), 'Thumbnail not specified.')
+
+        medias = [
+            {'type': 'image', 'size': (800, 600), 'data': '...'},
+            {'type': 'image', 'size': (800, 800), 'data': '...'},
+        ]
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_album(medias, caption=caption, disable_comments=disable_comments)
+        self.assertEqual(str(ve.exception), 'Invalid media aspect ratio.')

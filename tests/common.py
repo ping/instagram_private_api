@@ -112,3 +112,12 @@ class WebApiTestBase(unittest.TestCase):
     def tearDown(self):
         if not self._testMethodName.endswith('_mock'):
             time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
+
+
+class MockResponse(object):
+    def __init__(self, code=200, content_type=''):
+        self.code = 200
+        self.content_type = content_type
+
+    def info(self):
+        return {'Content-Type': self.content_type}

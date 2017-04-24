@@ -6,10 +6,11 @@ try:
 except ImportError:
     # python 3.x
     from urllib.request import urlopen
+from io import BytesIO
 
 from ..common import (
-    Client, ClientError,
-    ApiTestBase, compat_mock
+    Client, ClientError, ClientLoginError,
+    ApiTestBase, compat_mock, compat_urllib_error
 )
 
 
@@ -146,12 +147,34 @@ class AccountTests(ApiTestBase):
                 compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
                 compat_mock.patch('instagram_private_api.Client._read_response') as read_response:
             generate_uuid_mock.return_value = generated_uuid
-            call_api.return_value = ''
+            call_api.side_effect = [
+                '',     # Test 1
+                '',     # Test 1
+                '',     # Test 2
+                compat_urllib_error.HTTPError(      # Test 2
+                    self.api.api_url, 500, 'Internal Server Error', {},
+                    BytesIO('Internal Server Error'.encode('utf-8'))),
+                '',     # Test 3
+                compat_urllib_error.HTTPError(      # Test 2
+                    self.api.api_url, 400, 'Invalid', {},
+                    BytesIO('Invalid'.encode('utf-8'))),
+            ]
             read_response.return_value = json.dumps({'status': 'fail'})
 
-            with self.assertRaises(ClientError) as tc:
+            # Test 1
+            with self.assertRaises(ClientError) as ce:
                 self.api.login()
-            self.assertEqual(tc.exception.msg, 'Unable to login.')
+            self.assertEqual(ce.exception.msg, 'Unable to login.')
+
+            # Test 2
+            with self.assertRaises(ClientError) as ce:
+                self.api.login()
+            self.assertEqual(ce.exception.msg, 'Internal Server Error')
+
+            # Test 3
+            with self.assertRaises(ClientLoginError) as cle:
+                self.api.login()
+            self.assertEqual(cle.exception.msg, 'Unable to login: HTTP Error 400: Invalid')
 
     def test_current_user(self):
         results = self.api.current_user()
@@ -304,7 +327,12 @@ class AccountTests(ApiTestBase):
 
     @compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open')
     def test_change_profile_picture_mock(self, opener):
-        opener.return_value = ''
+        opener.side_effect = [
+            '',
+            compat_urllib_error.HTTPError(
+                self.api.api_url, 500, 'Internal Server Error', {},
+                BytesIO('Internal Server Error'.encode('utf-8')))
+        ]
         with compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
                 compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
                 compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.Request') as request:
@@ -340,3 +368,7 @@ class AccountTests(ApiTestBase):
             request.assert_called_with(
                 self.api.api_url + 'accounts/change_profile_picture/',
                 body.encode('ascii'), headers=headers)
+
+            with self.assertRaises(ClientError) as he:
+                self.api.change_profile_picture(photo_data)
+            self.assertEqual(str(he.exception), 'Internal Server Error')
