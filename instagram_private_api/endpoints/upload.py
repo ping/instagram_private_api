@@ -402,7 +402,7 @@ class UploadEndpointsMixin(object):
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_msg = e.reason
-            error_response = e.read()
+            error_response = e.read().decode('utf8')
             self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
             try:
                 error_obj = json.loads(error_response)
@@ -577,7 +577,7 @@ class UploadEndpointsMixin(object):
 
                 except compat_urllib_error.HTTPError as e:
                     error_msg = e.reason
-                    error_response = e.read()
+                    error_response = e.read().decode('utf8')
                     self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
                     try:
                         error_obj = json.loads(error_response)
@@ -668,7 +668,7 @@ class UploadEndpointsMixin(object):
                     raise ValueError('Thumbnail not specified.')
             aspect_ratio = (media['size'][0] * 1.0) / (media['size'][1] * 1.0)
             if aspect_ratio > 1.0 or aspect_ratio < 1.0:
-                raise ValueError('Invalid media aspect ratio')
+                raise ValueError('Invalid media aspect ratio.')
 
             if media['type'] == 'video':
                 metadata = self.post_video(
