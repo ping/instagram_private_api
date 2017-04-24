@@ -36,7 +36,7 @@ class AccountsEndpointsMixin(object):
             login_response = self._call_api(
                 'accounts/login/', params=login_params, return_response=True)
         except compat_urllib_error.HTTPError as e:
-            error_response = e.read().decode('utf8')
+            error_response = self._read_response(e)
             if e.code == 400:
                 raise ClientLoginError('Unable to login: %s' % e)
             raise ClientError(e.reason, e.code, error_response)
@@ -142,7 +142,7 @@ class AccountsEndpointsMixin(object):
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_msg = e.reason
-            error_response = e.read().decode('utf8')
+            error_response = self._read_response(e)
             try:
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):

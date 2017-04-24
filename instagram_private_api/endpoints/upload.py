@@ -402,7 +402,7 @@ class UploadEndpointsMixin(object):
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_msg = e.reason
-            error_response = e.read().decode('utf8')
+            error_response = self._read_response(e)
             self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
             try:
                 error_obj = json.loads(error_response)
@@ -577,7 +577,7 @@ class UploadEndpointsMixin(object):
 
                 except compat_urllib_error.HTTPError as e:
                     error_msg = e.reason
-                    error_response = e.read().decode('utf8')
+                    error_response = self._read_response(e)
                     self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
                     try:
                         error_obj = json.loads(error_response)
