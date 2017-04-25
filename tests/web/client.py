@@ -29,18 +29,21 @@ class ClientTests(WebApiTestBase):
                 'test': ClientTests('test_client_init', api)
             },
             {
-                'name': 'test_login',
-                'test': ClientTests('test_login', api)
+                'name': 'test_login_mock',
+                'test': ClientTests('test_login_mock', api)
             },
         ]
 
     @compat_mock.patch('instagram_web_api.Client._make_request')
-    def test_login(self, make_request):
+    def test_login_mock(self, make_request):
         make_request.side_effect = [
             {'status': 'ok', 'authenticated': 'x'},
             {'status': 'fail'}
         ]
+        self.api.on_login = lambda x: self.assertIsNotNone(x)
         self.api.login()
+        self.api.on_login = None
+
         make_request.assert_called_with(
             'https://www.instagram.com/accounts/login/ajax/',
             params={'username': self.api.username, 'password': self.api.password})
@@ -53,6 +56,7 @@ class ClientTests(WebApiTestBase):
         self.assertGreaterEqual(len(results['hashtags']), 0)
 
     def test_client_properties(self):
+        self.sleep_interval = 0
         self.assertIsNotNone(self.api.csrftoken)
         self.assertIsNotNone(self.api.authenticated_user_id)
         self.assertIsNone(self.api.authenticated_user_name)
@@ -64,6 +68,7 @@ class ClientTests(WebApiTestBase):
 
     @compat_mock.patch('instagram_web_api.client.compat_urllib_request.OpenerDirector.open')
     def test_client_errors(self, open_mock):
+        self.sleep_interval = 0
         open_mock.side_effect = [
             compat_urllib_error.HTTPError('', 404, 'Not Found', None, None),
             compat_urllib_error.URLError('No route to host')]

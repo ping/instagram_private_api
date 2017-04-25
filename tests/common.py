@@ -11,7 +11,7 @@ import os
 try:
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError, ClientCompatPatch,
+        ClientCookieExpiredError, ClientThrottledError, ClientCompatPatch,
         ClientLoginRequiredError)
     from instagram_private_api.utils import (
         InstagramID, gen_user_breadcrumb,
@@ -22,7 +22,7 @@ except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError, ClientCompatPatch,
+        ClientCookieExpiredError, ClientThrottledError, ClientCompatPatch,
         ClientLoginRequiredError)
     from instagram_private_api.utils import (
         InstagramID, gen_user_breadcrumb,
@@ -72,6 +72,9 @@ class ApiTestBase(unittest.TestCase):
         self.api = api
         self.test_user_id = user_id
         self.test_media_id = media_id
+        self.sleep_interval = 2.5
+        if testname.endswith('_mock'):
+            self.sleep_interval = 0      # sleep a bit between tests to avoid HTTP429 errors
 
     @classmethod
     def setUpClass(cls):
@@ -85,8 +88,7 @@ class ApiTestBase(unittest.TestCase):
         pass
 
     def tearDown(self):
-        if not self._testMethodName.endswith('_mock'):
-            time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
+        time.sleep(self.sleep_interval)
 
 
 class WebApiTestBase(unittest.TestCase):
@@ -94,6 +96,9 @@ class WebApiTestBase(unittest.TestCase):
     def __init__(self, testname, api):
         super(WebApiTestBase, self).__init__(testname)
         self.api = api
+        self.sleep_interval = 2.5
+        if testname.endswith('_mock'):
+            self.sleep_interval = 0   # sleep a bit between tests to avoid HTTP429 errors
 
     @classmethod
     def setUpClass(cls):
@@ -110,8 +115,7 @@ class WebApiTestBase(unittest.TestCase):
         self.test_comment_id = '1234567890'
 
     def tearDown(self):
-        if not self._testMethodName.endswith('_mock'):
-            time.sleep(2.5)   # sleep a bit between tests to avoid HTTP429 errors
+        time.sleep(self.sleep_interval)
 
 
 class MockResponse(object):

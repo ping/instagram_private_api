@@ -1,6 +1,7 @@
 import unittest
 import json
 import time
+from io import BytesIO
 try:
     # python 2.x
     from urllib2 import urlopen
@@ -8,7 +9,7 @@ except ImportError:
     # python 3.x
     from urllib.request import urlopen
 
-from ..common import ApiTestBase, compat_mock, MockResponse
+from ..common import ClientError, ApiTestBase, compat_mock, compat_urllib_error, MockResponse
 
 
 class UploadTests(ApiTestBase):
@@ -142,7 +143,7 @@ class UploadTests(ApiTestBase):
         self.assertIsNotNone(results.get('media'))
 
     def test_post_photo_base(self, size=(800, 800), caption='HEY', upload_id=None, location=None,
-                             disable_comments=False, is_reel=False, is_sidecar=False):
+                             disable_comments=False, is_reel=False, is_sidecar=False, **kwargs):
         ts_now = time.time()
         with compat_mock.patch(
                 'instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open') as opener, \
@@ -158,7 +159,12 @@ class UploadTests(ApiTestBase):
             # for photo posting
             default_headers.return_value = {'Header': 'X'}
 
-            opener.return_value = MockResponse()
+            if kwargs.pop('raise_httperror', False):
+                opener.side_effect = [compat_urllib_error.HTTPError(
+                    'http://localhost', 400, 'Bad Request', {},
+                    BytesIO(json.dumps({'status': 'fail', 'message': 'Invalid Request'}).encode('ascii')))]
+            else:
+                opener.side_effect = [MockResponse()]
 
             if upload_id:
                 for_video = True
@@ -167,7 +173,12 @@ class UploadTests(ApiTestBase):
                 upload_id = str(int(ts_now * 1000))
             read_response.return_value = json.dumps({'status': 'ok', 'upload_id': upload_id})
             # for configure
-            call_api.return_value = {'status': 'ok'}
+            call_api.return_value = {
+                'status': 'ok',
+                'media': {
+                    'code': 'x', 'taken_at': 149000000, 'media_type': 1, 'caption': None,
+                    'user': {'pk': 10, 'profile_pic_url': ''}}
+            }
 
             photo_data = '...'.encode('ascii')
             headers = self.api.default_headers
@@ -316,6 +327,10 @@ class UploadTests(ApiTestBase):
             self.test_post_photo_base(location=location)
         self.assertEqual(str(ve.exception), 'Location dict must contain "address".')
 
+        with self.assertRaises(ClientError) as ce:
+            self.test_post_photo_base(raise_httperror=True)
+        self.assertEqual(ce.exception.msg, 'Bad Request')
+
         # Stories
         self.test_post_photo_base(size=(608, 1080), is_reel=True)
         with self.assertRaises(ValueError) as ve:
@@ -326,7 +341,8 @@ class UploadTests(ApiTestBase):
         self.test_post_photo_base(is_sidecar=True)
 
     def test_post_video_base(self, size, duration, caption='', location=None,
-                             disable_comments=False, to_reel=False, is_sidecar=False):
+                             disable_comments=False, to_reel=False, is_sidecar=False,
+                             **kwargs):
         ts_now = time.time()
         with compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
                 compat_mock.patch(
@@ -345,10 +361,13 @@ class UploadTests(ApiTestBase):
             thumbnail_data = '....'.encode('ascii')
             upload_id = str(int(ts_now * 1000))
 
+            raise_httperror = kwargs.pop('raise_httperror', False)
             opener.side_effect = [
                 MockResponse(),     # chunk 1
                 MockResponse(),     # chunk 2
-                MockResponse(),     # chunk 3
+                MockResponse() if not raise_httperror else compat_urllib_error.HTTPError(
+                    'http://localhost', 400, 'Bad Request', {},
+                    BytesIO(json.dumps({'status': 'fail', 'message': 'Invalid Request'}).encode('ascii'))),  # chunk 3
                 MockResponse(content_type='application/json'),
                 MockResponse(),     # For uploading thmbnail
             ]
@@ -356,7 +375,9 @@ class UploadTests(ApiTestBase):
             call_api.side_effect = [
                 {'video_upload_urls': [{'url': 'http://localhost', 'job': '1111'}]},  # Upload request
                 {'status': 'ok'},    # Upload photo thumbnail request
-                {'status': 'ok'},    # Configure video request
+                {'status': 'ok', 'media':
+                    {'code': 'x', 'taken_at': 149000000, 'media_type': 1, 'caption': None,
+                     'user': {'pk': 10, 'profile_pic_url': ''}}},    # Configure video request
             ]
             read_response.side_effect = [
                 '0-3/16',           # 1st response to chunk upload
@@ -507,6 +528,10 @@ class UploadTests(ApiTestBase):
         with self.assertRaises(ValueError) as ve:
             self.test_post_video_base(size=(612, 1080), duration=16, to_reel=True)
         self.assertEqual(str(ve.exception), 'Duration is more than 15s.')
+
+        with self.assertRaises(ClientError) as ce:
+            self.test_post_video_base(size=(800, 800), duration=16, raise_httperror=True)
+        self.assertEqual(ce.exception.msg, 'Bad Request')
 
         # Album
         self.test_post_video_base(

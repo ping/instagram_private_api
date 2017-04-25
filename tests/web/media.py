@@ -25,8 +25,8 @@ class MediaTests(WebApiTestBase):
                 'test': MediaTests('test_notfound_media_comments', api)
             },
             {
-                'name': 'test_media_comments_extract',
-                'test': MediaTests('test_media_comments_extract', api)
+                'name': 'test_media_comments_noextract',
+                'test': MediaTests('test_media_comments_noextract', api)
             },
             {
                 'name': 'test_post_comment',
@@ -64,12 +64,16 @@ class MediaTests(WebApiTestBase):
             },
             {
                 'name': 'test_delete_like_mock',
-                'test': MediaTests('test_post_like_mock', api),
+                'test': MediaTests('test_delete_like_mock', api),
             },
             {
                 'name': 'test_carousel_media_info',
                 'test': MediaTests('test_carousel_media_info', api),
             },
+            {
+                'name': 'test_post_comment_validation_mock',
+                'test': MediaTests('test_post_comment_validation_mock', api),
+            }
         ]
 
     def test_media_info(self):
@@ -90,15 +94,15 @@ class MediaTests(WebApiTestBase):
     def test_media_comments(self):
         results = self.api.media_comments(self.test_media_shortcode, count=20)
         self.assertGreaterEqual(len(results), 0)
+        self.assertIsInstance(results, list)
+        self.assertIsInstance(results[0], dict)
 
     def test_notfound_media_comments(self):
         self.assertRaises(ClientError, lambda: self.api.media_comments('BSgmaRDg-xX'))
 
-    def test_media_comments_extract(self):
-        results = self.api.media_comments(self.test_media_shortcode, count=20, extract=True)
-        self.assertGreaterEqual(len(results), 0)
-        self.assertIsInstance(results, list)
-        self.assertIsInstance(results[0], dict)
+    def test_media_comments_noextract(self):
+        results = self.api.media_comments(self.test_media_shortcode, count=20, extract=False)
+        self.assertIsInstance(results, dict)
 
     @unittest.skip('Modifies data.')
     def test_post_comment(self):
@@ -109,7 +113,7 @@ class MediaTests(WebApiTestBase):
     @compat_mock.patch('instagram_web_api.Client._make_request')
     def test_post_comment_mock(self, make_request):
         make_request.return_value = {'status': 'ok', 'id': '12345678'}
-        self.api.post_comment(self.test_media_id, '<3')
+        self.api.post_comment(self.test_media_id + '_12345', '<3')      # test sanitise media id
         make_request.assert_called_with(
             'https://www.instagram.com/web/comments/%(media_id)s/add/' % {'media_id': self.test_media_id},
             params={'comment_text': '<3'})
@@ -153,3 +157,23 @@ class MediaTests(WebApiTestBase):
         make_request.assert_called_with(
             'https://www.instagram.com/web/likes/%(media_id)s/unlike/' % {'media_id': self.test_media_id},
             params='')
+
+    @compat_mock.patch('instagram_web_api.Client._make_request')
+    def test_post_comment_validation_mock(self, make_request):
+        make_request.return_value = {'status': 'ok', 'id': '12345678'}
+
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_comment(self.test_media_id, '.' * 400)
+        self.assertEqual(str(ve.exception), 'The total length of the comment cannot exceed 300 characters.')
+
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_comment(self.test_media_id, 'ABC DEFG.')
+        self.assertEqual(str(ve.exception), 'The comment cannot consist of all capital letters.')
+
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_comment(self.test_media_id, '#this #is #a #test #fail')
+        self.assertEqual(str(ve.exception), 'The comment cannot contain more than 4 hashtags.')
+
+        with self.assertRaises(ValueError) as ve:
+            self.api.post_comment(self.test_media_id, 'https://google.com or http://instagram.com?')
+        self.assertEqual(str(ve.exception), 'The comment cannot contain more than 1 URL.')

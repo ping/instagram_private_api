@@ -15,6 +15,10 @@ class FriendshipTests(ApiTestBase):
                 'test': FriendshipTests('test_autocomplete_user_list', api)
             },
             {
+                'name': 'test_autocomplete_user_list_mock',
+                'test': FriendshipTests('test_autocomplete_user_list_mock', api)
+            },
+            {
                 'name': 'test_user_following',
                 'test': FriendshipTests('test_user_following', api, user_id='124317')
             },
@@ -69,6 +73,17 @@ class FriendshipTests(ApiTestBase):
         results = self.api.autocomplete_user_list()
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('users', [])), 0, 'No users returned.')
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_autocomplete_user_list_mock(self, call_api):
+        call_api.return_value = {
+            'status': 'ok', 'users': [
+                {'pk': 100, 'profile_pic_url': ''},
+                {'pk': 200, 'profile_pic_url': ''},
+            ]}
+        self.api.autocomplete_user_list()
+        call_api.assert_called_with('friendships/autocomplete_user_list/',
+                                    query={'followinfo': 'True', 'version': '2'})
 
     def test_user_following(self):
         results = self.api.user_following(self.test_user_id)

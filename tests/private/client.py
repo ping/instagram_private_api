@@ -1,7 +1,10 @@
+from io import BytesIO
+import json
 
 from ..common import (
-    ApiTestBase, Client, ClientLoginRequiredError, Constants,
-    gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator
+    ApiTestBase, Client, ClientThrottledError, ClientError, ClientLoginRequiredError, Constants,
+    gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator,
+    compat_mock, compat_urllib_error
 )
 
 
@@ -54,9 +57,14 @@ class ClientTests(ApiTestBase):
                 'name': 'test_client_loginrequired',
                 'test': ClientTests('test_client_loginrequired', api)
             },
+            {
+                'name': 'test_client_requests',
+                'test': ClientTests('test_client_requests', api)
+            },
         ]
 
     def test_validate_useragent(self):
+        self.sleep_interval = 0
         ua = 'Instagram 9.2.0 Android (22/5.1.1; 480dpi; 1080x1920; Xiaomi; Redmi Note 3; kenzo; qcom; en_GB)'
         results = Client.validate_useragent(ua)
         self.assertEqual(results['parsed_params']['brand'], 'Xiaomi')
@@ -70,11 +78,13 @@ class ClientTests(ApiTestBase):
         self.assertEqual(results['parsed_params']['app_version'], '9.2.0')
 
     def test_validate_useragent2(self):
+        self.sleep_interval = 0
         ua = 'Instagram 9.2.0 Android (xx/5.1.1; 480dpi; 1080x1920; Xiaomi; Redmi Note 3; kenzo; qcom; en_GB)'
         with self.assertRaises(ValueError):
             Client.validate_useragent(ua)
 
     def test_generate_useragent(self):
+        self.sleep_interval = 0
         custom_device = {
             'manufacturer': 'Samsung',
             'model': 'maguro',
@@ -113,14 +123,17 @@ class ClientTests(ApiTestBase):
         )
 
     def test_cookiejar_dump(self):
+        self.sleep_interval = 0
         dump = self.api.cookie_jar.dump()
         self.assertIsNotNone(dump)
 
     def test_gen_user_breadcrumb(self):
+        self.sleep_interval = 0
         output = gen_user_breadcrumb(15)
         self.assertIsNotNone(output)
 
     def test_max_chunk_size_generator(self):
+        self.sleep_interval = 0
         chunk_data = 'abcdefghijklmnopqrstuvwxyz'
         chunk_size = 5
         chunk_count = 0
@@ -132,6 +145,7 @@ class ClientTests(ApiTestBase):
             self.assertEqual(chunk_info.is_first, chunk_count == 1)
 
     def test_max_chunk_count_generator(self):
+        self.sleep_interval = 0
         chunk_data = 'abcdefghijklmnopqrstuvwxyz'
         expected_chunk_count = 5
         chunk_count = 0
@@ -145,6 +159,7 @@ class ClientTests(ApiTestBase):
         self.assertEqual(chunk_count, expected_chunk_count, 'Chunk count is wrong.')
 
     def test_settings(self):
+        self.sleep_interval = 0
         results = self.api.settings
         for k in ('uuid', 'device_id', 'ad_id', 'signature_key', 'key_version',
                   'ig_capabilities', 'app_version', 'android_release', 'android_version',
@@ -153,6 +168,7 @@ class ClientTests(ApiTestBase):
             self.assertIsNotNone(results.get(k))
 
     def test_user_agent(self):
+        self.sleep_interval = 0
         ua = self.api.user_agent
         self.assertIsNotNone(ua)
         self.api.user_agent = ua
@@ -168,6 +184,7 @@ class ClientTests(ApiTestBase):
         self.assertEqual(results['parsed_params']['brand'], 'BrandX')
 
     def test_client_properties(self):
+        self.sleep_interval = 0
         results = self.api.get_cookie_value('non-existent-cookie-value')
         self.assertIsNone(results)
 
@@ -182,5 +199,39 @@ class ClientTests(ApiTestBase):
         self.assertIsInstance(self.api.timezone_offset, int)
 
     def test_client_loginrequired(self):
+        self.sleep_interval = 0
         with self.assertRaises(ClientLoginRequiredError):
             Client('', '')
+
+    @compat_mock.patch('instagram_private_api.client.compat_urllib_request.OpenerDirector.open')
+    def test_client_requests(self, open_mock):
+        self.sleep_interval = 0
+        open_mock.side_effect = [
+            compat_urllib_error.HTTPError(
+                '', 400, 'Bad Request', {},
+                BytesIO(json.dumps({'status': 'fail', 'message': 'login_required'}).encode('ascii'))),
+
+            compat_urllib_error.HTTPError(
+                '', 429, 'Too Many Requests', {},
+                BytesIO(
+                    json.dumps({
+                        'status': 'fail',
+                        'message': 'Sorry, too many requests. Please try again later.'}
+                    ).encode('ascii')
+                )),
+
+            compat_urllib_error.HTTPError(
+                '', 500, 'Internal Server Error', {},
+                BytesIO('Internal Server Error'.encode('ascii'))),
+        ]
+        with self.assertRaises(ClientLoginRequiredError) as ce:
+            self.api.feed_timeline()
+        self.assertEqual(ce.exception.msg, 'login_required')
+
+        with self.assertRaises(ClientThrottledError) as ce:
+            self.api.feed_timeline()
+        self.assertEqual(ce.exception.msg, 'Sorry, too many requests. Please try again later.')
+
+        with self.assertRaises(ClientError) as ce:
+            self.api.feed_timeline()
+        self.assertEqual(ce.exception.msg, 'Internal Server Error')

@@ -1,4 +1,5 @@
 import unittest
+import time
 
 from ..common import WebApiTestBase, WebClientError as ClientError, compat_mock
 
@@ -21,8 +22,8 @@ class UserTests(WebApiTestBase):
                 'test': UserTests('test_notfound_user_feed', api)
             },
             {
-                'name': 'test_user_feed_extract',
-                'test': UserTests('test_user_feed_extract', api)
+                'name': 'test_user_feed_noextract',
+                'test': UserTests('test_user_feed_noextract', api)
             },
             {
                 'name': 'test_user_followers',
@@ -30,8 +31,8 @@ class UserTests(WebApiTestBase):
                 'require_auth': True,
             },
             {
-                'name': 'test_user_followers_extract',
-                'test': UserTests('test_user_followers_extract', api),
+                'name': 'test_user_followers_noextract',
+                'test': UserTests('test_user_followers_noextract', api),
                 'require_auth': True,
             },
             {
@@ -67,29 +68,55 @@ class UserTests(WebApiTestBase):
     def test_user_feed(self):
         results = self.api.user_feed(self.test_user_id)
         self.assertGreater(len(results), 0)
+        self.assertIsInstance(results, list)
+        self.assertIsInstance(results[0], dict)
 
     def test_notfound_user_feed(self):
         self.assertRaises(ClientError, lambda: self.api.user_feed('1'))
 
-    def test_user_feed_extract(self, extract=True):
-        results = self.api.user_feed(self.test_user_id)
-        self.assertIsInstance(results, list)
-        self.assertGreater(len(results), 0)
-        self.assertIsInstance(results[0], dict)
+    def test_user_feed_noextract(self, extract=True):
+        results = self.api.user_feed(self.test_user_id, extract=False)
+        self.assertIsInstance(results, dict)
+        self.assertIsInstance(results.get('media', {}).get('nodes'), list)
+        self.assertGreater(len(results.get('media', {}).get('nodes', [])), 0)
+        first_code = results.get('media', {}).get('nodes')[0]['code']
+        end_cursor = results.get('media', {}).get('page_info', {}).get('end_cursor')
+
+        time.sleep(self.sleep_interval)
+        results = self.api.user_feed(self.test_user_id, extract=False, end_cursor=end_cursor)
+        self.assertNotEqual(first_code, results.get('media', {}).get('nodes')[0]['code'])
 
     def test_user_followers(self):
         results = self.api.user_followers(self.test_user_id)
         self.assertGreater(len(results), 0)
-
-    def test_user_followers_extract(self):
-        results = self.api.user_followers(self.test_user_id, extract=True)
-        self.assertGreater(len(results), 0)
         self.assertIsInstance(results, list)
         self.assertIsInstance(results[0], dict)
+
+    def test_user_followers_noextract(self):
+        results = self.api.user_followers(self.test_user_id, extract=False)
+        self.assertIsInstance(results, dict)
+
+        self.assertIsInstance(results.get('followed_by', {}).get('nodes'), list)
+        self.assertGreater(len(results.get('followed_by', {}).get('nodes', [])), 0)
+        first_user = results.get('followed_by', {}).get('nodes')[0]['username']
+        end_cursor = results.get('followed_by', {}).get('page_info', {}).get('end_cursor')
+
+        time.sleep(self.sleep_interval)
+        results = self.api.user_followers(self.test_user_id, extract=False, end_cursor=end_cursor)
+        self.assertNotEqual(first_user, results.get('followed_by', {}).get('nodes')[0]['username'])
 
     def test_user_following(self):
         results = self.api.user_following(self.test_user_id)
         self.assertGreater(len(results), 0)
+        first_user = results[0]['username']
+
+        time.sleep(self.sleep_interval)
+        results = self.api.user_following(self.test_user_id, extract=False)
+        end_cursor = results.get('follows', {}).get('page_info', {}).get('end_cursor')
+
+        time.sleep(self.sleep_interval)
+        results = self.api.user_following(self.test_user_id, extract=False, end_cursor=end_cursor)
+        self.assertNotEqual(first_user, results.get('follows', {}).get('nodes', [{}])[0].get('username'))
 
     @unittest.skip('Modifies data')
     def test_friendships_create(self):
