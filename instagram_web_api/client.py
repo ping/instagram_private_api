@@ -23,7 +23,7 @@ def login_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if not args[0].is_authenticated:
-            raise ClientError('Method requires authentication', 403)
+            raise ClientError('Method requires authentication.', 403)
         return fn(*args, **kwargs)
     return wrapper
 

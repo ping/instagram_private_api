@@ -2,7 +2,7 @@
 
 from .client import Client
 from .compatpatch import ClientCompatPatch
-from .errors import ClientError, ClientLoginError, ClientLoginRequiredError, ClientCookieExpiredError
+from .errors import ClientError, ClientLoginError, ClientLoginRequiredError, ClientCookieExpiredError, ClientThrottledError
 
 
 __version__ = '1.2.5'
