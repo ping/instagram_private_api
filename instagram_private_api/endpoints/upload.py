@@ -7,7 +7,7 @@ import warnings
 from ..compat import compat_urllib_error, compat_urllib_request
 from ..errors import ClientError
 from ..http import MultipartFormDataEncoder
-from ..utils import max_chunk_count_generator
+from ..utils import max_chunk_count_generator, get_file_size
 from ..compatpatch import ClientCompatPatch
 
 
@@ -440,7 +440,7 @@ class UploadEndpointsMixin(object):
 
         [CAUTION] FLAKY, IG is very picky about sizes, etc, needs testing.
 
-        :param video_data: byte string of the video content
+        :param video_data: byte string or a file-like object of the video content
         :param size: tuple of (width, height)
         :param duration: in seconds
         :param thumbnail_data: byte string of the video thumbnail content
@@ -474,7 +474,12 @@ class UploadEndpointsMixin(object):
         if to_reel and duration > 15.0:
             raise ValueError('Duration is more than 15s.')
 
-        if len(video_data) > 50 * 1024 * 1000:
+        max_file_len = 50 * 1024 * 1000
+        try:
+            video_file_len = len(video_data)
+        except TypeError:
+            video_file_len = get_file_size(video_data)
+        if video_file_len > max_file_len:
             raise ValueError('Video file is too big.')
 
         location = kwargs.pop('location', None)
@@ -507,7 +512,6 @@ class UploadEndpointsMixin(object):
         upload_job = res['video_upload_urls'][-1]['job']
 
         chunk_count = 4
-        total_len = len(video_data)
 
         # Alternatively, can use max_chunk_size_generator(20480, video_data)
         # [TODO] We can be a little smart about using either generators
@@ -515,18 +519,14 @@ class UploadEndpointsMixin(object):
         # Example:
         # max_chunk_size_generator(200000, video_data), OR
         # max_chunk_count_generator(chunk_count, video_data)
-        chunks_for_upload = []
-        for chunk, _ in max_chunk_count_generator(chunk_count, video_data):
-            chunks_for_upload.append(chunk)
-
         successful_chunk_ranges = []
         all_done = False
 
         max_retry_count = kwargs.pop('max_retry_count', 10)
-
+        configure_delay = 0
         for _ in range(max_retry_count + 1):
 
-            for chunk in chunks_for_upload:
+            for chunk, data in max_chunk_count_generator(chunk_count, video_data):
                 skip_chunk = False
                 for received_chunk in successful_chunk_ranges:
                     if received_chunk[0] <= chunk.start and received_chunk[1] >= (chunk.end - 1):
@@ -536,8 +536,7 @@ class UploadEndpointsMixin(object):
                     self.logger.debug('Skipped chunk: %d - %d' % (chunk.start, chunk.end - 1))
                     continue
 
-                data = video_data[chunk.start: chunk.end]
-
+                # data = video_data[chunk.start: chunk.end]
                 headers = self.default_headers
                 headers['Connection'] = 'keep-alive'
                 headers['Content-Type'] = 'application/octet-stream'
@@ -547,7 +546,7 @@ class UploadEndpointsMixin(object):
                     headers['Cookie'] = 'sessionid=' + self.get_cookie_value('sessionid')
                 headers['job'] = upload_job
                 headers['Content-Length'] = chunk.length
-                headers['Content-Range'] = 'bytes %d-%d/%d' % (chunk.start, chunk.end - 1, total_len)
+                headers['Content-Range'] = 'bytes %d-%d/%d' % (chunk.start, chunk.end - 1, video_file_len)
                 self.logger.debug('POST %s' % upload_url)
                 self.logger.debug('Uploading Content-Range: %s' % headers['Content-Range'])
 
@@ -560,6 +559,8 @@ class UploadEndpointsMixin(object):
                     self.logger.debug('RESPONSE: %d %s' % (res.code, post_response))
                     if res.info().get('Content-Type') == 'application/json':
                         # last chunk
+                        upload_res = json.loads(post_response)
+                        configure_delay = int(upload_res.get('configure_delay_ms', 0)) / 1000.0
                         all_done = True
                         break
                     else:
@@ -596,12 +597,26 @@ class UploadEndpointsMixin(object):
         if not all_done:
             raise ClientError('Upload has failed due to incomplete chunk uploads.', code=500)
 
-        if not to_reel:
-            return self.configure_video(
-                upload_id, size, duration, thumbnail_data, caption=caption, location=location,
-                disable_comments=disable_comments, is_sidecar=is_sidecar)
-        else:
-            return self.configure_video_to_reel(upload_id, size, duration, thumbnail_data)
+        if not configure_delay:
+            configure_delay = 3
+        configure_retry_max = 2
+
+        for i in range(1, configure_retry_max + 1):
+            try:
+                if not to_reel:
+                    result = self.configure_video(
+                        upload_id, size, duration, thumbnail_data, caption=caption, location=location,
+                        disable_comments=disable_comments, is_sidecar=is_sidecar)
+                else:
+                    result = self.configure_video_to_reel(
+                        upload_id, size, duration, thumbnail_data)
+                return result
+            except ClientError as ce:
+                if (ce.code == 202 or ce.msg == 'Transcode timeout') and i < configure_retry_max:
+                    self.logger.warn('Retry configure after %f seconds' % configure_delay)
+                    time.sleep(configure_delay)
+                else:
+                    raise
 
     def post_photo_story(self, photo_data, size):
         """
@@ -618,7 +633,7 @@ class UploadEndpointsMixin(object):
         """
         Upload a video story
 
-        :param video_data: byte string of the video content
+        :param video_data: byte string or a file-like object of the video content
         :param size: tuple of (width, height)
         :param duration: in seconds
         :param thumbnail_data: byte string of the video thumbnail content

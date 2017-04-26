@@ -1,6 +1,7 @@
 import unittest
 import json
 import time
+import os
 from io import BytesIO
 try:
     # python 2.x
@@ -9,7 +10,10 @@ except ImportError:
     # python 3.x
     from urllib.request import urlopen
 
-from ..common import ClientError, ApiTestBase, compat_mock, compat_urllib_error, MockResponse
+from ..common import (
+    ClientError, ApiTestBase, compat_mock, compat_urllib_error, MockResponse,
+    get_file_size
+)
 
 
 class UploadTests(ApiTestBase):
@@ -24,6 +28,10 @@ class UploadTests(ApiTestBase):
             {
                 'name': 'test_post_video',
                 'test': UploadTests('test_post_video', api)
+            },
+            {
+                'name': 'test_post_video2',
+                'test': UploadTests('test_post_video2', api)
             },
             {
                 'name': 'test_post_album',
@@ -83,6 +91,20 @@ class UploadTests(ApiTestBase):
         results = self.api.post_video(video_data, video_size, duration, thumb_data, caption='<3')
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
+
+    @unittest.skip('Modifies data.')
+    def test_post_video2(self):
+        sample_video = os.path.join(os.path.dirname(__file__), '../media/test.mp4')
+        sample_video_thumbnail = os.path.join(os.path.dirname(__file__), '../media/test_thumbnail.jpg')
+
+        with open(sample_video, 'rb') as video_fp, \
+                open(sample_video_thumbnail, 'rb') as thumbnail_file:
+            # 640x360, 60secs
+            thumbnail_data = thumbnail_file.read()
+            results = self.api.post_video(
+                video_fp, (640, 360), 60.0, thumbnail_data, caption='Hello World!', max_retry_count=15)
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertIsNotNone(results.get('media'))
 
     @unittest.skip('Modifies data.')
     def test_post_photo_story(self):
@@ -342,6 +364,7 @@ class UploadTests(ApiTestBase):
 
     def test_post_video_base(self, size, duration, caption='', location=None,
                              disable_comments=False, to_reel=False, is_sidecar=False,
+                             video_data=None, thumbnail_data=None,
                              **kwargs):
         ts_now = time.time()
         with compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
@@ -357,35 +380,63 @@ class UploadTests(ApiTestBase):
             time_mock.return_value = ts_now
             randint_mock.return_value = 0
             default_headers.return_value = {'Header': 'X'}
-            video_data = ('.' * 16).encode('ascii')
-            thumbnail_data = '....'.encode('ascii')
+            if not video_data:
+                video_data = ('.' * 16).encode('ascii')
+            try:
+                video_data_len = len(video_data)
+                is_fp = False
+            except TypeError:
+                video_data_len = get_file_size(video_data)
+                is_fp = True
+            if not thumbnail_data:
+                thumbnail_data = '....'.encode('ascii')
             upload_id = str(int(ts_now * 1000))
 
             raise_httperror = kwargs.pop('raise_httperror', False)
-            opener.side_effect = [
+            raise_transcodeclienterror = kwargs.pop('raise_transcodeclienterror', False)
+            opener_side_effect = [
                 MockResponse(),     # chunk 1
                 MockResponse(),     # chunk 2
                 MockResponse() if not raise_httperror else compat_urllib_error.HTTPError(
                     'http://localhost', 400, 'Bad Request', {},
                     BytesIO(json.dumps({'status': 'fail', 'message': 'Invalid Request'}).encode('ascii'))),  # chunk 3
                 MockResponse(content_type='application/json'),
-                MockResponse(),     # For uploading thmbnail
+                MockResponse() if not raise_transcodeclienterror else ClientError(
+                    'Transcode timeout', 202, '{"message": "Transcode timeout", "status": "fail"}'),     # For uploading thmbnail
             ]
+            if raise_transcodeclienterror:
+                # opener_side_effect.extend([MockResponse(), MockResponse()])
+                opener_side_effect.append(ClientError(
+                    'Transcode timeout', 202, '{"message": "Transcode timeout", "status": "fail"}'))
+            opener.side_effect = opener_side_effect
 
-            call_api.side_effect = [
+            call_api_side_effect = [
                 {'video_upload_urls': [{'url': 'http://localhost', 'job': '1111'}]},  # Upload request
                 {'status': 'ok'},    # Upload photo thumbnail request
+            ]
+            if raise_transcodeclienterror:
+                call_api_side_effect.extend([{'status': 'ok'}, {'status': 'ok'}])
+            call_api_side_effect.append(
                 {'status': 'ok', 'media':
                     {'code': 'x', 'taken_at': 149000000, 'media_type': 1, 'caption': None,
                      'user': {'pk': 10, 'profile_pic_url': ''}}},    # Configure video request
-            ]
-            read_response.side_effect = [
-                '0-3/16',           # 1st response to chunk upload
-                '4-7/16',           # 2nd response to chunk upload
-                '8-11/16',          # 3rd response to chunk upload
+            )
+            call_api.side_effect = call_api_side_effect
+            chunk_size = video_data_len // 4
+            read_response_side_effect = [
+                '%d-%d/%d' % (0, chunk_size - 1, video_data_len),           # 1st response to chunk upload
+                '%d-%d/%d' % (chunk_size, chunk_size * 2 - 1, video_data_len),           # 2nd response to chunk upload
+                '%d-%d/%d' % (chunk_size * 2, chunk_size * 3 - 1, video_data_len),       # 3rd response to chunk upload
                 json.dumps({'status': 'ok'}),  # Last response to chunk
                 json.dumps({'status': 'ok', 'upload_id': upload_id}),   # Response to thumbnail upload
             ]
+            if raise_transcodeclienterror:
+                # add another one due to retry
+                read_response_side_effect.extend([
+                    json.dumps({'status': 'ok', 'upload_id': upload_id}),   # Response to thumbnail upload
+                    json.dumps({'status': 'ok', 'upload_id': upload_id}),   # Response to thumbnail upload
+                ])
+            read_response.side_effect = read_response_side_effect
 
             upload_params = {
                 '_csrftoken': self.api.csrftoken,
@@ -416,18 +467,28 @@ class UploadTests(ApiTestBase):
 
             call_api.assert_any_call('upload/video/', params=upload_params, unsigned=True)
 
-            headers = self.api.default_headers
-            headers['Connection'] = 'keep-alive'
-            headers['Content-Type'] = 'application/octet-stream'
-            headers['Content-Disposition'] = 'attachment; filename="video.mov"'
-            headers['Session-ID'] = upload_id
-            if is_sidecar:
-                headers['Cookie'] = 'sessionid=' + self.api.get_cookie_value('sessionid')
-            headers['job'] = '1111'
-            headers['Content-Length'] = 4
-            headers['Content-Range'] = 'bytes %d-%d/%d' % (0, 3, 4)
-            request.assert_any_call(
-                'http://localhost', data=video_data[0:4], headers=headers)
+            for i in range(4):
+                headers = self.api.default_headers
+                headers['Connection'] = 'keep-alive'
+                headers['Content-Type'] = 'application/octet-stream'
+                headers['Content-Disposition'] = 'attachment; filename="video.mov"'
+                headers['Session-ID'] = upload_id
+                if is_sidecar:
+                    headers['Cookie'] = 'sessionid=' + self.api.get_cookie_value('sessionid')
+                headers['job'] = '1111'
+                headers['Content-Length'] = chunk_size
+                headers['Content-Range'] = 'bytes %d-%d/%d' % (
+                    i * chunk_size,
+                    (i * chunk_size if i <= 3 else video_data_len) - 1,
+                    video_data_len)
+
+                if not is_fp:
+                    data = video_data[0:chunk_size]
+                else:
+                    video_data.seek(i * chunk_size)
+                    data = video_data.read(chunk_size)
+                request.assert_any_call(
+                    'http://localhost', data=data, headers=headers)
 
             if not to_reel:
                 configure_params = {
@@ -529,13 +590,27 @@ class UploadTests(ApiTestBase):
             self.test_post_video_base(size=(612, 1080), duration=16, to_reel=True)
         self.assertEqual(str(ve.exception), 'Duration is more than 15s.')
 
+        # Client Errors
         with self.assertRaises(ClientError) as ce:
             self.test_post_video_base(size=(800, 800), duration=16, raise_httperror=True)
         self.assertEqual(ce.exception.msg, 'Bad Request')
 
+        with self.assertRaises(ClientError) as ce:
+            self.test_post_video_base(size=(800, 800), duration=16, raise_transcodeclienterror=True)
+        self.assertEqual(ce.exception.msg, 'Transcode timeout')
+
         # Album
         self.test_post_video_base(
             (800, 800), 15, caption='HEY', is_sidecar=True)
+
+        sample_video = os.path.join(os.path.dirname(__file__), '../media/test.mp4')
+        sample_video_thumbnail = os.path.join(os.path.dirname(__file__), '../media/test_thumbnail.jpg')
+
+        with open(sample_video, 'rb') as video_fp, \
+                open(sample_video_thumbnail, 'rb') as thumbnail_file:
+            # 640x360, 60secs
+            thumbnail_data = thumbnail_file.read()
+            self.test_post_video_base((640, 360), 60.0, 'TEST', video_data=video_fp, thumbnail_data=thumbnail_data)
 
     def test_post_album_mock(self):
         ts_now = time.time()

@@ -470,13 +470,13 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
 
         if json_response.get('message', '') == 'login_required':
             raise ClientLoginRequiredError(
-                json_response.get('message'),
+                json_response.get('message'), code=response.code,
                 error_response=json.dumps(json_response))
 
         # not from oembed or an ok response
         if not json_response.get('provider_url') and json_response.get('status', '') != 'ok':
             raise ClientError(
-                json_response.get('message', 'Unknown error'),
+                json_response.get('message', 'Unknown error'), code=response.code,
                 error_response=json.dumps(json_response))
 
         return json_response

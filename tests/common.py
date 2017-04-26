@@ -15,7 +15,7 @@ try:
         ClientLoginRequiredError)
     from instagram_private_api.utils import (
         InstagramID, gen_user_breadcrumb,
-        max_chunk_size_generator, max_chunk_count_generator
+        max_chunk_size_generator, max_chunk_count_generator, get_file_size
     )   # noqa
     from instagram_private_api.constants import Constants
 except ImportError:
@@ -26,7 +26,7 @@ except ImportError:
         ClientLoginRequiredError)
     from instagram_private_api.utils import (
         InstagramID, gen_user_breadcrumb,
-        max_chunk_size_generator, max_chunk_count_generator
+        max_chunk_size_generator, max_chunk_count_generator, get_file_size
     )   # noqa
     from instagram_private_api.constants import Constants
 
