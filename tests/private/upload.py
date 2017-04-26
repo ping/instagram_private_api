@@ -401,8 +401,9 @@ class UploadTests(ApiTestBase):
                     'http://localhost', 400, 'Bad Request', {},
                     BytesIO(json.dumps({'status': 'fail', 'message': 'Invalid Request'}).encode('ascii'))),  # chunk 3
                 MockResponse(content_type='application/json'),
+                # For uploading thmbnail
                 MockResponse() if not raise_transcodeclienterror else ClientError(
-                    'Transcode timeout', 202, '{"message": "Transcode timeout", "status": "fail"}'),     # For uploading thmbnail
+                    'Transcode timeout', 202, '{"message": "Transcode timeout", "status": "fail"}'),
             ]
             if raise_transcodeclienterror:
                 # opener_side_effect.extend([MockResponse(), MockResponse()])
