@@ -1,8 +1,11 @@
 # Change Log
 
-## 1.2.6 (pending)
+## 1.2.6
 - Change default user agent constants
-- Video: implement chunks upload retry, remove configure delay
+- Video:
+    - implement chunks upload retry
+    - remove configure delay
+    - support using a file-like object instead of having the whole file in memory
 - Implement collections
 - Update app version to 10.16.0
 - Other minor fixes
