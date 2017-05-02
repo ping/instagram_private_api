@@ -83,7 +83,7 @@ class MiscEndpointsMixin(object):
         """
         query = {'url': url}
         query.update(kwargs)
-        res = self._call_api('oembed', query=query)
+        res = self._call_api('oembed/', query=query)
         return res
 
     def translate(self, object_id, object_type):

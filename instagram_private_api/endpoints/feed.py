@@ -41,7 +41,7 @@ class FeedEndpointsMixin(object):
             'ranked_content': 'true'
         }
         query.update(kwargs)
-        res = self._call_api('feed/popular', query=query)
+        res = self._call_api('feed/popular/', query=query)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
