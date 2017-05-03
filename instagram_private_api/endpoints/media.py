@@ -1,6 +1,8 @@
 import json
 import re
 import warnings
+import time
+from random import randint
 
 from ..utils import gen_user_breadcrumb
 from ..compatpatch import ClientCompatPatch
@@ -296,27 +298,39 @@ class MediaEndpointsMixin(object):
         """
         Mark multiple stories as seen
 
-        :param reels: A dict of media_ids and timings
+        :param reels: A list of reel media objects, or a dict of media_ids and timings
+            as defined below.
 
             .. code-block:: javascript
 
                 {
-                    "1309763051087626108_124317": "1470355944_1470372029",
-                    "1309764045355643149_124317": "1470356063_1470372039",
-                    "1309818450243415912_124317": "1470362548_1470372060",
-                    "1309764653429046112_124317": "1470356135_1470372049",
-                    "1309209597843679372_124317": "1470289967_1470372013"
+                    "1309763051087626108_124317_124317": ["1470355944_1470372029"],
+                    "1309764045355643149_124317_124317": ["1470356063_1470372039"],
+                    "1309818450243415912_124317_124317": ["1470362548_1470372060"],
+                    "1309764653429046112_124317_124317": ["1470356135_1470372049"],
+                    "1309209597843679372_124317_124317": ["1470289967_1470372013"]
                 }
 
                 where
                     1309763051087626108_124317 = <media_id>,
+                    124317 = <media.owner_id>
                     1470355944_1470372029 is <media_created_time>_<view_time>
 
         :return:
         """
-        params = {'nuxes': {}, 'reels': reels}
+        if isinstance(reels, list):
+            # is a list of reel media
+            reels_seen = {}
+            reels = sorted(reels, key=lambda m: m['taken_at'], reverse=True)
+            now = int(time.time())
+            for i, reel in enumerate(reels):
+                reel_seen_at = now - min(i + 1 + randint(0, 2), max(0, now - reel['taken_at']))
+                reels_seen['%s_%s' % (reel['id'], reel['user']['pk'])] = ['%s_%s' % (reel['taken_at'], reel_seen_at)]
+            params = {'reels': reels_seen}
+        else:
+            params = {'reels': reels}
         params.update(self.authenticated_params)
-        res = self._call_api('media/seen/', params=params)
+        res = self._call_api('media/seen/', params=params, version='v2')
         return res
 
     def comment_like(self, comment_id):

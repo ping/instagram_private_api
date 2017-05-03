@@ -37,7 +37,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
              UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
              CollectionsEndpointsMixin, object):
 
-    API_URL = 'https://i.instagram.com/api/v1/'
+    API_URL = 'https://i.instagram.com/api/%(version)s/'
 
     USER_AGENT = Constants.USER_AGENT
     IG_SIG_KEY = Constants.IG_SIG_KEY
@@ -409,8 +409,19 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             res = response.read().decode('utf8')
         return res
 
-    def _call_api(self, endpoint, params=None, query=None, return_response=False, unsigned=False):
-        url = self.api_url + endpoint
+    def _call_api(self, endpoint, params=None, query=None, return_response=False, unsigned=False, version='v1'):
+        """
+        Calls the private api
+
+        :param endpoint: endpoint path that should end with '/', example 'discover/explore/'
+        :param params: POST parameters
+        :param query: GET url query parameters
+        :param return_response: return the response instead of the parsed json object
+        :param unsigned: use post params as-is without signing
+        :param version: for the versioned api base url. Default 'v1'.
+        :return:
+        """
+        url = (self.api_url % {'version': version}) + endpoint
         if query:
             url += ('?' if '?' not in endpoint else '&') + compat_urllib_parse.urlencode(query)
 

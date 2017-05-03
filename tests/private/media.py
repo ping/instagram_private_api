@@ -133,8 +133,16 @@ class MediaTests(ApiTestBase):
                 'test': MediaTests('test_enable_comments_mock', api)
             },
             {
+                'name': 'test_media_seen',
+                'test': MediaTests('test_media_seen', api)
+            },
+            {
                 'name': 'test_media_seen_mock',
                 'test': MediaTests('test_media_seen_mock', api)
+            },
+            {
+                'name': 'test_media_seen2_mock',
+                'test': MediaTests('test_media_seen2_mock', api)
             },
         ]
 
@@ -417,16 +425,48 @@ class MediaTests(ApiTestBase):
             'media/%(media_id)s/enable_comments/' % {'media_id': self.test_media_id},
             params=params, unsigned=True)
 
+    @unittest.skip('Modifies data.')
+    def test_media_seen(self, call_api):
+        reels_media_results = self.api.reels_media(['25025320'])
+        if not reels_media_results.get('reels_media'):
+            return
+        reels_media = reels_media_results['reels_media'][0]['items']
+        results = self.api.media_seen(reels_media)
+        self.assertEqual(results['status'], 'ok')
+
     @compat_mock.patch('instagram_private_api.Client._call_api')
     def test_media_seen_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         params = {
             'reels': {
-                '1309764653429046112_124317': '1470356135_1470372049',
-                '1309209597843679372_124317': '1470289967_1470372013'},
-            'nuxes': {}
+                '1309764653429046112_124317_124317': ['1470356135_1470372049'],
+                '1309209597843679372_124317_124317': ['1470289967_1470372013']},
         }
         params.update(self.api.authenticated_params)
         self.api.media_seen(params['reels'])
         call_api.assert_called_with(
-            'media/seen/', params=params)
+            'media/seen/', params=params, version='v2')
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_media_seen2_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        ts_now = 1493789777
+
+        with compat_mock.patch('instagram_private_api.endpoints.media.randint') as randint_mock, \
+                compat_mock.patch('instagram_private_api.endpoints.media.time.time') as time_mock:
+
+            time_mock.return_value = ts_now
+            randint_mock.return_value = 0
+            params = {
+                'reels': {
+                    '1309764653429046112_124317_124317': ['1470356135_%s' % (int(ts_now) - 1)],
+                    '1309209597843679372_124317_124317': ['1470289967_%s' % (int(ts_now) - 2)]},
+            }
+            reels_params = [
+                {'id': '1309764653429046112_124317', 'taken_at': 1470356135, 'user': {'pk': 124317}},
+                {'id': '1309209597843679372_124317', 'taken_at': 1470289967, 'user': {'pk': 124317}}
+            ]
+            params.update(self.api.authenticated_params)
+            self.api.media_seen(reels_params)
+            call_api.assert_called_with(
+                'media/seen/', params=params, version='v2')
