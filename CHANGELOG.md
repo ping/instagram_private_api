@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.2.7 (pending)
+- New endpoints: ``api.friendships_unblock()``, ``api.block_friend_reel()``, ``api.unblock_friend_reel()``, ``api.set_reel_block_status()``, ``api.blocked_reels()``, ``api.blocked_user_list()``, ``api.user_reel_settings()``,  ``api.set_reel_settings()``
+- Update ``api. media_seen()``
+- Minor fixes
+
 ## 1.2.6
 - Change default user agent constants
 - Video:

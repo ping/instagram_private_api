@@ -66,6 +66,26 @@ class FriendshipTests(ApiTestBase):
                 'name': 'test_friendships_block_mock',
                 'test': FriendshipTests('test_friendships_block_mock', api, user_id='2958144170')
             },
+            {
+                'name': 'test_friendships_unblock_mock',
+                'test': FriendshipTests('test_friendships_unblock_mock', api, user_id='2958144170')
+            },
+            {
+                'name': 'test_blocked_reels',
+                'test': FriendshipTests('test_blocked_reels', api)
+            },
+            {
+                'name': 'test_block_friend_reel_mock',
+                'test': FriendshipTests('test_block_friend_reel_mock', api)
+            },
+            {
+                'name': 'test_unblock_friend_reel_mock',
+                'test': FriendshipTests('test_unblock_friend_reel_mock', api)
+            },
+            {
+                'name': 'test_set_reel_block_status_mock',
+                'test': FriendshipTests('test_set_reel_block_status_mock', api)
+            },
         ]
 
     @unittest.skip('Heavily throttled.')
@@ -162,3 +182,51 @@ class FriendshipTests(ApiTestBase):
         call_api.assert_called_with(
             'friendships/block/%(user_id)s/' % {'user_id': user_id},
             params=params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_friendships_unblock_mock(self, call_api):
+        call_api.return_value = {'status': 'ok', 'blocking': False}
+        user_id = '2958144170'
+        params = {'user_id': user_id}
+        params.update(self.api.authenticated_params)
+        self.api.friendships_unblock(user_id)
+        call_api.assert_called_with(
+            'friendships/unblock/%(user_id)s/' % {'user_id': user_id},
+            params=params)
+
+    def test_blocked_reels(self):
+        results = self.api.blocked_reels()
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertTrue('users' in results)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_block_friend_reel_mock(self, call_api):
+        call_api.return_value = {'status': 'ok', 'blocking': True}
+        user_id = '2958144170'
+        params = {'source': 'main_feed'}
+        params.update(self.api.authenticated_params)
+        self.api.block_friend_reel(user_id)
+        call_api.assert_called_with(
+            'friendships/block_friend_reel/%(user_id)s/' % {'user_id': user_id},
+            params=params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_unblock_friend_reel_mock(self, call_api):
+        call_api.return_value = {'status': 'ok', 'blocking': False}
+        user_id = '2958144170'
+        self.api.unblock_friend_reel(user_id)
+        call_api.assert_called_with(
+            'friendships/unblock_friend_reel/%(user_id)s/' % {'user_id': user_id},
+            params=self.api.authenticated_params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_set_reel_block_status_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        user_id = '2958144170'
+        self.api.set_reel_block_status(user_id, block_status='unblock')
+        params = {
+            'source': 'settings',
+            'user_block_statuses': {user_id: 'unblock'}}
+        params.update(self.api.authenticated_params)
+        call_api.assert_called_with(
+            'friendships/set_reel_block_status/', params=params)

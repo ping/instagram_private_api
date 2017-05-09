@@ -103,3 +103,39 @@ class UsersEndpointsMixin(object):
         """
         params = {'username': username}
         return self._call_api('users/check_username/', params=params)
+
+    def blocked_user_list(self):
+        """
+        Get list of blocked users
+
+        """
+        return self._call_api('users/blocked_list/')
+
+    def user_reel_settings(self):
+        """
+        Get user reel settings
+        """
+        res = self._call_api('users/reel_settings/')
+        if self.auto_patch and res.get('blocked_reels', {}).get('users'):
+            [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
+             for u in res.get('blocked_reels', {}).get('users', [])]
+        return res
+
+    def set_reel_settings(self, message_prefs):
+        """
+        Set story message replies settings
+
+        :param message_prefs: One of 'anyone', 'following', 'off'
+        :return:
+            .. code-block:: javascript
+
+                {
+                    "message_prefs": "off",
+                    "status": "ok"
+                }
+        """
+        if message_prefs not in ['anyone', 'following', 'off']:
+            raise ValueError('Invalid message_prefs: %s' % message_prefs)
+        params = {'message_prefs': message_prefs}
+        params.update(self.authenticated_params)
+        return self._call_api('users/set_reel_settings/', params=params)
