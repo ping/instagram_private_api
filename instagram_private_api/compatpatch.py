@@ -171,14 +171,16 @@ class ClientCompatPatch():
                 images = {
                     'low_resolution': cls._get_closest_size(image_versions2, 320),
                     'thumbnail': cls._get_closest_size(image_versions2, 150, 150),
-                    'standard_resolution': cls._get_closest_size(image_versions2, media.get('original_width', 1000)),
+                    'standard_resolution': cls._get_closest_size(
+                        image_versions2, carousel_media.get('original_width', 1000)),
                 }
                 carousel_media['images'] = images
                 if carousel_media['media_type'] == 2:
                     video_versions = carousel_media.get('video_versions', [])
                     videos = {
                         'low_bandwidth': cls._get_closest_size(video_versions, 480),
-                        'standard_resolution': cls._get_closest_size(video_versions, media.get('original_width', 640)),
+                        'standard_resolution': cls._get_closest_size(
+                            video_versions, carousel_media.get('original_width', 640)),
                         'low_resolution': cls._get_closest_size(video_versions, 640),
                     }
                     if drop_incompat_keys:
