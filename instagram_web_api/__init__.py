@@ -5,4 +5,4 @@ from .compatpatch import ClientCompatPatch
 from .errors import ClientError, ClientLoginError, ClientCookieExpiredError
 
 
-__version__ = '1.2.6'
+__version__ = '1.2.7'
