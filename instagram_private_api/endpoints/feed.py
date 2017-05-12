@@ -1,3 +1,5 @@
+import warnings
+
 from ..compatpatch import ClientCompatPatch
 
 
@@ -34,7 +36,10 @@ class FeedEndpointsMixin(object):
         return res
 
     def feed_popular(self, **kwargs):
-        """Get popular feed"""
+        """Get popular feed. This endpoint is believed to be obsolete. Do not use."""
+        warnings.warn(
+            'This endpoint is believed to be obsolete. Do not use.', DeprecationWarning)
+
         query = {
             'people_teaser_supported': '1',
             'rank_token': self.rank_token,
