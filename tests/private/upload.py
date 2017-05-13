@@ -381,7 +381,7 @@ class UploadTests(ApiTestBase):
             randint_mock.return_value = 0
             default_headers.return_value = {'Header': 'X'}
             if not video_data:
-                video_data = ('.' * 16).encode('ascii')
+                video_data = ('.' * (1 * 1024 * 1000 + 1)).encode('ascii')
             try:
                 video_data_len = len(video_data)
                 is_fp = False
@@ -392,23 +392,51 @@ class UploadTests(ApiTestBase):
                 thumbnail_data = '....'.encode('ascii')
             upload_id = str(int(ts_now * 1000))
 
+            # Prevent excessively small chunks
+            if video_data_len > 1 * 1024 * 1000:
+                chunk_count = 4
+            elif video_data_len > int(0.5 * 1024 * 1000):
+                chunk_count = 2
+            else:
+                chunk_count = 1
+
             raise_httperror = kwargs.pop('raise_httperror', False)
             raise_transcodeclienterror = kwargs.pop('raise_transcodeclienterror', False)
-            opener_side_effect = [
-                MockResponse(),     # chunk 1
-                MockResponse(),     # chunk 2
-                MockResponse() if not raise_httperror else compat_urllib_error.HTTPError(
-                    'http://localhost', 400, 'Bad Request', {},
-                    BytesIO(json.dumps({'status': 'fail', 'message': 'Invalid Request'}).encode('ascii'))),  # chunk 3
-                MockResponse(content_type='application/json'),
-                # For uploading thmbnail
-                MockResponse() if not raise_transcodeclienterror else ClientError(
-                    'Transcode timeout', 202, '{"message": "Transcode timeout", "status": "fail"}'),
-            ]
-            if raise_transcodeclienterror:
-                # opener_side_effect.extend([MockResponse(), MockResponse()])
-                opener_side_effect.append(ClientError(
-                    'Transcode timeout', 202, '{"message": "Transcode timeout", "status": "fail"}'))
+            opener_side_effect = []
+            if chunk_count == 4:
+                opener_side_effect = [
+                    MockResponse(),     # chunk 1
+                    MockResponse(),     # chunk 2
+                ]
+            elif chunk_count == 2:
+                opener_side_effect = [
+                    MockResponse(),     # chunk 1
+                ]
+            if not raise_httperror:
+                if chunk_count == 4:
+                    opener_side_effect.append(
+                        MockResponse()
+                    )
+            else:
+                opener_side_effect.append(
+                    compat_urllib_error.HTTPError(
+                        'http://localhost', 400, 'Bad Request', {},
+                        BytesIO(json.dumps({'status': 'fail', 'message': 'Invalid Request'}).encode('ascii')))
+                )
+            opener_side_effect.append(MockResponse(content_type='application/json'))
+
+            # For uploading thmbnail
+            if not raise_transcodeclienterror:
+                opener_side_effect.append(
+                    MockResponse()
+                )
+            else:
+                opener_side_effect.extend([
+                    ClientError(
+                        'Transcode timeout', 202, '{"message": "Transcode timeout", "status": "fail"}'),
+                    ClientError(
+                        'Transcode timeout', 202, '{"message": "Transcode timeout", "status": "fail"}')
+                ])
             opener.side_effect = opener_side_effect
 
             call_api_side_effect = [
@@ -423,14 +451,20 @@ class UploadTests(ApiTestBase):
                      'user': {'pk': 10, 'profile_pic_url': ''}}},    # Configure video request
             )
             call_api.side_effect = call_api_side_effect
-            chunk_size = video_data_len // 4
-            read_response_side_effect = [
-                '%d-%d/%d' % (0, chunk_size - 1, video_data_len),           # 1st response to chunk upload
-                '%d-%d/%d' % (chunk_size, chunk_size * 2 - 1, video_data_len),           # 2nd response to chunk upload
-                '%d-%d/%d' % (chunk_size * 2, chunk_size * 3 - 1, video_data_len),       # 3rd response to chunk upload
-                json.dumps({'status': 'ok'}),  # Last response to chunk
-                json.dumps({'status': 'ok', 'upload_id': upload_id}),   # Response to thumbnail upload
-            ]
+            chunk_size = video_data_len // chunk_count
+
+            read_response_side_effect = []
+            for i in range(chunk_count):
+                if i < (chunk_count - 1):
+                    read_response_side_effect.append(
+                        '%d-%d/%d' % (chunk_size * i, chunk_size * (i + 1) - 1, video_data_len))
+                else:
+                    read_response_side_effect.append(json.dumps({'status': 'ok'}))
+
+            # Response to thumbnail upload
+            read_response_side_effect.append(
+                json.dumps({'status': 'ok', 'upload_id': upload_id})
+            )
             if raise_transcodeclienterror:
                 # add another one due to retry
                 read_response_side_effect.extend([
@@ -468,7 +502,7 @@ class UploadTests(ApiTestBase):
 
             call_api.assert_any_call('upload/video/', params=upload_params, unsigned=True)
 
-            for i in range(4):
+            for i in range(chunk_count):
                 headers = self.api.default_headers
                 headers['Connection'] = 'keep-alive'
                 headers['Content-Type'] = 'application/octet-stream'
@@ -570,7 +604,11 @@ class UploadTests(ApiTestBase):
         location = location_results.get('venues', [{}])[0] or None
 
         self.test_post_video_base(
-            (800, 800), 15, caption='HEY', location=location, disable_comments=True)
+            (800, 800), 15, caption='HEY', location=location, disable_comments=True,
+            video_data='*' * 200000)
+
+        self.test_post_video_base(
+            (800, 800), 15, caption='HEY', video_data='*' * 800000)
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_video_base((600, 600), 15, 'HEY')

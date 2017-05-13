@@ -511,7 +511,13 @@ class UploadEndpointsMixin(object):
         upload_url = res['video_upload_urls'][-1]['url']
         upload_job = res['video_upload_urls'][-1]['job']
 
-        chunk_count = 4
+        # Prevent excessively small chunks
+        if video_file_len > 1 * 1024 * 1000:
+            chunk_count = 4
+        elif video_file_len > int(0.5 * 1024 * 1000):
+            chunk_count = 2
+        else:
+            chunk_count = 1
 
         # Alternatively, can use max_chunk_size_generator(20480, video_data)
         # [TODO] We can be a little smart about using either generators
@@ -525,7 +531,6 @@ class UploadEndpointsMixin(object):
         max_retry_count = kwargs.pop('max_retry_count', 10)
         configure_delay = 0
         for _ in range(max_retry_count + 1):
-
             for chunk, data in max_chunk_count_generator(chunk_count, video_data):
                 skip_chunk = False
                 for received_chunk in successful_chunk_ranges:
