@@ -222,6 +222,29 @@ class MediaEndpointsMixin(object):
         res = self._call_api(endpoint, params=params)
         return res
 
+    def bulk_delete_comments(self, media_id, comment_ids):
+        """
+        Bulk delete comment
+
+        :param media_id: Media id
+        :param comment_ids: List of comment ids
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
+        """
+        if not isinstance(comment_ids, list):
+            comment_ids = [comment_ids]
+        endpoint = 'media/%(media_id)s/comment/bulk_delete/' % {
+            'media_id': media_id}
+        params = {
+            'comment_ids_to_delete': ','.join(
+                [str(comment_id) for comment_id in comment_ids])
+        }
+        params.update(self.authenticated_params)
+        res = self._call_api(endpoint, params=params)
+        return res
+
     def media_likers(self, media_id, **kwargs):
         """
         Get users who have liked a post

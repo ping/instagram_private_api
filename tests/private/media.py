@@ -109,6 +109,10 @@ class MediaTests(ApiTestBase):
                 'test': MediaTests('test_delete_comment_mock', api)
             },
             {
+                'name': 'test_bulk_delete_comments_mock',
+                'test': MediaTests('test_bulk_delete_comments_mock', api)
+            },
+            {
                 'name': 'test_save_photo',
                 'test': MediaTests('test_save_photo', api, media_id='1206573574980690068_1497851591')
             },
@@ -470,3 +474,18 @@ class MediaTests(ApiTestBase):
             self.api.media_seen(reels_params)
             call_api.assert_called_with(
                 'media/seen/', params=params, version='v2')
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_bulk_delete_comments_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        media_id = '123_123'
+        comment_ids = ['123456', '7890123']
+        params = {
+            'comment_ids_to_delete': ','.join(comment_ids)
+        }
+        params.update(self.api.authenticated_params)
+        self.api.bulk_delete_comments(media_id, comment_ids)
+        call_api.assert_called_with(
+            'media/%(media_id)s/comment/bulk_delete/'
+            % {'media_id': media_id},
+            params=params)
