@@ -2,8 +2,7 @@
 
 A Python wrapper for the Instagram private API with no 3rd party dependencies. Supports both the app and web APIs.
 
-![Python 2.7](https://img.shields.io/badge/Python-2.7-3776ab.svg)
-![Python 3.5](https://img.shields.io/badge/Python-3.5-3776ab.svg)
+![Python 2.7, 3.5](https://img.shields.io/badge/Python-2.7%2C%203.5-3776ab.svg)
 [![Release](https://img.shields.io/badge/release-v1.2.7-orange.svg)](https://github.com/ping/instagram_private_api/releases)
 [![Docs](https://img.shields.io/badge/docs-readthedocs.io-ff4980.svg)](https://instagram-private-api.readthedocs.io/en/latest/)
 [![Build](https://img.shields.io/travis/ping/instagram_private_api.svg)](https://travis-ci.org/ping/instagram_private_api)

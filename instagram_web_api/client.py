@@ -433,7 +433,6 @@ class Client(object):
             query['after'] = end_cursor
 
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
-        # print(info.get('data', {}).get('user', {}))
         if self.auto_patch:
             [ClientCompatPatch.list_user(u['node'], drop_incompat_keys=self.drop_incompat_keys)
              for u in info.get('data', {}).get('user', {}).get(
