@@ -395,10 +395,10 @@ class UploadTests(ApiTestBase):
             # Prevent excessively small chunks
             if video_data_len > 1 * 1024 * 1000:
                 chunk_count = 4
-            elif video_data_len > int(0.5 * 1024 * 1000):
-                chunk_count = 2
             else:
-                chunk_count = 1
+                chunk_count, final_chunk = divmod(video_data_len, 350000)
+                if final_chunk:
+                    chunk_count += 1
 
             raise_httperror = kwargs.pop('raise_httperror', False)
             raise_transcodeclienterror = kwargs.pop('raise_transcodeclienterror', False)
@@ -608,7 +608,7 @@ class UploadTests(ApiTestBase):
             video_data='*' * 200000)
 
         self.test_post_video_base(
-            (800, 800), 15, caption='HEY', video_data='*' * 800000)
+            (800, 800), 15, caption='HEY', video_data='*' * 700000)
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_video_base((600, 600), 15, 'HEY')

@@ -7,7 +7,7 @@ import warnings
 from ..compat import compat_urllib_error, compat_urllib_request
 from ..errors import ClientError
 from ..http import MultipartFormDataEncoder
-from ..utils import max_chunk_count_generator, get_file_size
+from ..utils import max_chunk_count_generator, max_chunk_size_generator, get_file_size
 from ..compatpatch import ClientCompatPatch
 
 
@@ -513,25 +513,20 @@ class UploadEndpointsMixin(object):
 
         # Prevent excessively small chunks
         if video_file_len > 1 * 1024 * 1000:
-            chunk_count = 4
-        elif video_file_len > int(0.5 * 1024 * 1000):
-            chunk_count = 2
+            # max num of chunks = 4
+            chunk_generator = max_chunk_count_generator(4, video_data)
         else:
-            chunk_count = 1
+            # max chunk size = 350,000 so that we'll always have
+            # <4 chunks when it's <1mb
+            chunk_generator = max_chunk_size_generator(350000, video_data)
 
-        # Alternatively, can use max_chunk_size_generator(20480, video_data)
-        # [TODO] We can be a little smart about using either generators
-        # depending on the file size, or other factors
-        # Example:
-        # max_chunk_size_generator(200000, video_data), OR
-        # max_chunk_count_generator(chunk_count, video_data)
         successful_chunk_ranges = []
         all_done = False
 
         max_retry_count = kwargs.pop('max_retry_count', 10)
         configure_delay = 0
         for _ in range(max_retry_count + 1):
-            for chunk, data in max_chunk_count_generator(chunk_count, video_data):
+            for chunk, data in chunk_generator:
                 skip_chunk = False
                 for received_chunk in successful_chunk_ranges:
                     if received_chunk[0] <= chunk.start and received_chunk[1] >= (chunk.end - 1):
