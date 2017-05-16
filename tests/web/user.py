@@ -96,14 +96,18 @@ class UserTests(WebApiTestBase):
         results = self.api.user_followers(self.test_user_id, extract=False)
         self.assertIsInstance(results, dict)
 
-        self.assertIsInstance(results.get('followed_by', {}).get('nodes'), list)
-        self.assertGreater(len(results.get('followed_by', {}).get('nodes', [])), 0)
-        first_user = results.get('followed_by', {}).get('nodes')[0]['username']
-        end_cursor = results.get('followed_by', {}).get('page_info', {}).get('end_cursor')
+        nodes = results.get('data', {}).get('user', {}).get(
+            'edge_followed_by', {}).get('edges')
+        self.assertIsInstance(nodes, list)
+        self.assertGreater(len(nodes or []), 0)
+        first_user = nodes[0]['node']['username']
+        end_cursor = results.get('data', {}).get('user', {}).get(
+            'edge_followed_by', {}).get('page_info', {}).get('end_cursor')
 
         time.sleep(self.sleep_interval)
         results = self.api.user_followers(self.test_user_id, extract=False, end_cursor=end_cursor)
-        self.assertNotEqual(first_user, results.get('followed_by', {}).get('nodes')[0]['username'])
+        self.assertNotEqual(first_user, results.get('data', {}).get('user', {}).get(
+            'edge_followed_by', {}).get('edges')[0]['node']['username'])
 
     def test_user_following(self):
         results = self.api.user_following(self.test_user_id)

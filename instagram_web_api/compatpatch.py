@@ -157,11 +157,12 @@ class ClientCompatPatch():
     def comment(cls, comment, drop_incompat_keys=False):
         """Patch a comment object"""
         comment['created_time'] = str(int(comment['created_at']))
+        comment_user = comment.get('user') or comment.get('owner')
         from_user = {
-            'id': comment['user']['id'],
-            'profile_picture': comment['user'].get('profile_pic_url'),
-            'username': comment['user']['username'],
-            'full_name': comment['user'].get('full_name') or ''
+            'id': comment_user['id'],
+            'profile_picture': comment_user.get('profile_pic_url'),
+            'username': comment_user['username'],
+            'full_name': comment_user.get('full_name') or ''
         }
         comment['from'] = from_user
         if drop_incompat_keys:

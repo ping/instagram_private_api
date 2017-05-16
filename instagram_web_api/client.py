@@ -31,6 +31,7 @@ def login_required(fn):
 class Client(object):
 
     API_URL = 'https://www.instagram.com/query/'
+    GRAPHQL_API_URL = 'https://www.instagram.com/graphql/query/'
     USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) ' \
                  'Version/9.1.1 Safari/601.6.17'
 
@@ -145,7 +146,7 @@ class Client(object):
             'created_ts': int(time.time())
         }
 
-    def _make_request(self, url, params=None, headers=None, return_response=False, get_method=None):
+    def _make_request(self, url, params=None, headers=None, query=None, return_response=False, get_method=None):
         if not headers:
             headers = {
                 'User-Agent': self.user_agent,
@@ -164,6 +165,8 @@ class Client(object):
                     'Origin': 'https://www.instagram.com',
                     'Content-Type': 'application/x-www-form-urlencoded'
                 })
+        if query:
+            url += ('?' if '?' not in url else '&') + compat_urllib_parse.urlencode(query)
         req = compat_urllib_request.Request(url, headers=headers)
         if get_method:
             req.get_method = get_method
@@ -348,28 +351,30 @@ class Client(object):
         :return:
         """
         count = kwargs.pop('count', 16)
-        before_comment_id = kwargs.pop('before_comment_id', '0')
+        end_cursor = kwargs.pop('end_cursor', None)
 
-        params = {
-            'q': 'ig_shortcode(%(media_code)s) {comments.before(%(before_comment_id)s, %(count)d) {count, nodes {'
-                 'id, created_at, text, user {id, profile_pic_url, username, full_name, is_verified, is_private}}, '
-                 'page_info}}' %
-                 {'media_code': short_code, 'before_comment_id': before_comment_id, 'count': count},
-            'ref': 'media::show'
-        }
-        info = self._make_request(self.API_URL, params=params)
+        query = {
+            'query_id': '17852405266163336',
+            'shortcode': short_code,
+            'first': count}
 
-        if not info.get('comments'):
+        if end_cursor:
+            query['after'] = end_cursor
+        info = self._make_request(self.GRAPHQL_API_URL, query=query)
+
+        if not info.get('data', {}).get('shortcode_media'):
             # deleted media does not return 'comments' at all
             # media without comments will return comments, with counts = 0, nodes = [], etc
             raise ClientError('Not Found', 404)
 
         if self.auto_patch:
-            [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
-             for c in info.get('comments', {}).get('nodes', [])]
+            [ClientCompatPatch.comment(c['node'], drop_incompat_keys=self.drop_incompat_keys)
+             for c in info.get('data', {}).get('shortcode_media', {}).get(
+                 'edge_media_to_comment', {}).get('edges', [])]
 
         if kwargs.pop('extract', True):
-            return info.get('comments', {}).get('nodes', [])
+            return [c['node'] for c in info.get('data', {}).get('shortcode_media', {}).get(
+                'edge_media_to_comment', {}).get('edges', [])]
         return info
 
     @login_required
@@ -386,26 +391,23 @@ class Client(object):
         """
         count = kwargs.pop('count', 10)
         end_cursor = kwargs.pop('end_cursor', None)
-        if end_cursor:
-            command = 'follows.after(%(end_cursor)s, %(count)d)' % {
-                'end_cursor': end_cursor,
-                'count': count}
-        else:
-            command = 'follows.first(%(count)d)' % {'count': count}
-
-        params = {
-            'q': 'ig_user(%(user_id)s) {%(command)s {count, page_info {end_cursor, has_next_page}, '
-                 'nodes {id, is_verified, is_private, followed_by_viewer, requested_by_viewer, full_name, '
-                 'profile_pic_url, username}}}' % {'user_id': user_id, 'command': command},
-            'ref': 'relationships::follow_list',
+        query = {
+            'query_id': '17874545323001329',
+            'id': user_id,
+            'first': count,
         }
-        info = self._make_request(self.API_URL, params=params)
+        if end_cursor:
+            query['after'] = end_cursor
+
+        info = self._make_request(self.GRAPHQL_API_URL, query=query)
         if self.auto_patch:
-            [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
-             for u in info.get('follows', {}).get('nodes', [])]
+            [ClientCompatPatch.list_user(u['node'], drop_incompat_keys=self.drop_incompat_keys)
+             for u in info.get('data', {}).get('user', {}).get(
+                 'edge_follow', {}).get('edges', [])]
 
         if kwargs.pop('extract', True):
-            return info.get('follows', {}).get('nodes', [])
+            return [u['node'] for u in info.get('data', {}).get('user', {}).get(
+                'edge_follow', {}).get('edges', [])]
         return info
 
     @login_required
@@ -422,26 +424,24 @@ class Client(object):
         """
         count = kwargs.pop('count', 10)
         end_cursor = kwargs.pop('end_cursor', None)
-        if end_cursor:
-            command = 'followed_by.after(%(end_cursor)s, %(count)d)' % {
-                'end_cursor': end_cursor,
-                'count': count}
-        else:
-            command = 'followed_by.first(%(count)d)' % {'count': count}
-
-        params = {
-            'q': 'ig_user(%(user_id)s) {%(command)s {count, page_info {end_cursor, has_next_page}, '
-                 'nodes {id, is_verified, is_private, followed_by_viewer, requested_by_viewer, full_name, '
-                 'profile_pic_url, username}}}' % {'user_id': user_id, 'command': command},
-            'ref': 'relationships::follow_list',
+        query = {
+            'query_id': '17851374694183129',
+            'id': user_id,
+            'first': count,
         }
-        info = self._make_request(self.API_URL, params=params)
+        if end_cursor:
+            query['after'] = end_cursor
+
+        info = self._make_request(self.GRAPHQL_API_URL, query=query)
+        # print(info.get('data', {}).get('user', {}))
         if self.auto_patch:
-            [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
-             for u in info.get('followed_by', {}).get('nodes', [])]
+            [ClientCompatPatch.list_user(u['node'], drop_incompat_keys=self.drop_incompat_keys)
+             for u in info.get('data', {}).get('user', {}).get(
+                 'edge_followed_by', {}).get('edges', [])]
 
         if kwargs.pop('extract', True):
-            return info.get('followed_by', {}).get('nodes', [])
+            return [u['node'] for u in info.get('data', {}).get('user', {}).get(
+                'edge_followed_by', {}).get('edges', [])]
         return info
 
     @login_required
