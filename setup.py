@@ -10,7 +10,7 @@ except ImportError:
     has_mock = False
 
 __author__ = 'ping <lastmodified@gmail.com>'
-__version__ = '1.2.7'
+__version__ = '1.2.8'
 
 packages = [
     'instagram_private_api',
