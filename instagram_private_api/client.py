@@ -124,7 +124,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
         if cookie_string and cookie_jar.expires_earliest and int(time.time()) >= cookie_jar.expires_earliest:
-            raise ClientCookieExpiredError('Oldest cookie expired at %s' % cookie_jar.expires_earliest)
+            raise ClientCookieExpiredError('Oldest cookie expired at {0!s}'.format(cookie_jar.expires_earliest))
         cookie_handler = compat_urllib_request.HTTPCookieProcessor(cookie_jar)
 
         proxy_handler = None
@@ -133,10 +133,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             warnings.warn('Proxy support is alpha.', UserWarning)
             parsed_url = compat_urllib_parse_urlparse(proxy)
             if parsed_url.netloc and parsed_url.scheme:
-                proxy_address = '%s://%s' % (parsed_url.scheme, parsed_url.netloc)
+                proxy_address = '{0!s}://{1!s}'.format(parsed_url.scheme, parsed_url.netloc)
                 proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
             else:
-                raise ValueError('Invalid proxy argument: %s' % proxy)
+                raise ValueError('Invalid proxy argument: {0!s}'.format(proxy))
         handlers = []
         if proxy_handler:
             handlers.append(proxy_handler)
@@ -211,8 +211,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         """Override the useragent string with your own"""
         mobj = re.search(Constants.USER_AGENT_EXPRESSION, value)
         if not mobj:
-            raise ValueError('User-agent specified does not fit format required: %s' %
-                             Constants.USER_AGENT_EXPRESSION)
+            raise ValueError('User-agent specified does not fit format required: {0!s}'.format(
+                             Constants.USER_AGENT_EXPRESSION))
         self.app_version = mobj.group('app_version')
         self.android_release = mobj.group('android_release')
         self.android_version = int(mobj.group('android_version'))
@@ -261,8 +261,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         """
         mobj = re.search(Constants.USER_AGENT_EXPRESSION, value)
         if not mobj:
-            raise ValueError('User-agent specified does not fit format required: %s' %
-                             Constants.USER_AGENT_EXPRESSION)
+            raise ValueError('User-agent specified does not fit format required: {0!s}'.format(
+                             Constants.USER_AGENT_EXPRESSION))
         parse_params = {
             'app_version': mobj.group('app_version'),
             'android_version': int(mobj.group('android_version')),
@@ -319,7 +319,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     def rank_token(self):
         if not self.authenticated_user_id:
             return None
-        return '%s_%s' % (self.authenticated_user_id, self.uuid)
+        return '{0!s}_{1!s}'.format(self.authenticated_user_id, self.uuid)
 
     @property
     def authenticated_params(self):
@@ -344,7 +344,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'Accept-Encoding': 'gzip, deflate',
             'X-IG-Capabilities': self.ig_capabilities,
             'X-IG-Connection-Type': 'WIFI',
-            'X-IG-Connection-Speed': '%dkbps' % random.randint(1000, 5000),
+            'X-IG-Connection-Speed': '{0:d}kbps'.format(random.randint(1000, 5000)),
         }
 
     @property
@@ -384,7 +384,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         :param seed: Seed value to generate a consistent device ID
         :return:
         """
-        return 'android-%s' % cls.generate_uuid(True, seed)[:16]
+        return 'android-{0!s}'.format(cls.generate_uuid(True, seed)[:16])
 
     def generate_adid(self, seed=None):
         """
@@ -446,13 +446,13 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
 
         req = compat_urllib_request.Request(url, data, headers=headers)
         try:
-            self.logger.debug('REQUEST: %s %s' % (url, req.get_method()))
-            self.logger.debug('DATA: %s' % data)
+            self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
+            self.logger.debug('DATA: {0!s}'.format(data))
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_msg = e.reason
             error_response = self._read_response(e)
-            self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
+            self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
             try:
                 error_obj = json.loads(error_response)
                 if error_obj.get('message') == 'login_required':
@@ -464,7 +464,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                         error_obj.get('message'), code=e.code,
                         error_response=json.dumps(error_obj))
                 elif error_obj.get('message'):
-                    error_msg = '%s: %s' % (e.reason, error_obj['message'])
+                    error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
             except (ClientLoginError, ClientLoginRequiredError, ClientThrottledError):
                 raise
             except:
@@ -476,7 +476,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             return response
 
         response_content = self._read_response(response)
-        self.logger.debug('RESPONSE: %d %s' % (response.code, response_content))
+        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, response_content))
         json_response = json.loads(response_content)
 
         if json_response.get('message', '') == 'login_required':

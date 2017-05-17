@@ -14,9 +14,9 @@ class ClientCompatPatch():
     def _generate_image_url(cls, url, size, crop):
         mobj = re.search(cls.IG_IMAGE_URL_EXPR, url)
         if not mobj:
-            replacement_expr = '\g<eparam>%(crop)s%(size)sx%(size)s/' % {'crop': crop, 'size': size}
+            replacement_expr = '\g<eparam>{crop!s}{size!s}x{size!s}/'.format(**{'crop': crop, 'size': size})
             return re.sub(r'(?P<eparam>/e[0-9]+/)', replacement_expr, url)
-        replacement_expr = '/%(crop)s%(size)sx%(size)s/' % {'crop': mobj.group('crop') or crop, 'size': size}
+        replacement_expr = '/{crop!s}{size!s}x{size!s}/'.format(**{'crop': mobj.group('crop') or crop, 'size': size})
         return re.sub(cls.IG_IMAGE_URL_EXPR, replacement_expr, url)
 
     @classmethod
@@ -29,8 +29,8 @@ class ClientCompatPatch():
     @classmethod
     def media(cls, media, drop_incompat_keys=False):
         """Patch a media object"""
-        media['link'] = 'https://www.instagram.com/p/%s/' % (
-            media.get('code') or media.get('shortcode'))   # for media_info2
+        media['link'] = 'https://www.instagram.com/p/{0!s}/'.format((
+            media.get('code') or media.get('shortcode')))   # for media_info2
         caption = media.get('caption')
         if not caption:
             media['caption'] = None
@@ -84,7 +84,7 @@ class ClientCompatPatch():
         else:
             media['location']['latitude'] = media['location']['lat']
             media['location']['longitude'] = media['location']['lng']
-        media['id'] = '%s_%s' % (media['id'], media['owner']['id'])
+        media['id'] = '{0!s}_{1!s}'.format(media['id'], media['owner']['id'])
         media['created_time'] = str(media.get('date', '') or media.get('taken_at_timestamp', ''))
 
         usertags = media.get('usertags', {}).get('nodes', [])
@@ -125,7 +125,7 @@ class ClientCompatPatch():
                     node['videos'] = videos
                     node['type'] = 'video'
                 node['pk'] = node['id']
-                node['id'] = '%s_%s' % (node['id'], media['owner']['id'])
+                node['id'] = '{0!s}_{1!s}'.format(node['id'], media['owner']['id'])
                 node['original_width'] = node['dimensions']['width']
                 node['original_height'] = node['dimensions']['height']
                 carousel_media.append(node)

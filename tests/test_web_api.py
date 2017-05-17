@@ -40,7 +40,7 @@ if __name__ == '__main__':
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    print('Client version: %s' % __version__)
+    print('Client version: {0!s}'.format(__version__))
 
     cached_auth = None
     if args.settings_file_path and os.path.isfile(args.settings_file_path):
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     def match_regex(test_name):
         for test_re in args.tests:
-            test_re = r'%s' % test_re
+            test_re = r'{0!s}'.format(test_re)
             if re.match(test_re, test_name):
                 return True
         return False
@@ -111,4 +111,4 @@ if __name__ == '__main__':
         unittest.TextTestRunner(verbosity=2).run(suite)
 
     except ClientError as e:
-        print('Unexpected ClientError %s (Code: %d)' % (e.msg, e.code))
+        print('Unexpected ClientError {0!s} (Code: {1:d})'.format(e.msg, e.code))

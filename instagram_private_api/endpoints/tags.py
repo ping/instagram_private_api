@@ -10,7 +10,7 @@ class TagsEndpointsMixin(object):
         :param tag:
         :return:
         """
-        endpoint = 'tags/%(tag)s/info/' % {'tag': tag}
+        endpoint = 'tags/{tag!s}/info/'.format(**{'tag': tag})
         res = self._call_api(endpoint)
         return res
 
@@ -21,7 +21,7 @@ class TagsEndpointsMixin(object):
         :param tag:
         :return:
         """
-        endpoint = 'tags/%(tag)s/related/' % {'tag': tag}
+        endpoint = 'tags/{tag!s}/related/'.format(**{'tag': tag})
         query = {
             'visited': json.dumps([{'id': tag, 'type': 'hashtag'}], separators=(',', ':')),
             'related_types': json.dumps(['hashtag'], separators=(',', ':'))}

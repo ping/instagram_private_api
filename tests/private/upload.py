@@ -205,7 +205,7 @@ class UploadTests(ApiTestBase):
             photo_data = '...'.encode('ascii')
             headers = self.api.default_headers
             headers.update({
-                'Content-Type': 'multipart/form-data; boundary=%s' % self.api.uuid,
+                'Content-Type': 'multipart/form-data; boundary={0!s}'.format(self.api.uuid),
                 'Content-Length': len(photo_data)
             })
             sidecar_fields = ''
@@ -456,7 +456,7 @@ class UploadTests(ApiTestBase):
             for i in range(chunk_count):
                 if i < (chunk_count - 1):
                     read_response_side_effect.append(
-                        '%d-%d/%d' % (chunk_size * i, chunk_size * (i + 1) - 1, video_data_len))
+                        '{0:d}-{1:d}/{2:d}'.format(chunk_size * i, chunk_size * (i + 1) - 1, video_data_len))
                 else:
                     read_response_side_effect.append(json.dumps({'status': 'ok'}))
 
@@ -511,7 +511,7 @@ class UploadTests(ApiTestBase):
                     headers['Cookie'] = 'sessionid=' + self.api.get_cookie_value('sessionid')
                 headers['job'] = '1111'
                 headers['Content-Length'] = chunk_size
-                headers['Content-Range'] = 'bytes %d-%d/%d' % (
+                headers['Content-Range'] = 'bytes {0:d}-{1:d}/{2:d}'.format(
                     i * chunk_size,
                     (i * chunk_size if i <= 3 else video_data_len) - 1,
                     video_data_len)

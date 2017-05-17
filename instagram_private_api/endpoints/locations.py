@@ -26,7 +26,7 @@ class LocationsEndpointsMixin(object):
                   }
                 }
         """
-        endpoint = 'locations/%(location_id)s/info/' % {'location_id': location_id}
+        endpoint = 'locations/{location_id!s}/info/'.format(**{'location_id': location_id})
         return self._call_api(endpoint)
 
     def location_related(self, location_id, **kwargs):
@@ -36,7 +36,7 @@ class LocationsEndpointsMixin(object):
         :param location_id:
         :return:
         """
-        endpoint = 'locations/%(location_id)s/related/' % {'location_id': location_id}
+        endpoint = 'locations/{location_id!s}/related/'.format(**{'location_id': location_id})
         query = {
             'visited': json.dumps([{'id': location_id, 'type': 'location'}], separators=(',', ':')),
             'related_types': json.dumps(['location'], separators=(',', ':'))}

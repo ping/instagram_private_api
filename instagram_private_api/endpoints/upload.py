@@ -32,10 +32,10 @@ class UploadEndpointsMixin(object):
                 location[self.EXTERNAL_LOC_SOURCES[external_source]] = location['external_id']
         for k in location_keys:
             if not location.get(k):
-                raise ValueError('Location dict must contain "%s".' % k)
+                raise ValueError('Location dict must contain "{0!s}".'.format(k))
         for k, val in self.EXTERNAL_LOC_SOURCES.items():
             if location['external_source'] == k and not location.get(val):
-                raise ValueError('Location dict must contain "%s".' % val)
+                raise ValueError('Location dict must contain "{0!s}".'.format(val))
 
         media_loc = {
             'name': location['name'],
@@ -387,7 +387,7 @@ class UploadEndpointsMixin(object):
                 fields.append(('media_type', '2'))
 
         files = [
-            ('photo', 'pending_media_%s%s' % (str(int(time.time() * 1000)), '.jpg'),
+            ('photo', 'pending_media_{0!s}{1!s}'.format(str(int(time.time() * 1000)), '.jpg'),
              'application/octet-stream', photo_data)
         ]
 
@@ -398,23 +398,23 @@ class UploadEndpointsMixin(object):
 
         req = compat_urllib_request.Request(self.api_url + endpoint, body, headers=headers)
         try:
-            self.logger.debug('POST %s' % self.api_url + endpoint)
+            self.logger.debug('POST {0!s}'.format(self.api_url) + endpoint)
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_msg = e.reason
             error_response = self._read_response(e)
-            self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
+            self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
             try:
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):
-                    error_msg = '%s: %s' % (e.reason, error_obj['message'])
+                    error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
             except:
                 # do nothing, prob can't parse json
                 pass
             raise ClientError(error_msg, e.code, error_response)
 
         post_response = self._read_response(response)
-        self.logger.debug('RESPONSE: %d %s' % (response.code, post_response))
+        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, post_response))
         json_response = json.loads(post_response)
 
         if for_video and is_sidecar:
@@ -533,7 +533,7 @@ class UploadEndpointsMixin(object):
                         skip_chunk = True
                         break
                 if skip_chunk:
-                    self.logger.debug('Skipped chunk: %d - %d' % (chunk.start, chunk.end - 1))
+                    self.logger.debug('Skipped chunk: {0:d} - {1:d}'.format(chunk.start, chunk.end - 1))
                     continue
 
                 # data = video_data[chunk.start: chunk.end]
@@ -546,9 +546,9 @@ class UploadEndpointsMixin(object):
                     headers['Cookie'] = 'sessionid=' + self.get_cookie_value('sessionid')
                 headers['job'] = upload_job
                 headers['Content-Length'] = chunk.length
-                headers['Content-Range'] = 'bytes %d-%d/%d' % (chunk.start, chunk.end - 1, video_file_len)
-                self.logger.debug('POST %s' % upload_url)
-                self.logger.debug('Uploading Content-Range: %s' % headers['Content-Range'])
+                headers['Content-Range'] = 'bytes {0:d}-{1:d}/{2:d}'.format(chunk.start, chunk.end - 1, video_file_len)
+                self.logger.debug('POST {0!s}'.format(upload_url))
+                self.logger.debug('Uploading Content-Range: {0!s}'.format(headers['Content-Range']))
 
                 req = compat_urllib_request.Request(
                     str(upload_url), data=data, headers=headers)
@@ -556,7 +556,7 @@ class UploadEndpointsMixin(object):
                 try:
                     res = self.opener.open(req, timeout=self.timeout)
                     post_response = self._read_response(res)
-                    self.logger.debug('RESPONSE: %d %s' % (res.code, post_response))
+                    self.logger.debug('RESPONSE: {0:d} {1!s}'.format(res.code, post_response))
                     if res.info().get('Content-Type') == 'application/json':
                         # last chunk
                         upload_res = json.loads(post_response)
@@ -571,19 +571,19 @@ class UploadEndpointsMixin(object):
                             if mobj:
                                 successful_chunk_ranges.append((int(mobj.group('start')), int(mobj.group('end'))))
                             else:
-                                self.logger.error('Received unexpected chunk upload response: %s' % post_response)
+                                self.logger.error('Received unexpected chunk upload response: {0!s}'.format(post_response))
                                 raise ClientError(
-                                    'Upload has failed due to unexpected upload response: %s' % post_response,
+                                    'Upload has failed due to unexpected upload response: {0!s}'.format(post_response),
                                     code=500)
 
                 except compat_urllib_error.HTTPError as e:
                     error_msg = e.reason
                     error_response = self._read_response(e)
-                    self.logger.debug('RESPONSE: %d %s' % (e.code, error_response))
+                    self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
                     try:
                         error_obj = json.loads(error_response)
                         if error_obj.get('message'):
-                            error_msg = '%s: %s' % (e.reason, error_obj['message'])
+                            error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
                     except:
                         # do nothing, prob can't parse json
                         pass
@@ -613,7 +613,7 @@ class UploadEndpointsMixin(object):
                 return result
             except ClientError as ce:
                 if (ce.code == 202 or ce.msg == 'Transcode timeout') and i < configure_retry_max:
-                    self.logger.warn('Retry configure after %f seconds' % configure_delay)
+                    self.logger.warn('Retry configure after {0:f} seconds'.format(configure_delay))
                     time.sleep(configure_delay)
                 else:
                     raise
@@ -671,7 +671,7 @@ class UploadEndpointsMixin(object):
             if len(children_metadata) >= 10:
                 continue
             if media.get('type', '') not in ['image', 'video']:
-                raise ValueError('Invalid media type: %s' % media.get('type', ''))
+                raise ValueError('Invalid media type: {0!s}'.format(media.get('type', '')))
             if not media.get('data'):
                 raise ValueError('Data not specified.')
             if not media.get('size'):
@@ -706,7 +706,7 @@ class UploadEndpointsMixin(object):
             children_metadata.append(metadata)
 
         if len(children_metadata) <= 1:
-            raise ValueError('Invalid number of media objects: %d' % len(children_metadata))
+            raise ValueError('Invalid number of media objects: {0:d}'.format(len(children_metadata)))
 
         # configure as sidecar
         endpoint = 'media/configure_sidecar/'

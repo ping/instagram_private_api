@@ -132,7 +132,7 @@ class UserTests(WebApiTestBase):
         make_request.return_value = {'status': 'ok'}
         self.api.friendships_create(self.test_user_id)
         make_request.assert_called_with(
-            'https://www.instagram.com/web/friendships/%(user_id)s/follow/' % {'user_id': self.test_user_id},
+            'https://www.instagram.com/web/friendships/{user_id!s}/follow/'.format(**{'user_id': self.test_user_id}),
             params='')
 
     @unittest.skip('Modifies data')
@@ -145,5 +145,5 @@ class UserTests(WebApiTestBase):
         make_request.return_value = {'status': 'ok'}
         self.api.friendships_destroy(self.test_user_id)
         make_request.assert_called_with(
-            'https://www.instagram.com/web/friendships/%(user_id)s/unfollow/' % {'user_id': self.test_user_id},
+            'https://www.instagram.com/web/friendships/{user_id!s}/unfollow/'.format(**{'user_id': self.test_user_id}),
             params='')

@@ -62,7 +62,7 @@ class FeedEndpointsMixin(object):
             - **min_timestamp**: For pagination
         :return:
         """
-        endpoint = 'feed/user/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'feed/user/{user_id!s}/'.format(**{'user_id': user_id})
         query = {'rank_token': self.rank_token, 'ranked_content': 'true'}
         query.update(kwargs)
         res = self._call_api(endpoint, query=query)
@@ -86,7 +86,7 @@ class FeedEndpointsMixin(object):
             - **min_timestamp**: For pagination
         :return:
         """
-        endpoint = 'feed/user/%(user_name)s/username/' % {'user_name': user_name}
+        endpoint = 'feed/user/{user_name!s}/username/'.format(**{'user_name': user_name})
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -112,7 +112,7 @@ class FeedEndpointsMixin(object):
         :param kwargs:
         :return:
         """
-        endpoint = 'feed/user/%(user_id)s/reel_media/' % {'user_id': user_id}
+        endpoint = 'feed/user/{user_id!s}/reel_media/'.format(**{'user_id': user_id})
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -148,7 +148,7 @@ class FeedEndpointsMixin(object):
         :param tag:
         :return:
         """
-        endpoint = 'feed/tag/%(tag)s/' % {'tag': tag}
+        endpoint = 'feed/tag/{tag!s}/'.format(**{'tag': tag})
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             if res.get('items'):
@@ -166,7 +166,7 @@ class FeedEndpointsMixin(object):
         :param user_id:
         :return:
         """
-        endpoint = 'feed/user/%(user_id)s/story/' % {'user_id': user_id}
+        endpoint = 'feed/user/{user_id!s}/story/'.format(**{'user_id': user_id})
         res = self._call_api(endpoint)
         if self.auto_patch and res.get('reel'):
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -180,7 +180,7 @@ class FeedEndpointsMixin(object):
         :param location_id:
         :return:
         """
-        endpoint = 'feed/location/%(location_id)s/' % {'location_id': location_id}
+        endpoint = 'feed/location/{location_id!s}/'.format(**{'location_id': location_id})
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             if res.get('items'):

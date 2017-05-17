@@ -12,7 +12,7 @@ class UsersEndpointsMixin(object):
         :param user_id:
         :return:
         """
-        res = self._call_api('users/%(user_id)s/info/' % {'user_id': user_id})
+        res = self._call_api('users/{user_id!s}/info/'.format(**{'user_id': user_id}))
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
@@ -23,7 +23,7 @@ class UsersEndpointsMixin(object):
         :param user_name:
         :return:
         """
-        res = self._call_api('users/%(user_name)s/usernameinfo/' % {'user_name': user_name})
+        res = self._call_api('users/{user_name!s}/usernameinfo/'.format(**{'user_name': user_name}))
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
@@ -41,7 +41,7 @@ class UsersEndpointsMixin(object):
         """
         warnings.warn('This endpoint is experimental. Do not use.', UserWarning)
 
-        endpoint = 'users/%(user_id)s/full_detail_info/' % {'user_id': user_id}
+        endpoint = 'users/{user_id!s}/full_detail_info/'.format(**{'user_id': user_id})
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             ClientCompatPatch.user(res['user_detail']['user'], drop_incompat_keys=self.drop_incompat_keys)
@@ -60,7 +60,7 @@ class UsersEndpointsMixin(object):
         :param user_id: User id
         :return:
         """
-        endpoint = 'maps/user/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'maps/user/{user_id!s}/'.format(**{'user_id': user_id})
         return self._call_api(endpoint)
 
     def search_users(self, query, **kwargs):
@@ -135,7 +135,7 @@ class UsersEndpointsMixin(object):
                 }
         """
         if message_prefs not in ['anyone', 'following', 'off']:
-            raise ValueError('Invalid message_prefs: %s' % message_prefs)
+            raise ValueError('Invalid message_prefs: {0!s}'.format(message_prefs))
         params = {'message_prefs': message_prefs}
         params.update(self.authenticated_params)
         return self._call_api('users/set_reel_settings/', params=params)

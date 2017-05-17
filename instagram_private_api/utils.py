@@ -15,10 +15,10 @@ def gen_user_breadcrumb(size):
 
     text_change_event_count = max(1, size / randint(3, 5))
 
-    data = '%(size)s %(elapsed)s %(count)s %(dt)s' % {
+    data = '{size!s} {elapsed!s} {count!s} {dt!s}'.format(**{
         'size': size, 'elapsed': time_elapsed, 'count': text_change_event_count, 'dt': dt
-    }
-    return '%s\n%s\n' % (
+    })
+    return '{0!s}\n{1!s}\n'.format(
         base64.b64encode(hmac.new(key.encode('ascii'), data.encode('ascii'), digestmod=hashlib.sha256).digest()),
         base64.b64encode(data.encode('ascii')))
 
@@ -157,7 +157,7 @@ class InstagramID:
         :param media_id:
         :return:
         """
-        return 'https://www.instagram.com/p/%s/' % cls.shorten_media_id(media_id)
+        return 'https://www.instagram.com/p/{0!s}/'.format(cls.shorten_media_id(media_id))
 
     @classmethod
     def shorten_media_id(cls, media_id):

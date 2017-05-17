@@ -78,7 +78,7 @@ class LiveTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.broadcast_like(broadcast_id, like_count)
         call_api.assert_called_with(
-            'live/%(broadcast_id)s/like/' % {'broadcast_id': broadcast_id},
+            'live/{broadcast_id!s}/like/'.format(**{'broadcast_id': broadcast_id}),
             params=params)
 
     def test_broadcast_like_count(self):
@@ -152,7 +152,7 @@ class LiveTests(ApiTestBase):
             params.update(self.api.authenticated_params)
             self.api.broadcast_comment(broadcast_id, comment_text)
             call_api.assert_called_with(
-                'live/%(broadcast_id)s/comment/' % {'broadcast_id': broadcast_id},
+                'live/{broadcast_id!s}/comment/'.format(**{'broadcast_id': broadcast_id}),
                 params=params)
 
     def test_broadcast_info(self):
