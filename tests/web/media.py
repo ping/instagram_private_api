@@ -115,7 +115,8 @@ class MediaTests(WebApiTestBase):
         make_request.return_value = {'status': 'ok', 'id': '12345678'}
         self.api.post_comment(self.test_media_id + '_12345', '<3')      # test sanitise media id
         make_request.assert_called_with(
-            'https://www.instagram.com/web/comments/{media_id!s}/add/'.format(**{'media_id': self.test_media_id}),
+            'https://www.instagram.com/web/comments/{media_id!s}/add/'.format(
+                **{'media_id': self.test_media_id}),
             params={'comment_text': '<3'})
 
     @unittest.skip('Modifies data / Needs actual data.')
@@ -128,7 +129,8 @@ class MediaTests(WebApiTestBase):
         make_request.return_value = {'status': 'ok'}
         self.api.delete_comment(self.test_media_id, self.test_comment_id)
         make_request.assert_called_with(
-            'https://www.instagram.com/web/comments/{media_id!s}/delete/{comment_id!s}/'.format(**{'media_id': self.test_media_id, 'comment_id': self.test_comment_id}),
+            'https://www.instagram.com/web/comments/{media_id!s}/delete/{comment_id!s}/'.format(
+                **{'media_id': self.test_media_id, 'comment_id': self.test_comment_id}),
             params='')
 
     @unittest.skip('Modifies data')
@@ -141,7 +143,8 @@ class MediaTests(WebApiTestBase):
         make_request.return_value = {'status': 'ok'}
         self.api.post_like(self.test_media_id)
         make_request.assert_called_with(
-            'https://www.instagram.com/web/likes/{media_id!s}/like/'.format(**{'media_id': self.test_media_id}),
+            'https://www.instagram.com/web/likes/{media_id!s}/like/'.format(
+                **{'media_id': self.test_media_id}),
             params='')
 
     @unittest.skip('Modifies data')
@@ -154,7 +157,8 @@ class MediaTests(WebApiTestBase):
         make_request.return_value = {'status': 'ok'}
         self.api.delete_like(self.test_media_id)
         make_request.assert_called_with(
-            'https://www.instagram.com/web/likes/{media_id!s}/unlike/'.format(**{'media_id': self.test_media_id}),
+            'https://www.instagram.com/web/likes/{media_id!s}/unlike/'.format(
+                **{'media_id': self.test_media_id}),
             params='')
 
     @compat_mock.patch('instagram_web_api.Client._make_request')

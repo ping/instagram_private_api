@@ -571,7 +571,8 @@ class UploadEndpointsMixin(object):
                             if mobj:
                                 successful_chunk_ranges.append((int(mobj.group('start')), int(mobj.group('end'))))
                             else:
-                                self.logger.error('Received unexpected chunk upload response: {0!s}'.format(post_response))
+                                self.logger.error(
+                                    'Received unexpected chunk upload response: {0!s}'.format(post_response))
                                 raise ClientError(
                                     'Upload has failed due to unexpected upload response: {0!s}'.format(post_response),
                                     code=500)

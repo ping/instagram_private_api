@@ -350,7 +350,8 @@ class MediaEndpointsMixin(object):
             now = int(time.time())
             for i, reel in enumerate(reels):
                 reel_seen_at = now - min(i + 1 + randint(0, 2), max(0, now - reel['taken_at']))
-                reels_seen['{0!s}_{1!s}'.format(reel['id'], reel['user']['pk'])] = ['{0!s}_{1!s}'.format(reel['taken_at'], reel_seen_at)]
+                reels_seen['{0!s}_{1!s}'.format(reel['id'], reel['user']['pk'])] = [
+                    '{0!s}_{1!s}'.format(reel['taken_at'], reel_seen_at)]
             params = {'reels': reels_seen}
         else:
             params = {'reels': reels}

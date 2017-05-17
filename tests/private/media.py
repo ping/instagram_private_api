@@ -279,7 +279,8 @@ class MediaTests(ApiTestBase):
         comment_id = '123456'
         self.api.delete_comment(media_id, comment_id)
         call_api.assert_called_with(
-            'media/{media_id!s}/comment/{comment_id!s}/delete/'.format(**{'media_id': media_id, 'comment_id': comment_id}),
+            'media/{media_id!s}/comment/{comment_id!s}/delete/'.format(
+                **{'media_id': media_id, 'comment_id': comment_id}),
             params=self.api.authenticated_params)
 
     def test_media_likers(self):
