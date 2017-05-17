@@ -347,7 +347,7 @@ class AccountTests(ApiTestBase):
             signed_body = hash_sig + '.' + json_params
             headers = self.api.default_headers
             headers.update({
-                'Content-Type': 'multipart/form-data; boundary=%s' % self.api.uuid,
+                'Content-Type': 'multipart/form-data; boundary={0!s}'.format(self.api.uuid),
                 'Content-Length': len(photo_data)
             })
             body = '--%(uuid)s\r\n' \

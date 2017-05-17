@@ -123,7 +123,7 @@ class ClientCompatPatch():
     @classmethod
     def media(cls, media, drop_incompat_keys=False):
         """Patch a media object"""
-        media['link'] = 'https://www.instagram.com/p/%s/' % media['code']
+        media['link'] = 'https://www.instagram.com/p/{0!s}/'.format(media['code'])
         media['created_time'] = str(int(media.get('taken_at') or media.get('device_timestamp')))
 
         if media['media_type'] == 1:

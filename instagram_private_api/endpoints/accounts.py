@@ -38,7 +38,7 @@ class AccountsEndpointsMixin(object):
         except compat_urllib_error.HTTPError as e:
             error_response = self._read_response(e)
             if e.code == 400:
-                raise ClientLoginError('Unable to login: %s' % e)
+                raise ClientLoginError('Unable to login: {0!s}'.format(e))
             raise ClientError(e.reason, e.code, error_response)
 
         if not self.csrftoken:
@@ -86,7 +86,7 @@ class AccountsEndpointsMixin(object):
         :return:
         """
         if int(gender) not in [1, 2, 3]:
-            raise ValueError('Invalid gender: %d' % int(gender))
+            raise ValueError('Invalid gender: {0:d}'.format(int(gender)))
         if not email:
             raise ValueError('Email is required.')
 
@@ -146,7 +146,7 @@ class AccountsEndpointsMixin(object):
             try:
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):
-                    error_msg = '%s: %s' % (e.reason, error_obj['message'])
+                    error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
             except:
                 # do nothing, prob can't parse json
                 pass

@@ -141,7 +141,7 @@ class MiscEndpointsMixin(object):
         :return:
         """
         if sticker_type not in ['static_stickers']:
-            raise ValueError('Invalid sticker_type: %s' % sticker_type)
+            raise ValueError('Invalid sticker_type: {0!s}'.format(sticker_type))
         if location and not ('lat' in location and 'lng' in location and 'horizontalAccuracy' in location):
             raise ValueError('Invalid location')
         params = {

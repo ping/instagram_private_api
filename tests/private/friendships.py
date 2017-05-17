@@ -146,7 +146,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.friendships_create(user_id)
         call_api.assert_called_with(
-            'friendships/create/%(user_id)s/' % {'user_id': user_id},
+            'friendships/create/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -163,7 +163,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.friendships_destroy(user_id)
         call_api.assert_called_with(
-            'friendships/destroy/%(user_id)s/' % {'user_id': user_id},
+            'friendships/destroy/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -180,7 +180,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.friendships_block(user_id)
         call_api.assert_called_with(
-            'friendships/block/%(user_id)s/' % {'user_id': user_id},
+            'friendships/block/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -191,7 +191,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.friendships_unblock(user_id)
         call_api.assert_called_with(
-            'friendships/unblock/%(user_id)s/' % {'user_id': user_id},
+            'friendships/unblock/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
 
     def test_blocked_reels(self):
@@ -207,7 +207,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.block_friend_reel(user_id)
         call_api.assert_called_with(
-            'friendships/block_friend_reel/%(user_id)s/' % {'user_id': user_id},
+            'friendships/block_friend_reel/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -216,7 +216,7 @@ class FriendshipTests(ApiTestBase):
         user_id = '2958144170'
         self.api.unblock_friend_reel(user_id)
         call_api.assert_called_with(
-            'friendships/unblock_friend_reel/%(user_id)s/' % {'user_id': user_id},
+            'friendships/unblock_friend_reel/{user_id!s}/'.format(**{'user_id': user_id}),
             params=self.api.authenticated_params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')

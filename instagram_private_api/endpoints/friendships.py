@@ -24,7 +24,7 @@ class FriendshipsEndpointsMixin(object):
             - **max_id**: For pagination
         :return:
         """
-        endpoint = 'friendships/%(user_id)s/following/' % {'user_id': user_id}
+        endpoint = 'friendships/{user_id!s}/following/'.format(**{'user_id': user_id})
         query = {
             'rank_token': self.rank_token,
         }
@@ -44,7 +44,7 @@ class FriendshipsEndpointsMixin(object):
             - **max_id**: For pagination
         :return:
         """
-        endpoint = 'friendships/%(user_id)s/followers/' % {'user_id': user_id}
+        endpoint = 'friendships/{user_id!s}/followers/'.format(**{'user_id': user_id})
         query = {
             'rank_token': self.rank_token,
         }
@@ -83,7 +83,7 @@ class FriendshipsEndpointsMixin(object):
                     "is_private": false
                 }
         """
-        endpoint = 'friendships/show/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'friendships/show/{user_id!s}/'.format(**{'user_id': user_id})
         res = self._call_api(endpoint)
         return res
 
@@ -138,7 +138,7 @@ class FriendshipsEndpointsMixin(object):
                     }
                 }
         """
-        endpoint = 'friendships/create/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'friendships/create/{user_id!s}/'.format(**{'user_id': user_id})
         params = {'user_id': user_id, 'radio_type': self.radio_type}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -165,7 +165,7 @@ class FriendshipsEndpointsMixin(object):
                     "is_private": false
                 }
         """
-        endpoint = 'friendships/destroy/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'friendships/destroy/{user_id!s}/'.format(**{'user_id': user_id})
         params = {'user_id': user_id, 'radio_type': self.radio_type}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -191,7 +191,7 @@ class FriendshipsEndpointsMixin(object):
                     "is_private": false
                 }
         """
-        endpoint = 'friendships/block/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'friendships/block/{user_id!s}/'.format(**{'user_id': user_id})
         params = {'user_id': user_id}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -217,7 +217,7 @@ class FriendshipsEndpointsMixin(object):
                     "is_private": false
                 }
         """
-        endpoint = 'friendships/unblock/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'friendships/unblock/{user_id!s}/'.format(**{'user_id': user_id})
         params = {'user_id': user_id}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -243,7 +243,7 @@ class FriendshipsEndpointsMixin(object):
                     "is_private": false
                 }
         """
-        endpoint = 'friendships/block_friend_reel/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'friendships/block_friend_reel/{user_id!s}/'.format(**{'user_id': user_id})
         params = {'source': 'main_feed'}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -269,7 +269,7 @@ class FriendshipsEndpointsMixin(object):
                     "is_private": false
                 }
         """
-        endpoint = 'friendships/unblock_friend_reel/%(user_id)s/' % {'user_id': user_id}
+        endpoint = 'friendships/unblock_friend_reel/{user_id!s}/'.format(**{'user_id': user_id})
         res = self._call_api(endpoint, params=self.authenticated_params)
         return res
 
@@ -306,7 +306,7 @@ class FriendshipsEndpointsMixin(object):
         """
 
         if block_status not in ['block', 'unblock']:
-            raise ValueError('Invalid block_status: %s' % block_status)
+            raise ValueError('Invalid block_status: {0!s}'.format(block_status))
         if not isinstance(user_ids, list):
             user_ids = [user_ids]
         params = {'source': 'settings'}

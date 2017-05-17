@@ -35,7 +35,7 @@ def onlogin_callback(api, new_settings_file):
     cache_settings = api.settings
     with open(new_settings_file, 'w') as outfile:
         json.dump(cache_settings, outfile, default=to_json)
-        print('SAVED: %s' % new_settings_file)
+        print('SAVED: {0!s}'.format(new_settings_file))
 
 
 if __name__ == '__main__':
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    print('Client version: %s' % client_version)
+    print('Client version: {0!s}'.format(client_version))
 
     device_id = None
     try:
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         settings_file = args.settings_file_path
         if not os.path.isfile(settings_file):
             # settings file does not exist
-            print('Unable to find file: %s' % settings_file)
+            print('Unable to find file: {0!s}'.format(settings_file))
 
             # login new
             api = Client(
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         else:
             with open(settings_file) as file_data:
                 cached_settings = json.load(file_data, object_hook=from_json)
-            print('Reusing settings: %s' % settings_file)
+            print('Reusing settings: {0!s}'.format(settings_file))
 
             device_id = cached_settings.get('device_id')
             # reuse auth settings
@@ -82,7 +82,7 @@ if __name__ == '__main__':
                 settings=cached_settings)
 
     except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
-        print('ClientCookieExpiredError/ClientLoginRequiredError: %s' % e)
+        print('ClientCookieExpiredError/ClientLoginRequiredError: {0!s}'.format(e))
 
         # Login expired
         # Do relogin but use default ua, keys and such
@@ -92,18 +92,18 @@ if __name__ == '__main__':
             on_login=lambda x: onlogin_callback(x, args.settings_file_path))
 
     except ClientLoginError as e:
-        print('ClientLoginError %s' % e)
+        print('ClientLoginError {0!s}'.format(e))
         exit(9)
     except ClientError as e:
-        print('ClientError %s (Code: %d, Response: %s)' % (e.msg, e.code, e.error_response))
+        print('ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response))
         exit(9)
     except Exception as e:
-        print('Unexpected Exception: %s' % e)
+        print('Unexpected Exception: {0!s}'.format(e))
         exit(99)
 
     # Show when login expires
     cookie_expiry = api.cookie_jar.expires_earliest
-    print('Cookie Expiry: %s' % datetime.datetime.fromtimestamp(cookie_expiry).strftime('%Y-%m-%dT%H:%M:%SZ'))
+    print('Cookie Expiry: {0!s}'.format(datetime.datetime.fromtimestamp(cookie_expiry).strftime('%Y-%m-%dT%H:%M:%SZ')))
 
     # Call the api
     results = api.tag_search('cats')

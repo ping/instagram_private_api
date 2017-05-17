@@ -29,7 +29,7 @@ if __name__ == '__main__':
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    print('Client version: %s' % client_version)
+    print('Client version: {0!s}'.format(client_version))
     api = Client(args.username, args.password)
 
     user_id = '2958144170'

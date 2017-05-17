@@ -67,7 +67,7 @@ class Client(object):
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
         if cookie_string and cookie_jar.expires_earliest and int(time.time()) >= cookie_jar.expires_earliest:
-            raise ClientCookieExpiredError('Oldest cookie expired at %s' % cookie_jar.expires_earliest)
+            raise ClientCookieExpiredError('Oldest cookie expired at {0!s}'.format(cookie_jar.expires_earliest))
 
         custom_ssl_context = kwargs.pop('custom_ssl_context', None)
         proxy_handler = None
@@ -76,10 +76,10 @@ class Client(object):
             warnings.warn('Proxy support is alpha.', UserWarning)
             parsed_url = compat_urllib_parse_urlparse(proxy)
             if parsed_url.netloc and parsed_url.scheme:
-                proxy_address = '%s://%s' % (parsed_url.scheme, parsed_url.netloc)
+                proxy_address = '{0!s}://{1!s}'.format(parsed_url.scheme, parsed_url.netloc)
                 proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
             else:
-                raise ValueError('Invalid proxy argument: %s' % proxy)
+                raise ValueError('Invalid proxy argument: {0!s}'.format(proxy))
         handlers = []
         if proxy_handler:
             handlers.append(proxy_handler)
@@ -178,8 +178,8 @@ class Client(object):
             else:
                 data = compat_urllib_parse.urlencode(params).encode('ascii')
         try:
-            self.logger.debug('REQUEST: %s %s' % (url, req.get_method()))
-            self.logger.debug('DATA: %s' % data)
+            self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
+            self.logger.debug('DATA: {0!s}'.format(data))
             res = self.opener.open(req, data=data, timeout=self.timeout)
             if return_response:
                 return res
@@ -190,13 +190,13 @@ class Client(object):
             else:
                 response_content = res.read().decode('utf8')
 
-            self.logger.debug('RESPONSE: %s' % response_content)
+            self.logger.debug('RESPONSE: {0!s}'.format(response_content))
             return json.loads(response_content)
 
         except compat_urllib_error.HTTPError as e:
-            raise ClientError('HTTPError "%s" while opening %s' % (e.reason, url), e.code)
+            raise ClientError('HTTPError "{0!s}" while opening {1!s}'.format(e.reason, url), e.code)
         except compat_urllib_error.URLError as e:
-            raise ClientError('URLError "%s" while opening %s' % (e.reason, url))
+            raise ClientError('URLError "{0!s}" while opening {1!s}'.format(e.reason, url))
 
     def _sanitise_media_id(self, media_id):
         """The web API uses the numeric media ID only, and not the formatted one where it's XXXXX_YYY"""
@@ -261,9 +261,9 @@ class Client(object):
         count = kwargs.pop('count', 16)
         min_media_id = kwargs.pop('min_media_id', None) or kwargs.pop('end_cursor', None)
         if not min_media_id:
-            command = 'media.first(%(count)d)' % {'count': count}
+            command = 'media.first({count:d})'.format(**{'count': count})
         else:
-            command = 'media.after(%(min_id)s, %(count)d)' % {'count': count, 'min_id': min_media_id}
+            command = 'media.after({min_id!s}, {count:d})'.format(**{'count': count, 'min_id': min_media_id})
         params = {
             'q': 'ig_user(%(user_id)s) {%(command)s {count, nodes {'
                  'caption, code, comments {count}, date, dimensions {height, width}, comments_disabled, '
@@ -332,7 +332,7 @@ class Client(object):
             'x-requested-with': 'XMLHttpRequest',
         }
         info = self._make_request(
-            'https://www.instagram.com/p/%s/?__a=1&__b=1' % short_code,
+            'https://www.instagram.com/p/{0!s}/?__a=1&__b=1'.format(short_code),
             headers=headers)
         media = info.get('graphql', {}).get('shortcode_media', {})
         if self.auto_patch:
@@ -455,7 +455,7 @@ class Client(object):
                 {"status": "ok"}
         """
         media_id = self._sanitise_media_id(media_id)
-        endpoint = 'https://www.instagram.com/web/likes/%(media_id)s/like/' % {'media_id': media_id}
+        endpoint = 'https://www.instagram.com/web/likes/{media_id!s}/like/'.format(**{'media_id': media_id})
         res = self._make_request(endpoint, params='')
         return res
 
@@ -471,7 +471,7 @@ class Client(object):
                 {"status": "ok"}
         """
         media_id = self._sanitise_media_id(media_id)
-        endpoint = 'https://www.instagram.com/web/likes/%(media_id)s/unlike/' % {'media_id': media_id}
+        endpoint = 'https://www.instagram.com/web/likes/{media_id!s}/unlike/'.format(**{'media_id': media_id})
         return self._make_request(endpoint, params='')
 
     @login_required
@@ -485,7 +485,7 @@ class Client(object):
 
                 {"status": "ok", "result": "following"}
         """
-        endpoint = 'https://www.instagram.com/web/friendships/%(user_id)s/follow/' % {'user_id': user_id}
+        endpoint = 'https://www.instagram.com/web/friendships/{user_id!s}/follow/'.format(**{'user_id': user_id})
         return self._make_request(endpoint, params='')
 
     @login_required
@@ -499,7 +499,7 @@ class Client(object):
 
                 {"status": "ok"}
         """
-        endpoint = 'https://www.instagram.com/web/friendships/%(user_id)s/unfollow/' % {'user_id': user_id}
+        endpoint = 'https://www.instagram.com/web/friendships/{user_id!s}/unfollow/'.format(**{'user_id': user_id})
         return self._make_request(endpoint, params='')
 
     @login_required
@@ -535,7 +535,7 @@ class Client(object):
             raise ValueError('The comment cannot contain more than 1 URL.')
 
         media_id = self._sanitise_media_id(media_id)
-        endpoint = 'https://www.instagram.com/web/comments/%(media_id)s/add/' % {'media_id': media_id}
+        endpoint = 'https://www.instagram.com/web/comments/{media_id!s}/add/'.format(**{'media_id': media_id})
         params = {'comment_text': comment_text}
         return self._make_request(endpoint, params=params)
 
@@ -552,8 +552,8 @@ class Client(object):
                 {"status": "ok"}
         """
         media_id = self._sanitise_media_id(media_id)
-        endpoint = 'https://www.instagram.com/web/comments/%(media_id)s/delete/%(comment_id)s/' % {
-            'media_id': media_id, 'comment_id': comment_id}
+        endpoint = 'https://www.instagram.com/web/comments/{media_id!s}/delete/{comment_id!s}/'.format(**{
+            'media_id': media_id, 'comment_id': comment_id})
         return self._make_request(endpoint, params='')
 
     def search(self, query_text):
