@@ -412,12 +412,11 @@ class UploadTests(ApiTestBase):
                 opener_side_effect = [
                     MockResponse(),     # chunk 1
                 ]
-            if not raise_httperror:
-                if chunk_count == 4:
-                    opener_side_effect.append(
-                        MockResponse()
-                    )
-            else:
+            if not raise_httperror and chunk_count == 4:
+                opener_side_effect.append(
+                    MockResponse()
+                )
+            elif raise_httperror:
                 opener_side_effect.append(
                     compat_urllib_error.HTTPError(
                         'http://localhost', 400, 'Bad Request', {},

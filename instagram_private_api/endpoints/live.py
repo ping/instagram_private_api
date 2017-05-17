@@ -22,7 +22,7 @@ class LiveEndpointsMixin(object):
         :param like_count:
         :return:
         """
-        if like_count < 1 or like_count > 5:
+        if not (1 <= like_count <= 5):
             raise ValueError('Invalid like_count')
         broadcast_id = str(broadcast_id)
         endpoint = 'live/%(broadcast_id)s/like/' % {'broadcast_id': broadcast_id}

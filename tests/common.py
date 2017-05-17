@@ -59,9 +59,8 @@ def to_json(python_object):
 
 
 def from_json(json_object):
-    if '__class__' in json_object:
-        if json_object['__class__'] == 'bytes':
-            return codecs.decode(json_object['__value__'].encode(), 'base64')
+    if '__class__' in json_object and json_object['__class__'] == 'bytes':
+        return codecs.decode(json_object['__value__'].encode(), 'base64')
     return json_object
 
 

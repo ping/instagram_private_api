@@ -57,7 +57,7 @@ class MultipartFormDataEncoder(object):
             yield encoder('--{}\r\n'.format(self.boundary))
             yield encoder(self.u('Content-Disposition: form-data; name="{}"\r\n').format(key))
             yield encoder('\r\n')
-            if isinstance(value, int) or isinstance(value, float):
+            if isinstance(value, (int, float)):
                 value = str(value)
             yield encoder(self.u(value))
             yield encoder('\r\n')
