@@ -106,7 +106,7 @@ class MediaEndpointsMixin(object):
 
         return sorted(comments, key=lambda k: k['created_time'], reverse=reverse)
 
-    def edit_media(self, media_id, caption, usertags=[]):
+    def edit_media(self, media_id, caption, usertags=None):
         """
         Edit a media's caption
 
@@ -121,6 +121,8 @@ class MediaEndpointsMixin(object):
                 ]
         :return:
         """
+        if usertags is None:
+            usertags = []
         endpoint = 'media/%(media_id)s/edit_media/' % {'media_id': media_id}
         params = {'caption_text': caption}
         params.update(self.authenticated_params)
