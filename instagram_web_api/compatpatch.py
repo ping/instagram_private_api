@@ -2,7 +2,7 @@
 import re
 
 
-class ClientCompatPatch():
+class ClientCompatPatch(object):
     """Utility to make entities from the private api similar to the ones
     from the public one by adding the necessary properties, and if required,
     remove any incompatible properties (to save storage space for example).
@@ -14,9 +14,11 @@ class ClientCompatPatch():
     def _generate_image_url(cls, url, size, crop):
         mobj = re.search(cls.IG_IMAGE_URL_EXPR, url)
         if not mobj:
-            replacement_expr = '\g<eparam>{crop!s}{size!s}x{size!s}/'.format(**{'crop': crop, 'size': size})
+            replacement_expr = '\g<eparam>{crop!s}{size!s}x{size!s}/'.format(
+                **{'crop': crop, 'size': size})
             return re.sub(r'(?P<eparam>/e[0-9]+/)', replacement_expr, url)
-        replacement_expr = '/{crop!s}{size!s}x{size!s}/'.format(**{'crop': mobj.group('crop') or crop, 'size': size})
+        replacement_expr = '/{crop!s}{size!s}x{size!s}/'.format(
+            **{'crop': mobj.group('crop') or crop, 'size': size})
         return re.sub(cls.IG_IMAGE_URL_EXPR, replacement_expr, url)
 
     @classmethod

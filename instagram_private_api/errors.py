@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-class ClientErrorCodes:
+class ClientErrorCodes(object):
     """Holds static constant values for the http error codes returned from IG"""
 
     INTERNAL_SERVER_ERROR = 500

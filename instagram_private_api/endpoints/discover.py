@@ -59,7 +59,7 @@ class DiscoverEndpointsMixin(object):
         """
         if isinstance(broadcast_ids, str):
             broadcast_ids = [broadcast_ids]
-        broadcast_ids = list(map(lambda x: str(x), broadcast_ids))
+        broadcast_ids = [str(x) for x in broadcast_ids]
         params = {'broadcast_ids': broadcast_ids}
         params.update(self.authenticated_params)
         return self._call_api('discover/top_live_status/', params=params)

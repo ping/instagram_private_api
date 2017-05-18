@@ -21,7 +21,7 @@ class UploadEndpointsMixin(object):
 
     def _validate_location(self, location):
         location_keys = ['external_source', 'name', 'address']
-        if type(location) != dict:
+        if not isinstance(location, dict):
             raise ValueError('Location must be a dict.')
 
         # patch location object returned from location_search
@@ -72,7 +72,7 @@ class UploadEndpointsMixin(object):
         # min_ratio = 9.0/16.0
         # max_ratio = 3.0/4.0 if is_video else 9.0/16.0
         device_ratios = [(3, 4), (2, 3), (5, 8), (3, 5), (9, 16), (10, 16), (40, 71)]
-        aspect_ratios = list(map(lambda x: 1.0 * x[0] / x[1], device_ratios))
+        aspect_ratios = [1.0 * x[0] / x[1] for x in device_ratios]
         return min(aspect_ratios), max(aspect_ratios)
 
     @classmethod

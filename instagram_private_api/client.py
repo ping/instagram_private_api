@@ -212,7 +212,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         mobj = re.search(Constants.USER_AGENT_EXPRESSION, value)
         if not mobj:
             raise ValueError('User-agent specified does not fit format required: {0!s}'.format(
-                             Constants.USER_AGENT_EXPRESSION))
+                Constants.USER_AGENT_EXPRESSION))
         self.app_version = mobj.group('app_version')
         self.android_release = mobj.group('android_release')
         self.android_version = int(mobj.group('android_version'))
@@ -262,7 +262,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         mobj = re.search(Constants.USER_AGENT_EXPRESSION, value)
         if not mobj:
             raise ValueError('User-agent specified does not fit format required: {0!s}'.format(
-                             Constants.USER_AGENT_EXPRESSION))
+                Constants.USER_AGENT_EXPRESSION))
         parse_params = {
             'app_version': mobj.group('app_version'),
             'android_version': int(mobj.group('android_version')),
@@ -352,9 +352,9 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         """For use in certain endpoints"""
         return 'wifi-none'
 
-    def _generate_signature(self, input):
+    def _generate_signature(self, data):
         return hmac.new(
-            self.signature_key.encode('ascii'), input.encode('ascii'),
+            self.signature_key.encode('ascii'), data.encode('ascii'),
             digestmod=hashlib.sha256).hexdigest()
 
     @classmethod

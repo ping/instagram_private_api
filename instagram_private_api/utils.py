@@ -117,7 +117,7 @@ def max_chunk_count_generator(chunk_count, file_data):
     return chunk_generator(chunk_count, chunk_size, file_data)
 
 
-class InstagramID:
+class InstagramID(object):
     """
     Utility class to convert between IG's internal numeric ID and the shortcode used in weblinks.
     Does NOT apply to private accounts.

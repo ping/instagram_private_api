@@ -198,7 +198,8 @@ class Client(object):
         except compat_urllib_error.URLError as e:
             raise ClientError('URLError "{0!s}" while opening {1!s}'.format(e.reason, url))
 
-    def _sanitise_media_id(self, media_id):
+    @staticmethod
+    def _sanitise_media_id(media_id):
         """The web API uses the numeric media ID only, and not the formatted one where it's XXXXX_YYY"""
         if re.match(r'[0-9]+_[0-9]+', media_id):    # endpoint uses the entirely numeric ID, not XXXX_YYY
             media_id = media_id.split('_')[0]

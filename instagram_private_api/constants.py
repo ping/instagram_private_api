@@ -1,5 +1,5 @@
 
-class Constants:
+class Constants(object):
 
     IG_SIG_KEY = '234623953a1374bd664075f5cfe54e642901db7acb778231f17e658300ea7934'
     IG_CAPABILITIES = '3boBAA=='    # = base64.b64encode(struct.pack('<i', 113373)).decode('ascii')

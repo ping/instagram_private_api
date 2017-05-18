@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-class ClientCompatPatch():
+class ClientCompatPatch(object):
     """Utility to make entities from the private api similar to the ones
     from the public one by adding the necessary properties, and if required,
     remove any incompatible properties (to save storage space for example).

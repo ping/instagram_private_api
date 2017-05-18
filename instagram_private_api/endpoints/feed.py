@@ -127,7 +127,7 @@ class FeedEndpointsMixin(object):
         :param kwargs:
         :return:
         """
-        user_ids = list(map(lambda x: str(x), user_ids))
+        user_ids = [str(x) for x in user_ids]
         params = {'user_ids': user_ids}
         params.update(kwargs)
 
@@ -136,7 +136,7 @@ class FeedEndpointsMixin(object):
             for reel_media in res.get('reels_media', []):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
                  for m in reel_media.get('items', [])]
-            for user_id, reel in list(res.get('reels', {}).items()):
+            for _, reel in list(res.get('reels', {}).items()):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
                  for m in reel.get('items', [])]
         return res
