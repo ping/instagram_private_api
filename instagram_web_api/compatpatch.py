@@ -31,27 +31,32 @@ class ClientCompatPatch(object):
     @classmethod
     def media(cls, media, drop_incompat_keys=False):
         """Patch a media object"""
-        media['link'] = 'https://www.instagram.com/p/{0!s}/'.format((
-            media.get('code') or media.get('shortcode')))   # for media_info2
-        caption = media.get('caption')
+        media_shortcode = media.get('code') or media.get('shortcode')   # for media_info2
+        media['link'] = 'https://www.instagram.com/p/{0!s}/'.format(media_shortcode)
+        caption = (media.get('caption') or
+                   media.get('edge_media_to_caption', {}).get('edges', [{}])[0].get('node', {}).get('text'))
         if not caption:
             media['caption'] = None
         else:
             media['caption'] = {
                 'text': caption,
                 'from': media['owner'],
-                'id': str(abs(hash(caption + media['code'])) % (10 ** 12)),       # generate a psuedo 12-char ID
+                'id': str(abs(hash(caption + media_shortcode)) % (10 ** 12)),       # generate a psuedo 12-char ID
             }
         media['tags'] = []
         media['filter'] = ''
         media['attribution'] = None
         media['user_has_liked'] = False
-        media['user'] = {
+        media_user = {
             'id': media['owner']['id'],
-            'username': media['owner']['username'],
-            'full_name': media['owner']['full_name'],
-            'profile_picture': media['owner']['profile_pic_url'],
         }
+        if 'username' in media['owner']:
+            media_user['username'] = media['owner']['username']
+        if 'full_name' in media['owner']:
+            media_user['full_name'] = media['owner']['full_name']
+        if 'profile_pic_url' in media['owner']:
+            media_user['profile_picture'] = media['owner']['profile_pic_url']
+        media['user'] = media_user
         media['type'] = 'video' if media['is_video'] else 'image'
         display_src = media.get('display_src') or media.get('display_url')  # for media_info2
         images = {
@@ -63,7 +68,7 @@ class ClientCompatPatch(object):
             'thumbnail': {'url': cls._generate_image_url(display_src, '150', 's')},
         }
         media['images'] = images
-        if media['is_video']:
+        if media['is_video'] and media.get('video_url'):
             videos = {
                 'standard_resolution': {
                     'url': media['video_url'],
@@ -74,11 +79,11 @@ class ClientCompatPatch(object):
             }
             media['videos'] = videos
         media['likes'] = {
-            'count': media.get('likes', {}).get('count', 0),
+            'count': (media.get('likes', {}) or media.get('edge_liked_by', {})).get('count', 0),
             'data': []
         }
         media['comments'] = {
-            'count': media.get('comments', {}).get('count', 0),
+            'count': (media.get('comments', {}) or media.get('edge_media_to_comment', {})).get('count', 0),
             'data': []
         }
         if 'location' not in media or not media['location'] or not media['location'].get('lat'):
@@ -89,7 +94,9 @@ class ClientCompatPatch(object):
         media['id'] = '{0!s}_{1!s}'.format(media['id'], media['owner']['id'])
         media['created_time'] = str(media.get('date', '') or media.get('taken_at_timestamp', ''))
 
-        usertags = media.get('usertags', {}).get('nodes', [])
+        usertags = (
+            media.get('usertags', {}).get('nodes', []) or
+            [ut['node'] for ut in media.get('edge_media_to_tagged_user', {}).get('edges', [])])
         if not usertags:
             media['users_in_photo'] = []
         else:

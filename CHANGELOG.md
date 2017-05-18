@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.3.0 (pending)
+- Web API:
+    * _Important_: The new graphql endpoint appears to be replacing the old query endpoint. The graphql endpoint is comparatively more limited and some attributes may no longer be available.
+    * You should exercise caution when using functions relying on the old query endpoint such as ``user_info()`` and ``media_info()``since IG no longer uses them.
+    * ``user_feed()`` is now using the graphql endpoint and has compatibility-breaking changes.
+
 ## 1.2.8
 - New app client endpoint: ``api.bulk_delete_comments()``
 - Prevent uploading of very small chunks when posting video

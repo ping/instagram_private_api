@@ -254,40 +254,42 @@ class Client(object):
         :param user_id:
         :param kwargs:
             - **count**: Number of items to return. Default: 16
-            - **min_media_id** / **end_cursor**: For pagination
+            - **end_cursor**: For pagination. Taken from:
+
+                .. code-block:: python
+
+                    info.get('data', {}).get('user', {}).get(
+                        'edge_owner_to_timeline_media', {}).get(
+                        'page_info', {}).get('end_cursor')
             - **extract**: bool. Return a simple list of media
         :return:
         """
 
         count = kwargs.pop('count', 16)
-        min_media_id = kwargs.pop('min_media_id', None) or kwargs.pop('end_cursor', None)
-        if not min_media_id:
-            command = 'media.first({count:d})'.format(**{'count': count})
-        else:
-            command = 'media.after({min_id!s}, {count:d})'.format(**{'count': count, 'min_id': min_media_id})
-        params = {
-            'q': 'ig_user(%(user_id)s) {%(command)s {count, nodes {'
-                 'caption, code, comments {count}, date, dimensions {height, width}, comments_disabled, '
-                 'usertags {nodes {x, y, user {id, username, full_name, profile_pic_url} }}, '
-                 'location {id, name, lat, lng}, display_src, id, is_video, is_ad, '
-                 'likes {count}, owner {id, username, full_name, profile_pic_url, '
-                 'is_verified, is_private }, '
-                 '__typename, thumbnail_src, video_views, video_url}, page_info}}' % {
-                     'user_id': user_id, 'count': count, 'command': command},
-            'ref': 'tags::show'
-        }
-        info = self._make_request(self.API_URL, params=params)
-        if not info.get('media'):
+        end_cursor = kwargs.pop('end_cursor', None)
+
+        query = {
+            'query_id': '17880160963012870',
+            'id': user_id,
+            'first': count}
+
+        if end_cursor:
+            query['after'] = end_cursor
+        info = self._make_request(self.GRAPHQL_API_URL, query=query)
+
+        if not info.get('data', {}).get('user'):
             # non-existent accounts do not return media at all
             # private accounts return media with just a count, no nodes
             raise ClientError('Not Found', 404)
 
         if self.auto_patch:
-            [ClientCompatPatch.media(media, drop_incompat_keys=self.drop_incompat_keys)
-             for media in info.get('media', {}).get('nodes', [])]
+            [ClientCompatPatch.media(media['node'], drop_incompat_keys=self.drop_incompat_keys)
+             for media in info.get('data', {}).get('user', {}).get(
+                 'edge_owner_to_timeline_media', {}).get('edges', [])]
 
         if kwargs.pop('extract', True):
-            return info.get('media', {}).get('nodes', [])
+            return info.get('data', {}).get('user', {}).get(
+                'edge_owner_to_timeline_media', {}).get('edges', [])
         return info
 
     def media_info(self, short_code, **kwargs):
