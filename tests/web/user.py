@@ -77,14 +77,18 @@ class UserTests(WebApiTestBase):
     def test_user_feed_noextract(self, extract=True):
         results = self.api.user_feed(self.test_user_id, extract=False)
         self.assertIsInstance(results, dict)
-        self.assertIsInstance(results.get('media', {}).get('nodes'), list)
-        self.assertGreater(len(results.get('media', {}).get('nodes', [])), 0)
-        first_code = results.get('media', {}).get('nodes')[0]['code']
-        end_cursor = results.get('media', {}).get('page_info', {}).get('end_cursor')
+        nodes = [edge['node'] for edge in results.get('data', {}).get('user', {}).get(
+            'edge_owner_to_timeline_media', {}).get('edges', [])]
+        self.assertIsInstance(nodes, list)
+        self.assertGreater(len(nodes), 0)
+        first_code = nodes[0]['shortcode']
+        end_cursor = results.get('data', {}).get('user', {}).get(
+            'edge_owner_to_timeline_media', {}).get('page_info', {}).get('end_cursor')
 
         time.sleep(self.sleep_interval)
         results = self.api.user_feed(self.test_user_id, extract=False, end_cursor=end_cursor)
-        self.assertNotEqual(first_code, results.get('media', {}).get('nodes')[0]['code'])
+        self.assertNotEqual(first_code, results.get('data', {}).get('user', {}).get(
+            'edge_owner_to_timeline_media', {}).get('edges', [])[0]['node']['shortcode'])
 
     def test_user_followers(self):
         results = self.api.user_followers(self.test_user_id)
