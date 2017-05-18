@@ -108,7 +108,8 @@ if __name__ == '__main__':
         suite = unittest.TestSuite()
         for test in tests:
             suite.addTest(test['test'])
-        unittest.TextTestRunner(verbosity=2).run(suite)
+        result = unittest.TextTestRunner(verbosity=2).run(suite)
+        sys.exit(not result.wasSuccessful())
 
     except ClientError as e:
         print('Unexpected ClientError {0!s} (Code: {1:d})'.format(e.msg, e.code))
