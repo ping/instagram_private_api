@@ -47,15 +47,16 @@ class DiscoverTests(ApiTestBase):
     def test_discover_top_live(self):
         results = self.api.discover_top_live()
         self.assertEqual(results.get('status'), 'ok')
-        self.assertGreater(len(results.get('broadcasts', [])), 0, 'No broadcasts returned.')
+        self.assertTrue('broadcasts' in results)
 
     def test_top_live_status(self):
         results = self.api.discover_top_live()
         broadcast_ids = [b['id'] for b in results.get('broadcasts', [])]
-        results = self.api.top_live_status(broadcast_ids)
-        self.assertEqual(results.get('status'), 'ok')
-        self.assertGreater(len(results.get('broadcast_status_items', [])), 0, 'No broadcast_status_items returned.')
+        if broadcast_ids:
+            results = self.api.top_live_status(broadcast_ids)
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertGreater(len(results.get('broadcast_status_items', [])), 0, 'No broadcast_status_items returned.')
 
-        results = self.api.top_live_status(str(broadcast_ids[0]))
-        self.assertEqual(results.get('status'), 'ok')
-        self.assertGreater(len(results.get('broadcast_status_items', [])), 0, 'No broadcast_status_items returned.')
+            results = self.api.top_live_status(str(broadcast_ids[0]))
+            self.assertEqual(results.get('status'), 'ok')
+            self.assertGreater(len(results.get('broadcast_status_items', [])), 0, 'No broadcast_status_items returned.')
