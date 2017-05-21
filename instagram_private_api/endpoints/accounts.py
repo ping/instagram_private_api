@@ -131,18 +131,21 @@ class AccountsEndpointsMixin(object):
             ('profile_pic', 'profile_pic', 'application/octet-stream', photo_data)
         ]
 
-        content_type, body = MultipartFormDataEncoder(self.uuid).encode(fields, files)
+        content_type, body = MultipartFormDataEncoder().encode(fields, files)
 
         headers = self.default_headers
         headers['Content-Type'] = content_type
         headers['Content-Length'] = len(body)
 
-        req = compat_urllib_request.Request(self.api_url + endpoint, body, headers=headers)
+        endpoint_url = '{0}{1}'.format(self.api_url.format(version='v1'), endpoint)
+        req = compat_urllib_request.Request(endpoint_url, body, headers=headers)
         try:
+            self.logger.debug('POST {0!s}'.format(endpoint_url))
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_msg = e.reason
             error_response = self._read_response(e)
+            self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
             try:
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):
@@ -152,7 +155,9 @@ class AccountsEndpointsMixin(object):
                 pass
             raise ClientError(error_msg, e.code, error_response)
 
-        json_response = json.loads(self._read_response(response))
+        post_response = self._read_response(response)
+        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, post_response))
+        json_response = json.loads(post_response)
 
         if self.auto_patch:
             ClientCompatPatch.user(json_response['user'], drop_incompat_keys=self.drop_incompat_keys)

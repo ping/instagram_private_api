@@ -175,9 +175,11 @@ class UploadTests(ApiTestBase):
                     'instagram_private_api.endpoints.accounts.compat_urllib_request.Request') as request, \
                 compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
                 compat_mock.patch('instagram_private_api.endpoints.upload.time.time') as time_mock, \
-                compat_mock.patch('instagram_private_api.endpoints.upload.randint') as randint_mock:
+                compat_mock.patch('instagram_private_api.endpoints.upload.randint') as randint_mock, \
+                compat_mock.patch('instagram_private_api.http.random.choice') as randchoice_mock:
             time_mock.return_value = ts_now
             randint_mock.return_value = 0
+            randchoice_mock.return_value = 'x'
             # for photo posting
             default_headers.return_value = {'Header': 'X'}
 
@@ -212,27 +214,28 @@ class UploadTests(ApiTestBase):
             if is_sidecar:
                 sidecar_fields = 'Content-Disposition: form-data; name="is_sidecar"\r\n\r\n' \
                                  '1\r\n' \
-                                 '--%(uuid)s\r\n' % {'uuid': self.api.uuid}
+                                 '--%(boundary)s\r\n' % {'boundary': 'x' * 30}
 
-            body = '--%(uuid)s\r\n' \
+            body = '--%(boundary)s\r\n' \
                    'Content-Disposition: form-data; name="upload_id"\r\n\r\n' \
                    '%(upload_id)s\r\n' \
-                   '--%(uuid)s\r\n' \
+                   '--%(boundary)s\r\n' \
                    'Content-Disposition: form-data; name="_uuid"\r\n\r\n' \
                    '%(uuid)s\r\n' \
-                   '--%(uuid)s\r\n' \
+                   '--%(boundary)s\r\n' \
                    'Content-Disposition: form-data; name="_csrftoken"\r\n\r\n' \
                    '%(csrftoken)s\r\n' \
-                   '--%(uuid)s\r\n' \
+                   '--%(boundary)s\r\n' \
                    'Content-Disposition: form-data; name="image_compression"\r\n\r\n' \
                    '{"lib_name":"jt","lib_version":"1.3.0","quality":"87"}\r\n' \
-                   '--%(uuid)s\r\n' \
+                   '--%(boundary)s\r\n' \
                    '%(sidecar_fields)s' \
                    'Content-Disposition: form-data; name="photo"; filename="pending_media_%(ts)s.jpg"\r\n' \
                    'Content-Type: application/octet-stream\r\n' \
                    'Content-Transfer-Encoding: binary\r\n\r\n...\r\n' \
-                   '--%(uuid)s--\r\n'\
+                   '--%(boundary)s--\r\n'\
                    % {'uuid': self.api.uuid,
+                      'boundary': 'x' * 30,
                       'csrftoken': self.api.csrftoken,
                       'upload_id': upload_id,
                       'ts': str(int(ts_now * 1000)),
@@ -253,7 +256,7 @@ class UploadTests(ApiTestBase):
                 self.api.post_photo_story(photo_data, size)
 
             request.assert_called_with(
-                self.api.api_url + 'upload/photo/',
+                '{0}{1}'.format(self.api.api_url.format(version='v1'), 'upload/photo/'),
                 body.encode('utf-8'), headers=headers)
 
             if not is_reel:

@@ -391,14 +391,15 @@ class UploadEndpointsMixin(object):
              'application/octet-stream', photo_data)
         ]
 
-        content_type, body = MultipartFormDataEncoder(self.uuid).encode(fields, files)
+        content_type, body = MultipartFormDataEncoder().encode(fields, files)
         headers = self.default_headers
         headers['Content-Type'] = content_type
         headers['Content-Length'] = len(body)
 
-        req = compat_urllib_request.Request(self.api_url + endpoint, body, headers=headers)
+        endpoint_url = '{0}{1}'.format(self.api_url.format(version='v1'), endpoint)
+        req = compat_urllib_request.Request(endpoint_url, body, headers=headers)
         try:
-            self.logger.debug('POST {0!s}'.format(self.api_url) + endpoint)
+            self.logger.debug('POST {0!s}'.format(endpoint_url))
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_msg = e.reason

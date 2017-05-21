@@ -10,7 +10,7 @@ from io import BytesIO
 
 from ..common import (
     Client, ClientError, ClientLoginError,
-    ApiTestBase, compat_mock, compat_urllib_error
+    ApiTestBase, compat_mock, compat_urllib_error, MockResponse
 )
 
 
@@ -328,15 +328,18 @@ class AccountTests(ApiTestBase):
     @compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open')
     def test_change_profile_picture_mock(self, opener):
         opener.side_effect = [
-            '',
+            MockResponse(),
             compat_urllib_error.HTTPError(
                 self.api.api_url, 500, 'Internal Server Error', {},
                 BytesIO('Internal Server Error'.encode('utf-8')))
         ]
         with compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
                 compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
-                compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.Request') as request:
+                compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.Request') \
+                as request, \
+                compat_mock.patch('instagram_private_api.http.random.choice') as randchoice_mock:
             default_headers.return_value = {'Header': 'X'}
+            randchoice_mock.return_value = 'x'
             read_response.return_value = json.dumps(
                 {'status': 'ok',
                  'user': {'pk': 123, 'biography': '', 'profile_pic_url': '', 'external_url': ''}})
@@ -350,24 +353,27 @@ class AccountTests(ApiTestBase):
                 'Content-Type': 'multipart/form-data; boundary={0!s}'.format(self.api.uuid),
                 'Content-Length': len(photo_data)
             })
-            body = '--%(uuid)s\r\n' \
+            body = '--%(boundary)s\r\n' \
                    'Content-Disposition: form-data; name="ig_sig_key_version"\r\n\r\n' \
                    '%(sig_version)s\r\n' \
-                   '--%(uuid)s\r\n' \
+                   '--%(boundary)s\r\n' \
                    'Content-Disposition: form-data; name="signed_body"\r\n\r\n' \
                    '%(signed_body)s\r\n' \
-                   '--%(uuid)s\r\n' \
+                   '--%(boundary)s\r\n' \
                    'Content-Disposition: form-data; name="profile_pic"; filename="profile_pic"\r\n' \
                    'Content-Type: application/octet-stream\r\n' \
                    'Content-Transfer-Encoding: binary\r\n\r\n...\r\n' \
-                   '--%(uuid)s--\r\n' % {'uuid': self.api.uuid,
-                                         'signed_body': signed_body,
-                                         'sig_version': self.api.key_version}
+                   '--%(boundary)s--\r\n' % {
+                       'boundary': 'x' * 30,
+                       'uuid': self.api.uuid,
+                       'signed_body': signed_body,
+                       'sig_version': self.api.key_version
+                   }
 
             self.api.change_profile_picture(photo_data)
+            endpoint_url = '{0}{1}'.format(self.api.api_url.format(version='v1'), 'accounts/change_profile_picture/')
             request.assert_called_with(
-                self.api.api_url + 'accounts/change_profile_picture/',
-                body.encode('ascii'), headers=headers)
+                endpoint_url, body.encode('ascii'), headers=headers)
 
             with self.assertRaises(ClientError) as he:
                 self.api.change_profile_picture(photo_data)

@@ -37,7 +37,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
              UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
              CollectionsEndpointsMixin, object):
 
-    API_URL = 'https://i.instagram.com/api/%(version)s/'
+    API_URL = 'https://i.instagram.com/api/{version!s}/'
 
     USER_AGENT = Constants.USER_AGENT
     IG_SIG_KEY = Constants.IG_SIG_KEY
@@ -421,7 +421,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         :param version: for the versioned api base url. Default 'v1'.
         :return:
         """
-        url = (self.api_url % {'version': version}) + endpoint
+        url = '{0}{1}'.format(self.api_url.format(version=version), endpoint)
         if query:
             url += ('?' if '?' not in endpoint else '&') + compat_urllib_parse.urlencode(query)
 
