@@ -89,14 +89,13 @@ class UploadEndpointsMixin(object):
         return min_ratio <= this_ratio <= max_ratio
 
     @classmethod
-    def reel_compatible_aspect_ratio(cls, size, is_video=False):
+    def reel_compatible_aspect_ratio(cls, size):
         """
         Helper method to check aspect ratio for story uploads
 
         :param size: tuple of (width, height)
         :return: True/False
         """
-        warnings.warn('The is_video parameter will be removed in a future version.', FutureWarning)
         min_ratio, max_ratio = cls.reel_ratios()
         width, height = size
         this_ratio = 1.0 * width / height
