@@ -5,8 +5,8 @@ from ..common import InstagramID
 
 class ApiUtilsTests(unittest.TestCase):
 
-    @classmethod
-    def init_all(cls):
+    @staticmethod
+    def init_all():
         return [
             {
                 'name': 'test_expand_code',

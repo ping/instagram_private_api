@@ -9,8 +9,8 @@ from ..common import (
 class CollectionsTests(ApiTestBase):
     """Tests for CollectionsEndpointsMixin."""
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_create_collection',

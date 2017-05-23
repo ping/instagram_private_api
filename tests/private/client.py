@@ -11,8 +11,8 @@ from ..common import (
 class ClientTests(ApiTestBase):
     """Tests for general Client functions (not endpoint specific)."""
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_validate_useragent',

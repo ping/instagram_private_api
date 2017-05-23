@@ -6,8 +6,8 @@ from ..common import ApiTestBase, ClientCompatPatch
 class CompatPatchTests(ApiTestBase):
     """Tests for the ClientCompatPatch class."""
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_compat_media',

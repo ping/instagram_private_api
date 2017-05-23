@@ -29,8 +29,8 @@ class ClientCompatPatch(object):
             **{'crop': mobj.group('crop') or crop, 'size': size})
         return re.sub(cls.IG_IMAGE_URL_EXPR, replacement_expr, url)
 
-    @classmethod
-    def _drop_keys(cls, obj, keys):
+    @staticmethod
+    def _drop_keys(obj, keys):
         """
         Remove the specified keys from the object.
 

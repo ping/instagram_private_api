@@ -5,8 +5,8 @@ from ..common import ApiTestBase
 class DiscoverTests(ApiTestBase):
     """Tests for DiscoverEndpointsMixin."""
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_discover_channels_home',

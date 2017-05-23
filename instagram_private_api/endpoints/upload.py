@@ -21,6 +21,12 @@ class UploadEndpointsMixin(object):
     }
 
     def _validate_location(self, location):
+        """
+        Validates and patches a location dict for use with the upload functions
+
+        :param location: dict containing location info
+        :return:
+        """
         location_keys = ['external_source', 'name', 'address']
         if not isinstance(location, dict):
             raise ValueError('Location must be a dict.')
