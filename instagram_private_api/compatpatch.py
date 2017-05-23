@@ -55,8 +55,8 @@ class ClientCompatPatch(object):
         643: 'SubtleColor',
     }
 
-    @classmethod
-    def _get_closest_size(cls, medias, width, height=0):
+    @staticmethod
+    def _get_closest_size(medias, width, height=0):
         """
         Try to extract a image/video object that will most match the resolution returned by the public API
 
@@ -78,8 +78,8 @@ class ClientCompatPatch(object):
 
         return current
 
-    @classmethod
-    def _drop_keys(cls, obj, keys):
+    @staticmethod
+    def _drop_keys(obj, keys):
         """
         Drop unwanted dict keys
 

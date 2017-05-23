@@ -5,8 +5,8 @@ from ..common import ApiTestBase, compat_mock
 
 class UsertagsTests(ApiTestBase):
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_usertag_feed',

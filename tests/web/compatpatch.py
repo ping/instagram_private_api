@@ -6,8 +6,8 @@ from ..common import WebApiTestBase, WebClientCompatPatch as ClientCompatPatch
 
 class CompatPatchTests(WebApiTestBase):
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_compat_media',

@@ -9,8 +9,8 @@ from ..common import (
 
 class MediaTests(ApiTestBase):
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_media_info',

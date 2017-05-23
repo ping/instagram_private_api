@@ -51,8 +51,8 @@ class UploadEndpointsMixin(object):
                 media_loc[val] = location[val]
         return media_loc
 
-    @classmethod
-    def standard_ratios(cls):
+    @staticmethod
+    def standard_ratios():
         """
         Acceptable min, max values of with/height ratios for a standard media upload
 
@@ -62,8 +62,8 @@ class UploadEndpointsMixin(object):
         # and from https://help.instagram.com/1469029763400082
         return 4.0 / 5.0, 90.0 / 47.0
 
-    @classmethod
-    def reel_ratios(cls):
+    @staticmethod
+    def reel_ratios():
         """
         Acceptable min, max values of with/height ratios for a story upload
 

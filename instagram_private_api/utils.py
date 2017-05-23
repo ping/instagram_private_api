@@ -124,8 +124,8 @@ class InstagramID(object):
     """
     ENCODING_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
 
-    @classmethod
-    def _encode(cls, num, alphabet=ENCODING_CHARS):
+    @staticmethod
+    def _encode(num, alphabet=ENCODING_CHARS):
         if num == 0:
             return alphabet[0]
         arr = []
@@ -137,8 +137,8 @@ class InstagramID(object):
         arr.reverse()
         return ''.join(arr)
 
-    @classmethod
-    def _decode(cls, shortcode, alphabet=ENCODING_CHARS):
+    @staticmethod
+    def _decode(shortcode, alphabet=ENCODING_CHARS):
         base = len(alphabet)
         strlen = len(shortcode)
         num = 0

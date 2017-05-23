@@ -223,8 +223,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         self.phone_resolution = mobj.group('resolution')
         self.phone_chipset = mobj.group('chipset')
 
-    @classmethod
-    def generate_useragent(cls, **kwargs):
+    @staticmethod
+    def generate_useragent(**kwargs):
         """
         Helper method to generate a useragent string based on device parameters
 
@@ -251,8 +251,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'resolution': kwargs.pop('phone_resolution', None) or Constants.PHONE_RESOLUTION,
             'chipset': kwargs.pop('phone_chipset', None) or Constants.PHONE_CHIPSET}
 
-    @classmethod
-    def validate_useragent(cls, value):
+    @staticmethod
+    def validate_useragent(value):
         """
         Helper method to validate a useragent string for format correctness
 

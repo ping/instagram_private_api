@@ -6,8 +6,8 @@ from ..common import WebApiTestBase, WebClientError as ClientError, compat_mock
 
 class UserTests(WebApiTestBase):
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_user_info',

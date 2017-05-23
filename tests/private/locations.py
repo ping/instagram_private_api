@@ -4,8 +4,8 @@ from ..common import ApiTestBase
 
 class LocationTests(ApiTestBase):
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_location_info',

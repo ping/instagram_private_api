@@ -8,8 +8,8 @@ from ..common import (
 
 class ClientTests(WebApiTestBase):
 
-    @classmethod
-    def init_all(cls, api):
+    @staticmethod
+    def init_all(api):
         return [
             {
                 'name': 'test_search',
