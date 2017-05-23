@@ -4,6 +4,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class MiscEndpointsMixin(object):
+    """For miscellaneous functions."""
 
     def sync(self, prelogin=False):
         """Synchronise experiments."""

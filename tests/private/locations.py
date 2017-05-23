@@ -3,6 +3,7 @@ from ..common import ApiTestBase
 
 
 class LocationTests(ApiTestBase):
+    """Tests for LocationsEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

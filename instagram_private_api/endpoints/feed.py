@@ -4,6 +4,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class FeedEndpointsMixin(object):
+    """For endpoints in ``/feed/``."""
 
     def feed_liked(self):
         """Get liked feed"""

@@ -7,6 +7,12 @@ import os
 
 
 def gen_user_breadcrumb(size):
+    """
+    Used in comments posting.
+
+    :param size:
+    :return:
+    """
     key = 'iN4$aGr0m'
     dt = int(time.time() * 1000)
 
@@ -47,6 +53,12 @@ class Chunk(object):
 
 
 def get_file_size(fp):
+    """
+    Get the file size for a file-like object
+
+    :param fp: file-like object
+    :return:
+    """
     original_file_position = fp.tell()
     fp.seek(0, os.SEEK_END)
     file_len = fp.tell()
@@ -126,6 +138,7 @@ class InstagramID(object):
 
     @staticmethod
     def _encode(num, alphabet=ENCODING_CHARS):
+        """Covert a numeric value to a shortcode."""
         if num == 0:
             return alphabet[0]
         arr = []
@@ -139,6 +152,7 @@ class InstagramID(object):
 
     @staticmethod
     def _decode(shortcode, alphabet=ENCODING_CHARS):
+        """Covert a shortcode to a numeric value."""
         base = len(alphabet)
         strlen = len(shortcode)
         num = 0

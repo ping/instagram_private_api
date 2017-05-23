@@ -2,6 +2,7 @@ import json
 
 
 class TagsEndpointsMixin(object):
+    """For endpoints in ``/tags/``."""
 
     def tag_info(self, tag):
         """

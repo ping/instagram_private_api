@@ -4,6 +4,7 @@ from ..common import ApiTestBase, ClientCompatPatch
 
 
 class CompatPatchTests(ApiTestBase):
+    """Tests for the ClientCompatPatch class."""
 
     @classmethod
     def init_all(cls, api):

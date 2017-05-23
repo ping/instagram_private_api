@@ -3,6 +3,7 @@ from ..common import ApiTestBase
 
 
 class DiscoverTests(ApiTestBase):
+    """Tests for DiscoverEndpointsMixin."""
 
     @classmethod
     def init_all(cls, api):

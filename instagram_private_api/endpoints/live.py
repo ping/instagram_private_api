@@ -3,6 +3,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class LiveEndpointsMixin(object):
+    """For endpoints in ``/live/``."""
 
     def user_broadcast(self, user_id):
         """

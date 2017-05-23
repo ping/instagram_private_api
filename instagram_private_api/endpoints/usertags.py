@@ -2,6 +2,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class UsertagsEndpointsMixin(object):
+    """For endpoints in ``/usertags/``."""
 
     def usertag_feed(self, user_id, **kwargs):
         """

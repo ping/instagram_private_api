@@ -15,6 +15,7 @@ from ..common import (
 
 
 class AccountTests(ApiTestBase):
+    """Tests for AccountsEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

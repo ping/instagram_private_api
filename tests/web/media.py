@@ -4,6 +4,7 @@ from ..common import WebApiTestBase, WebClientError as ClientError, compat_mock
 
 
 class MediaTests(WebApiTestBase):
+    """Tests for media related functions."""
 
     @staticmethod
     def init_all(api):

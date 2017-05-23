@@ -5,6 +5,7 @@ from ..common import WebApiTestBase, WebClientCompatPatch as ClientCompatPatch
 
 
 class CompatPatchTests(WebApiTestBase):
+    """Tests for ClientCompatPatch."""
 
     @staticmethod
     def init_all(api):

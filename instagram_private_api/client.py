@@ -36,6 +36,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
              MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
              UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
              CollectionsEndpointsMixin, object):
+    """Main API client class for the private app api."""
 
     API_URL = 'https://i.instagram.com/api/{version!s}/'
 
@@ -353,6 +354,12 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         return 'wifi-none'
 
     def _generate_signature(self, data):
+        """
+        Generates the signature for a data string
+
+        :param data: content to be signed
+        :return:
+        """
         return hmac.new(
             self.signature_key.encode('ascii'), data.encode('ascii'),
             digestmod=hashlib.sha256).hexdigest()
@@ -402,6 +409,12 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         return self.generate_uuid(False, modified_seed)
 
     def _read_response(self, response):
+        """
+        Extract the response body from a http response.
+
+        :param response:
+        :return:
+        """
         if response.info().get('Content-Encoding') == 'gzip':
             buf = BytesIO(response.read())
             res = gzip.GzipFile(fileobj=buf).read().decode('utf8')
@@ -411,7 +424,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
 
     def _call_api(self, endpoint, params=None, query=None, return_response=False, unsigned=False, version='v1'):
         """
-        Calls the private api
+        Calls the private api.
 
         :param endpoint: endpoint path that should end with '/', example 'discover/explore/'
         :param params: POST parameters

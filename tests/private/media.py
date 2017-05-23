@@ -8,6 +8,7 @@ from ..common import (
 
 
 class MediaTests(ApiTestBase):
+    """Tests for MediaEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

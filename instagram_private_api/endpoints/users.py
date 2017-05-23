@@ -4,6 +4,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class UsersEndpointsMixin(object):
+    """For endpoints in ``/users/``."""
 
     def user_info(self, user_id):
         """

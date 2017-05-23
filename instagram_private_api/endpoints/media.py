@@ -9,6 +9,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class MediaEndpointsMixin(object):
+    """For endpoints in ``/media/``."""
 
     def media_info(self, media_id):
         """

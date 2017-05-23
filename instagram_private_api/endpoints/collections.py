@@ -3,6 +3,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class CollectionsEndpointsMixin(object):
+    """For endpoints in related to collections functionality."""
 
     def list_collections(self):
         return self._call_api('collections/list/')

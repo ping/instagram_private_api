@@ -3,6 +3,7 @@ from ..common import ApiTestBase, ClientError
 
 
 class FeedTests(ApiTestBase):
+    """Tests for FeedEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

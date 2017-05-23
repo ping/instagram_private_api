@@ -4,6 +4,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class FriendshipsEndpointsMixin(object):
+    """For endpoints in ``/friendships/``."""
 
     def autocomplete_user_list(self):
         """User list for autocomplete"""

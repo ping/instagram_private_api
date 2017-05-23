@@ -7,6 +7,7 @@ from ..common import (
 
 
 class ClientTests(WebApiTestBase):
+    """Tests for client related functions."""
 
     @staticmethod
     def init_all(api):

@@ -17,6 +17,7 @@ from ..common import (
 
 
 class UploadTests(ApiTestBase):
+    """Tests for UploadEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

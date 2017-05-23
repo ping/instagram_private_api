@@ -12,6 +12,14 @@ class ClientCompatPatch(object):
 
     @classmethod
     def _generate_image_url(cls, url, size, crop):
+        """
+        Try to generate an IG cropped  image url.
+
+        :param url: target url
+        :param size: width/height of the image
+        :param crop: 'p' or 's'
+        :return:
+        """
         mobj = re.search(cls.IG_IMAGE_URL_EXPR, url)
         if not mobj:
             replacement_expr = '\g<eparam>{crop!s}{size!s}x{size!s}/'.format(
@@ -23,6 +31,13 @@ class ClientCompatPatch(object):
 
     @classmethod
     def _drop_keys(cls, obj, keys):
+        """
+        Remove the specified keys from the object.
+
+        :param obj: target object
+        :param keys: list of keys
+        :return:
+        """
         if not obj:
             return obj
         for k in keys:

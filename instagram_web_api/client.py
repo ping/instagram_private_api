@@ -29,6 +29,7 @@ def login_required(fn):
 
 
 class Client(object):
+    """Main API client class for the web api."""
 
     API_URL = 'https://www.instagram.com/query/'
     GRAPHQL_API_URL = 'https://www.instagram.com/graphql/query/'
@@ -147,6 +148,17 @@ class Client(object):
         }
 
     def _make_request(self, url, params=None, headers=None, query=None, return_response=False, get_method=None):
+        """
+        Calls the web API.
+
+        :param url: fully formed api url
+        :param params: post params
+        :param headers: custom headers
+        :param query: get url params
+        :param return_response: bool flag to only return the http response object
+        :param get_method: custom http method type
+        :return:
+        """
         if not headers:
             headers = {
                 'User-Agent': self.user_agent,
@@ -213,6 +225,7 @@ class Client(object):
             raise ClientError('Unable to get csrf from init request.')
 
     def login(self):
+        """Login to the web site."""
         if not self.username or not self.password:
             raise ClientError('username/password is blank')
         params = {'username': self.username, 'password': self.password}

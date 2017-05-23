@@ -6,6 +6,7 @@ from ..common import (
 
 
 class FriendshipTests(ApiTestBase):
+    """Tests for FriendshipsEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

@@ -9,6 +9,7 @@ from ..common import (
 
 
 class ClientTests(ApiTestBase):
+    """Tests for general Client functions (not endpoint specific)."""
 
     @classmethod
     def init_all(cls, api):

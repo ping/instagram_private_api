@@ -4,6 +4,7 @@ from ..common import ApiTestBase, compat_mock
 
 
 class UsertagsTests(ApiTestBase):
+    """Tests for UsertagsEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

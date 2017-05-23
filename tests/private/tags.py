@@ -3,6 +3,7 @@ from ..common import ApiTestBase
 
 
 class TagsTests(ApiTestBase):
+    """Tests for TagsEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

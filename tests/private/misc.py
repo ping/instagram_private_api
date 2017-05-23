@@ -3,6 +3,7 @@ from ..common import ApiTestBase
 
 
 class MiscTests(ApiTestBase):
+    """Tests for MiscEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

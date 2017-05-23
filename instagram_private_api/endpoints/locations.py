@@ -3,6 +3,7 @@ import time
 
 
 class LocationsEndpointsMixin(object):
+    """For endpoints related to location functionality."""
 
     def location_info(self, location_id):
         """

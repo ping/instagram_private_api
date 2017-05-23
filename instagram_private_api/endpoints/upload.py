@@ -12,6 +12,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class UploadEndpointsMixin(object):
+    """For endpoints relating to upload functionality."""
 
     EXTERNAL_LOC_SOURCES = {
         'foursquare': 'foursquare_v2_id',

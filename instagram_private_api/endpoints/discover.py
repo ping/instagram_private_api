@@ -2,6 +2,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class DiscoverEndpointsMixin(object):
+    """For endpoints in ``/discover/``."""
 
     def explore(self, **kwargs):
         """

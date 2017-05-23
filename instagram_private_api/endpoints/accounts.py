@@ -7,6 +7,7 @@ from ..compatpatch import ClientCompatPatch
 
 
 class AccountsEndpointsMixin(object):
+    """For endpoints in ``/accounts/``."""
 
     def login(self):
         """Login."""

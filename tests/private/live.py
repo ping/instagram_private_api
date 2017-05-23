@@ -6,6 +6,7 @@ from ..common import (
 
 
 class LiveTests(ApiTestBase):
+    """Tests for LiveEndpointsMixin."""
 
     @staticmethod
     def init_all(api):

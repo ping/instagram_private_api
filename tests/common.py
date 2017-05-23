@@ -65,6 +65,7 @@ def from_json(json_object):
 
 
 class ApiTestBase(unittest.TestCase):
+    """Main base class for private api tests."""
 
     def __init__(self, testname, api, user_id=None, media_id=None):
         super(ApiTestBase, self).__init__(testname)
@@ -91,6 +92,7 @@ class ApiTestBase(unittest.TestCase):
 
 
 class WebApiTestBase(unittest.TestCase):
+    """Main base class for web api tests."""
 
     def __init__(self, testname, api):
         super(WebApiTestBase, self).__init__(testname)
@@ -118,6 +120,8 @@ class WebApiTestBase(unittest.TestCase):
 
 
 class MockResponse(object):
+    """A mock class to emulate api responses."""
+
     def __init__(self, code=200, content_type=''):
         self.code = 200
         self.content_type = content_type

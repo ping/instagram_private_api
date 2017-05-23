@@ -7,6 +7,7 @@ from ..common import (
 
 
 class CollectionsTests(ApiTestBase):
+    """Tests for CollectionsEndpointsMixin."""
 
     @classmethod
     def init_all(cls, api):
