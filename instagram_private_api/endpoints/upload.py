@@ -415,9 +415,9 @@ class UploadEndpointsMixin(object):
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):
                     error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
-            except:
-                # do nothing, prob can't parse json
-                pass
+            except Exception as e:
+                # do nothing else, prob can't parse json
+                self.logger.warn('Error parsing error response: {}'.format(str(e)))
             raise ClientError(error_msg, e.code, error_response)
 
         post_response = self._read_response(response)
@@ -592,9 +592,9 @@ class UploadEndpointsMixin(object):
                         error_obj = json.loads(error_response)
                         if error_obj.get('message'):
                             error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
-                    except:
-                        # do nothing, prob can't parse json
-                        pass
+                    except Exception as e:
+                        # do nothing else, prob can't parse json
+                        self.logger.warn('Error parsing error response: {}'.format(str(e)))
                     raise ClientError(error_msg, e.code, error_response)
             else:
                 # if not break due to completed chunks then continue with next chunk

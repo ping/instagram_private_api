@@ -4,6 +4,7 @@ from ..common import InstagramID
 
 
 class ApiUtilsTests(unittest.TestCase):
+    """Tests for the utility functions."""
 
     @staticmethod
     def init_all():

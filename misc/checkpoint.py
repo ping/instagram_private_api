@@ -14,6 +14,7 @@ import sys
 
 
 class Checkpoint:
+    """OBSOLETE. No longer working or supported."""
 
     USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) ' \
                  'AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/13G34 ' \
