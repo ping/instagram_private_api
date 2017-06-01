@@ -7,8 +7,28 @@ import warnings
 from ..compat import compat_urllib_error, compat_urllib_request
 from ..errors import ClientError
 from ..http import MultipartFormDataEncoder
-from ..utils import max_chunk_count_generator, max_chunk_size_generator, get_file_size
+from ..utils import (
+    max_chunk_count_generator, max_chunk_size_generator,
+    get_file_size
+)
 from ..compatpatch import ClientCompatPatch
+from .common import warn_usage
+
+
+class MediaRatios(object):
+    """
+    Class holding valid aspect ratios (width: height) for media uploads.
+    """
+
+    # Based on IG sampling
+    # and from https://help.instagram.com/1469029763400082
+    #: Acceptable min, max values of with/height ratios for a standard media upload
+    standard = 4.0 / 5.0, 90.0 / 47.0
+    __device_ratios = [(3, 4), (2, 3), (5, 8), (3, 5), (9, 16), (10, 16), (40, 71)]
+    __aspect_ratios = [1.0 * x[0] / x[1] for x in __device_ratios]
+
+    #: Acceptable min, max values of with/height ratios for a story upload
+    reel = min(__aspect_ratios), max(__aspect_ratios)
 
 
 class UploadEndpointsMixin(object):
@@ -59,28 +79,30 @@ class UploadEndpointsMixin(object):
         return media_loc
 
     @staticmethod
+    @warn_usage(warning=PendingDeprecationWarning,
+                message='Client.standard_ratios() will be deprecated in a future version. '
+                        'Please use MediaRatios.standard instead.')
     def standard_ratios():
         """
+        Deprecated. Use MediaRatios.standard instead.
         Acceptable min, max values of with/height ratios for a standard media upload
 
         :return: tuple of (min. ratio, max. ratio)
         """
-        # Based on IG sampling
-        # and from https://help.instagram.com/1469029763400082
-        return 4.0 / 5.0, 90.0 / 47.0
+        return MediaRatios.standard
 
     @staticmethod
+    @warn_usage(warning=PendingDeprecationWarning,
+                message='Client.reel_ratios() has will be deprecated in a future version. '
+                        'Please use MediaRatios.reel instead.')
     def reel_ratios():
         """
+        Deprecated. Use MediaRatios.reel instead.
         Acceptable min, max values of with/height ratios for a story upload
 
         :return: tuple of (min. ratio, max. ratio)
         """
-        # min_ratio = 9.0/16.0
-        # max_ratio = 3.0/4.0 if is_video else 9.0/16.0
-        device_ratios = [(3, 4), (2, 3), (5, 8), (3, 5), (9, 16), (10, 16), (40, 71)]
-        aspect_ratios = [1.0 * x[0] / x[1] for x in device_ratios]
-        return min(aspect_ratios), max(aspect_ratios)
+        return MediaRatios.reel
 
     @classmethod
     def compatible_aspect_ratio(cls, size):
@@ -90,7 +112,7 @@ class UploadEndpointsMixin(object):
         :param size: tuple of (width, height)
         :return: True/False
         """
-        min_ratio, max_ratio = cls.standard_ratios()
+        min_ratio, max_ratio = MediaRatios.standard
         width, height = size
         this_ratio = 1.0 * width / height
         return min_ratio <= this_ratio <= max_ratio
@@ -103,7 +125,7 @@ class UploadEndpointsMixin(object):
         :param size: tuple of (width, height)
         :return: True/False
         """
-        min_ratio, max_ratio = cls.reel_ratios()
+        min_ratio, max_ratio = MediaRatios.reel
         width, height = size
         this_ratio = 1.0 * width / height
         return min_ratio <= this_ratio <= max_ratio
@@ -543,7 +565,6 @@ class UploadEndpointsMixin(object):
                     self.logger.debug('Skipped chunk: {0:d} - {1:d}'.format(chunk.start, chunk.end - 1))
                     continue
 
-                # data = video_data[chunk.start: chunk.end]
                 headers = self.default_headers
                 headers['Connection'] = 'keep-alive'
                 headers['Content-Type'] = 'application/octet-stream'

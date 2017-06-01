@@ -76,19 +76,20 @@ class UploadTests(ApiTestBase):
 
     @unittest.skip('Modifies data.')
     def test_post_video(self):
-        # Reposting from https://www.instagram.com/p/BL5hkEHDyd5/
-        media_id = '1367271575733086073_2958144170'
-        res = self.api.media_info(media_id)
-        media_info = res['items'][0]
-        video_url = media_info['videos']['standard_resolution']['url']
-        video_size = (media_info['videos']['standard_resolution']['width'],
-                      media_info['videos']['standard_resolution']['height'])
-        thumbnail_url = media_info['images']['standard_resolution']['url']
+        # Reposting https://streamable.com/deltx
+        video_info_res = urlopen('https://api.streamable.com/videos/deltx')
+        video_info = json.loads(video_info_res.read().decode('utf8'))
+        mp4_info = video_info['files']['mp4']
+
+        video_url = ('https:' if mp4_info['url'].startswith('//') else '') + mp4_info['url']
+        video_size = (mp4_info['width'], mp4_info['height'])
+        thumbnail_url = ('https:' if video_info['thumbnail_url'].startswith('//') else '') + video_info['thumbnail_url']
+        duration = mp4_info['duration']
+
         video_res = urlopen(video_url)
         video_data = video_res.read()
         thumb_res = urlopen(thumbnail_url)
         thumb_data = thumb_res.read()
-        duration = media_info['video_duration']
         results = self.api.post_video(video_data, video_size, duration, thumb_data, caption='<3')
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
@@ -139,19 +140,20 @@ class UploadTests(ApiTestBase):
 
     @unittest.skip('Modifies data.')
     def test_post_album(self):
-        # Reposting from https://www.instagram.com/p/BL5hkEHDyd5/
-        media_id = '1367271575733086073_2958144170'
-        res = self.api.media_info(media_id)
-        media_info = res['items'][0]
-        video_url = media_info['videos']['standard_resolution']['url']
-        video_size = (media_info['videos']['standard_resolution']['width'],
-                      media_info['videos']['standard_resolution']['height'])
-        thumbnail_url = media_info['images']['standard_resolution']['url']
+        # Reposting https://streamable.com/deltx
+        video_info_res = urlopen('https://api.streamable.com/videos/deltx')
+        video_info = json.loads(video_info_res.read().decode('utf8'))
+        mp4_info = video_info['files']['mp4']
+
+        video_url = ('https:' if mp4_info['url'].startswith('//') else '') + mp4_info['url']
+        video_size = (mp4_info['width'], mp4_info['height'])
+        thumbnail_url = ('https:' if video_info['thumbnail_url'].startswith('//') else '') + video_info['thumbnail_url']
+        duration = mp4_info['duration']
+
         video_res = urlopen(video_url)
         video_data = video_res.read()
         thumb_res = urlopen(thumbnail_url)
         thumb_data = thumb_res.read()
-        duration = media_info['video_duration']
         medias = [
             {
                 'type': 'image', 'size': video_size, 'data': thumb_data
@@ -385,7 +387,7 @@ class UploadTests(ApiTestBase):
             randint_mock.return_value = 0
             default_headers.return_value = {'Header': 'X'}
             if not video_data:
-                video_data = ('.' * (1 * 1024 * 1000 + 1)).encode('ascii')
+                video_data = ('.' * (1 * 512 * 1000 + 1)).encode('ascii')
             try:
                 video_data_len = len(video_data)
                 is_fp = False
@@ -396,38 +398,48 @@ class UploadTests(ApiTestBase):
                 thumbnail_data = '....'.encode('ascii')
             upload_id = str(int(ts_now * 1000))
 
-            # Prevent excessively small chunks
+            chunk_sizes = []
             if video_data_len > 1 * 1024 * 1000:
+                # max num of chunks = 4
                 chunk_count = 4
+                for _ in range(chunk_count - 1):
+                    chunk_sizes.append(video_data_len // chunk_count)
             else:
-                chunk_count, final_chunk = divmod(video_data_len, 350000)
-                if final_chunk:
+                # max chunk size = 350,000 so that we'll always have
+                # <4 chunks when it's <1mb
+                chunk_count, rem = divmod(video_data_len, 350000)
+                if rem:
                     chunk_count += 1
+                for _ in range(chunk_count - 1):
+                    chunk_sizes.append(350000)
+            chunk_sizes.append(video_data_len - sum(chunk_sizes))
+
+            # if video_data_len > 400000:
+            #     chunk_count = 3
+            # elif video_data_len > 200000:
+            #     chunk_count = 2
+            # else:
+            #     chunk_count = 1
+            # chunk_sizes = [200000, 200000, 9999999999]
 
             raise_httperror = kwargs.pop('raise_httperror', False)
             raise_transcodeclienterror = kwargs.pop('raise_transcodeclienterror', False)
             opener_side_effect = []
-            if chunk_count == 4:
-                opener_side_effect = [
-                    MockResponse(),     # chunk 1
-                    MockResponse(),     # chunk 2
-                ]
-            elif chunk_count == 2:
-                opener_side_effect = [
-                    MockResponse(),     # chunk 1
-                ]
-            if not raise_httperror and chunk_count == 4:
-                opener_side_effect.append(
-                    MockResponse()
-                )
-            elif raise_httperror:
+
+            if not raise_httperror:
+                for _ in range(chunk_count - 1):
+                    opener_side_effect.append(MockResponse())
+            else:
+                for _ in range(chunk_count - 1 - 1):
+                    opener_side_effect.append(MockResponse())
                 opener_side_effect.append(
                     compat_urllib_error.HTTPError(
                         'http://localhost', 400, 'Bad Request', {},
                         BytesIO(json.dumps({'status': 'fail', 'message': 'Invalid Request'}).encode('ascii')))
                 )
-            opener_side_effect.append(MockResponse(content_type='application/json'))
 
+            # Last chunk upload response
+            opener_side_effect.append(MockResponse(content_type='application/json'))
             # For uploading thmbnail
             if not raise_transcodeclienterror:
                 opener_side_effect.append(
@@ -454,13 +466,14 @@ class UploadTests(ApiTestBase):
                      'user': {'pk': 10, 'profile_pic_url': ''}}},    # Configure video request
             )
             call_api.side_effect = call_api_side_effect
-            chunk_size = video_data_len // chunk_count
 
             read_response_side_effect = []
             for i in range(chunk_count):
+                chunk_start = sum(chunk_sizes[:i])
+                chunk_end = min(sum(chunk_sizes[:i + 1]), video_data_len)
                 if i < (chunk_count - 1):
                     read_response_side_effect.append(
-                        '{0:d}-{1:d}/{2:d}'.format(chunk_size * i, chunk_size * (i + 1) - 1, video_data_len))
+                        '{0:d}-{1:d}/{2:d}'.format(chunk_start, chunk_end - 1, video_data_len))
                 else:
                     read_response_side_effect.append(json.dumps({'status': 'ok'}))
 
@@ -506,6 +519,9 @@ class UploadTests(ApiTestBase):
             call_api.assert_any_call('upload/video/', params=upload_params, unsigned=True)
 
             for i in range(chunk_count):
+                chunk_start = sum(chunk_sizes[:i])
+                chunk_end = min(sum(chunk_sizes[:i + 1]), video_data_len)
+
                 headers = self.api.default_headers
                 headers['Connection'] = 'keep-alive'
                 headers['Content-Type'] = 'application/octet-stream'
@@ -514,17 +530,17 @@ class UploadTests(ApiTestBase):
                 if is_sidecar:
                     headers['Cookie'] = 'sessionid=' + self.api.get_cookie_value('sessionid')
                 headers['job'] = '1111'
-                headers['Content-Length'] = chunk_size
+                headers['Content-Length'] = chunk_end - chunk_start
                 headers['Content-Range'] = 'bytes {0:d}-{1:d}/{2:d}'.format(
-                    i * chunk_size,
-                    (i * chunk_size if i <= 3 else video_data_len) - 1,
+                    chunk_start,
+                    chunk_end - 1,
                     video_data_len)
 
                 if not is_fp:
-                    data = video_data[0:chunk_size]
+                    data = video_data[chunk_start:chunk_end]
                 else:
-                    video_data.seek(i * chunk_size)
-                    data = video_data.read(chunk_size)
+                    video_data.seek(chunk_start)
+                    data = video_data.read(chunk_end - chunk_start)
                 request.assert_any_call(
                     'http://localhost', data=data, headers=headers)
 
@@ -611,7 +627,7 @@ class UploadTests(ApiTestBase):
             video_data='*' * 200000)
 
         self.test_post_video_base(
-            (800, 800), 15, caption='HEY', video_data='*' * 700000)
+            (800, 800), 15, caption='HEY', video_data='*' * 300000)
 
         with self.assertRaises(ValueError) as ve:
             self.test_post_video_base((600, 600), 15, 'HEY')
