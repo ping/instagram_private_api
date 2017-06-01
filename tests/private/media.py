@@ -18,6 +18,10 @@ class MediaTests(ApiTestBase):
                 'test': MediaTests('test_media_info', api, media_id='1206573574980690068_1497851591')
             },
             {
+                'name': 'test_media_info2',
+                'test': MediaTests('test_media_info', api, media_id='1367271575733086073_2958144170')
+            },
+            {
                 'name': 'test_medias_info',
                 'test': MediaTests('test_medias_info', api, media_id='1206573574980690068_1497851591')
             },
@@ -155,6 +159,10 @@ class MediaTests(ApiTestBase):
         results = self.api.media_info(self.test_media_id)
         self.assertEqual(results.get('status'), 'ok')
         self.assertEqual(results.get('items', [])[0].get('id'), self.test_media_id)
+        video_versions = results.get('items', [])[0].get('video_versions')
+        if video_versions:
+            videos = sorted(video_versions, key=lambda m: m['width'], reverse=True)
+            self.assertGreaterEqual(videos[0]['width'], 640, 'High res video not retrieved.')
 
     def test_medias_info(self):
         results = self.api.medias_info([self.test_media_id])
