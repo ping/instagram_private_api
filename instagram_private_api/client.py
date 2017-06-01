@@ -169,6 +169,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 raise ClientLoginRequiredError('login_required', code=400)
             self.login()
 
+        super(Client, self).__init__()
+
     @property
     def settings(self):
         """Helper property that extracts the settings that you should cache
