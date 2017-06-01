@@ -4,6 +4,7 @@ import base64
 import hashlib
 from random import randint
 import os
+from datetime import datetime
 
 
 def gen_user_breadcrumb(size):
@@ -127,6 +128,50 @@ def max_chunk_count_generator(chunk_count, file_data):
         chunk_size = file_len // chunk_count
 
     return chunk_generator(chunk_count, chunk_size, file_data)
+
+
+def ig_chunk_generator(file_data, max_chunk_size=(500 * 1024)):
+    """
+    Generate chunks in similar pattern to IG
+
+    :param file_data: bytes data
+    :param max_chunk_size:
+    :return:
+    """
+    try:
+        total_len = len(file_data)
+        is_fp = False
+    except TypeError:
+        total_len = get_file_size(file_data)
+        is_fp = True
+
+    first_chunk_size = 200000
+    max_chunk_size = max_chunk_size or (500 * 1024)
+    chunks_generated = []
+    last_yield_dt = None
+
+    while sum(chunks_generated) < total_len:
+        if not chunks_generated or total_len <= first_chunk_size:
+            # first chunk
+            chunk = Chunk(0, 0, min(first_chunk_size, total_len), 0)
+            chunks_generated.append(chunk.length)
+        else:
+            chunk_elapsed_time = datetime.now() - last_yield_dt
+            new_chunk_size = 5000 * chunks_generated[-1] / int(chunk_elapsed_time.total_seconds() * 1000)
+            new_chunk_size = min(max_chunk_size, new_chunk_size)
+            chunk_start = sum(chunks_generated)
+            chunk_end = min(chunk_start + new_chunk_size, total_len)
+            chunk = Chunk(
+                len(chunks_generated), sum(chunks_generated), chunk_end,
+                0 if chunk_end < total_len else len(chunks_generated) + 1)
+            chunks_generated.append(chunk.length)
+
+        last_yield_dt = datetime.now()
+        if is_fp:
+            file_data.seek(chunk.start, os.SEEK_SET)
+            yield chunk, file_data.read(chunk.length)
+        else:
+            yield chunk, file_data[chunk.start: chunk.end]
 
 
 class InstagramID(object):
