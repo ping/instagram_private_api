@@ -87,14 +87,9 @@ class FeedTests(ApiTestBase):
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
 
     def test_private_user_feed(self):
-        def check_private_user():
+        with self.assertRaises(ClientError) as ce:
             self.api.user_feed(self.test_user_id)
-        self.assertRaises(ClientError, check_private_user)
-
-        try:
-            check_private_user()
-        except ClientError as e:
-            self.assertEqual(e.code, 400)
+        self.assertEqual(ce.exception.code, 400)
 
     def test_self_feed(self):
         results = self.api.self_feed()

@@ -12,6 +12,7 @@ from datetime import datetime
 import gzip
 from io import BytesIO
 import warnings
+
 from .compat import (
     compat_urllib_parse, compat_urllib_error,
     compat_urllib_request, compat_urllib_parse_urlparse)

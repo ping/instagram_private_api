@@ -170,14 +170,9 @@ class MediaTests(ApiTestBase):
         self.assertEqual(results.get('items', [])[0].get('id'), self.test_media_id)
 
     def test_deleted_media_info(self):
-        def check_deleted_media():
+        with self.assertRaises(ClientError) as ce:
             self.api.media_info(self.test_media_id)
-        self.assertRaises(ClientError, check_deleted_media)
-
-        try:
-            check_deleted_media()
-        except ClientError as e:
-            self.assertEqual(e.code, 400)
+        self.assertEqual(ce.exception.code, 400)
 
     def test_media_permalink(self):
         results = self.api.media_permalink(self.test_media_id)
@@ -190,14 +185,9 @@ class MediaTests(ApiTestBase):
         self.assertGreater(len(results.get('comments', [])), 0, 'No items returned.')
 
     def test_deleted_media_comments(self):
-        def check_deleted_media():
+        with self.assertRaises(ClientError) as ce:
             self.api.media_comments(self.test_media_id)
-        self.assertRaises(ClientError, check_deleted_media)
-
-        try:
-            check_deleted_media()
-        except ClientError as e:
-            self.assertEqual(e.code, 400)
+        self.assertEqual(ce.exception.code, 400)
 
     def test_media_n_comments(self):
         num_of_comments = 50
