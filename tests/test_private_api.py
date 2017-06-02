@@ -74,14 +74,14 @@ if __name__ == '__main__':
 
         # Optional. You can custom the device settings instead of using the default one
         my_custom_device = {
-            'manufacturer': 'Samsung',
-            'model': 'maguro',
-            'device': 'Galaxy Nexus',
-            'android_release': '4.3',
-            'android_version': 18,
-            'dpi': '320dpi',
-            'resolution': '720x1280',
-            'chipset': 'qcom'
+            'manufacturer': 'LGE/lge',
+            'model': 'RS988',
+            'device': 'h1',
+            'android_release': '6.0.1',
+            'android_version': 23,
+            'dpi': '640dpi',
+            'resolution': '1440x2392',
+            'chipset': 'h1'
         }
 
         # start afresh without existing auth
