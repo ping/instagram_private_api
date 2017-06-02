@@ -12,7 +12,7 @@ from ..utils import (
     get_file_size
 )
 from ..compatpatch import ClientCompatPatch
-from .common import warn_usage
+from .common import ClientDeprecationWarning
 
 
 class MediaRatios(object):
@@ -79,9 +79,6 @@ class UploadEndpointsMixin(object):
         return media_loc
 
     @staticmethod
-    @warn_usage(warning=PendingDeprecationWarning,
-                message='Client.standard_ratios() will be deprecated in a future version. '
-                        'Please use MediaRatios.standard instead.')
     def standard_ratios():
         """
         Deprecated. Use MediaRatios.standard instead.
@@ -89,12 +86,14 @@ class UploadEndpointsMixin(object):
 
         :return: tuple of (min. ratio, max. ratio)
         """
+        warnings.warn(
+            'Client.standard_ratios() is deprecated. '
+            'Please use MediaRatios.standard instead.',
+            ClientDeprecationWarning
+        )
         return MediaRatios.standard
 
     @staticmethod
-    @warn_usage(warning=PendingDeprecationWarning,
-                message='Client.reel_ratios() has will be deprecated in a future version. '
-                        'Please use MediaRatios.reel instead.')
     def reel_ratios():
         """
         Deprecated. Use MediaRatios.reel instead.
@@ -102,6 +101,11 @@ class UploadEndpointsMixin(object):
 
         :return: tuple of (min. ratio, max. ratio)
         """
+        warnings.warn(
+            'Client.reel_ratios() is deprecated. '
+            'Please use MediaRatios.reel instead.',
+            ClientDeprecationWarning
+        )
         return MediaRatios.reel
 
     @classmethod

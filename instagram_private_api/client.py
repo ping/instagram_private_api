@@ -25,10 +25,14 @@ from .endpoints import (
     FriendshipsEndpointsMixin, LiveEndpointsMixin, MediaEndpointsMixin,
     MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
     UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
-    CollectionsEndpointsMixin
+    CollectionsEndpointsMixin,
+    ClientDeprecationWarning, ClientPendingDeprecationWarning
 )
 
 logger = logging.getLogger(__name__)
+# Force Client deprecation warnings to always appear
+warnings.simplefilter('always', ClientDeprecationWarning)
+warnings.simplefilter('always', ClientPendingDeprecationWarning)
 
 
 class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
@@ -191,7 +195,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'phone_dpi': self.phone_dpi,
             'phone_resolution': self.phone_resolution,
             'phone_chipset': self.phone_chipset,
-            'cookie': self.opener.cookie_jar.dump(),
+            'cookie': self.cookie_jar.dump(),
             'created_ts': int(time.time())
         }
 
