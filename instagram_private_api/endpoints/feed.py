@@ -1,14 +1,22 @@
 import warnings
 
+from .common import ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
 
 
 class FeedEndpointsMixin(object):
     """For endpoints in ``/feed/``."""
 
-    def feed_liked(self):
-        """Get liked feed"""
-        res = self._call_api('feed/liked/')
+    def feed_liked(self, **kwargs):
+        """
+        Get liked feed
+
+        :param kwargs:
+            - **max_id**: For pagination. Taken from ``next_max_id`` in the previous page.
+
+        :return:
+        """
+        res = self._call_api('feed/liked/', query=kwargs)
         if self.auto_patch and res.get('items'):
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
@@ -18,7 +26,7 @@ class FeedEndpointsMixin(object):
         """
         Get timeline feed. To get a new timeline feed, you can mark a set of media
         as seen by setting seen_posts = comma-separated list of media IDs. Example:
-        api.feed_timeline(seen_posts='123456789_12345,987654321_54321')
+        ``api.feed_timeline(seen_posts='123456789_12345,987654321_54321')``
         """
         params = {
             '_uuid': self.uuid,
@@ -39,7 +47,8 @@ class FeedEndpointsMixin(object):
     def feed_popular(self, **kwargs):
         """Get popular feed. This endpoint is believed to be obsolete. Do not use."""
         warnings.warn(
-            'This endpoint is believed to be obsolete. Do not use.', DeprecationWarning)
+            'This endpoint is believed to be obsolete. Do not use.',
+            ClientDeprecationWarning)
 
         query = {
             'people_teaser_supported': '1',
@@ -73,9 +82,9 @@ class FeedEndpointsMixin(object):
              for m in res.get('items', [])]
         return res
 
-    def self_feed(self):
+    def self_feed(self, **kwargs):
         """Get authenticated user's own feed"""
-        return self.user_feed(self.authenticated_user_id)
+        return self.user_feed(self.authenticated_user_id, kwargs)
 
     def username_feed(self, user_name, **kwargs):
         """

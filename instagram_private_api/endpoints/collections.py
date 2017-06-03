@@ -8,7 +8,7 @@ class CollectionsEndpointsMixin(object):
     def list_collections(self):
         return self._call_api('collections/list/')
 
-    def collection_feed(self, collection_id):
+    def collection_feed(self, collection_id, **kwargs):
         """
         Get the items in a collection.
 
@@ -16,7 +16,7 @@ class CollectionsEndpointsMixin(object):
         :return:
         """
         endpoint = 'feed/collection/{collection_id!s}/'.format(**{'collection_id': collection_id})
-        res = self._call_api(endpoint)
+        res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch and res.get('items'):
             [ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', []) if m.get('media')]
