@@ -4,6 +4,7 @@ import warnings
 import time
 from random import randint
 
+from .common import ClientExperimentalWarning
 from ..utils import gen_user_breadcrumb
 from ..compatpatch import ClientCompatPatch
 
@@ -270,7 +271,7 @@ class MediaEndpointsMixin(object):
         :param media_id:
         :return:
         """
-        warnings.warn('This endpoint is experimental. Do not use.', UserWarning)
+        warnings.warn('This endpoint is experimental. Do not use.', ClientExperimentalWarning)
         res = self._call_api('media/{media_id!s}/likers_chrono/'.format(**{'media_id': media_id}))
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
