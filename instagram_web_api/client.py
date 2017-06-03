@@ -579,9 +579,8 @@ class Client(object):
         :param query_text: Search text
         :return:
         """
-        endpoint = 'https://www.instagram.com/web/search/topsearch/?' + compat_urllib_parse.urlencode(
-            {'query': query_text})
-        res = self._make_request(endpoint)
+        endpoint = 'https://www.instagram.com/web/search/topsearch/'
+        res = self._make_request(endpoint, query={'query': query_text})
         if self.auto_patch:
             for u in res.get('users', []):
                 ClientCompatPatch.list_user(u['user'])
