@@ -5,3 +5,7 @@ class ClientDeprecationWarning(DeprecationWarning):
 
 class ClientPendingDeprecationWarning(PendingDeprecationWarning):
     pass
+
+
+class ClientExperimentalWarning(UserWarning):
+    pass

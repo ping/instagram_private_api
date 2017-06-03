@@ -1,5 +1,6 @@
 import warnings
 
+from .common import ClientExperimentalWarning
 from ..compatpatch import ClientCompatPatch
 
 
@@ -40,7 +41,7 @@ class UsersEndpointsMixin(object):
             - **min_timestamp**: For pagination
         :return:
         """
-        warnings.warn('This endpoint is experimental. Do not use.', UserWarning)
+        warnings.warn('This endpoint is experimental. Do not use.', ClientExperimentalWarning)
 
         endpoint = 'users/{user_id!s}/full_detail_info/'.format(**{'user_id': user_id})
         res = self._call_api(endpoint, query=kwargs)

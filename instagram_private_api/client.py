@@ -27,13 +27,15 @@ from .endpoints import (
     MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
     UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
     CollectionsEndpointsMixin,
-    ClientDeprecationWarning, ClientPendingDeprecationWarning
+    ClientDeprecationWarning, ClientPendingDeprecationWarning,
+    ClientExperimentalWarning
 )
 
 logger = logging.getLogger(__name__)
 # Force Client deprecation warnings to always appear
 warnings.simplefilter('always', ClientDeprecationWarning)
 warnings.simplefilter('always', ClientPendingDeprecationWarning)
+warnings.simplefilter('default', ClientExperimentalWarning)
 
 
 class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,

@@ -1,5 +1,6 @@
 import warnings
 
+from .common import ClientExperimentalWarning
 from ..compatpatch import ClientCompatPatch
 
 
@@ -322,7 +323,7 @@ class FriendshipsEndpointsMixin(object):
         """
         Get list of users from whom you've hid your stories
         """
-        warnings.warn('This endpoint is experimental. Do not use.', UserWarning)
+        warnings.warn('This endpoint is experimental. Do not use.', ClientExperimentalWarning)
         res = self._call_api('friendships/blocked_reels/', params=self.authenticated_params)
         if self.auto_patch and res.get('users'):
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
