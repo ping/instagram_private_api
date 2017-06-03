@@ -1,7 +1,10 @@
 .coveragerc
 coverage.sh
+cov_html/
 
 venv/
+venv3/
+.vscode/
 docs/_build
 docs/_static
 docs/_templates
