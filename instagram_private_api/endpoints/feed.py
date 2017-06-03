@@ -84,7 +84,7 @@ class FeedEndpointsMixin(object):
 
     def self_feed(self, **kwargs):
         """Get authenticated user's own feed"""
-        return self.user_feed(self.authenticated_user_id, kwargs)
+        return self.user_feed(self.authenticated_user_id, **kwargs)
 
     def username_feed(self, user_name, **kwargs):
         """
