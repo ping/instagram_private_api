@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.3.1
+- App API:
+    * ``Client.standard_ratios()`` and ``Client.reel_ratios()`` is deprecated and replaced with ``MediaRatios.standard`` and ``MediaRatios.reel`` respectively.
+    * Deprecated and experimental endpoints now warned with ``ClientDeprecationWarning`` and ``ClientExperimentalWarning``.
+    * ``collection_feed()``, ``feed_liked()``, ``self_feed()`` have been updated to support pagination through the ``max_id`` kwarg.
+
 ## 1.3.0
 This update is recommended especially for those using the web api.
 

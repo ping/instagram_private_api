@@ -6,4 +6,4 @@ from .errors import ClientError, ClientLoginError, ClientLoginRequiredError, Cli
 from .endpoints.upload import MediaRatios
 
 
-__version__ = '1.3.0'
+__version__ = '1.3.1'
