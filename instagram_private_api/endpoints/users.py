@@ -1,6 +1,6 @@
 import warnings
 
-from .common import ClientExperimentalWarning
+from .common import ClientExperimentalWarning, ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
 
 
@@ -62,6 +62,10 @@ class UsersEndpointsMixin(object):
         :param user_id: User id
         :return:
         """
+        warnings.warn(
+            'This endpoint is believed to be obsolete. Do not use.',
+            ClientDeprecationWarning)
+
         endpoint = 'maps/user/{user_id!s}/'.format(**{'user_id': user_id})
         return self._call_api(endpoint)
 

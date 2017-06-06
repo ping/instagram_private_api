@@ -1,4 +1,6 @@
 import warnings
+
+from .common import ClientDeprecationWarning
 from ..constants import Constants
 from ..compatpatch import ClientCompatPatch
 
@@ -22,6 +24,10 @@ class MiscEndpointsMixin(object):
         return self._call_api('qe/sync/', params=params)
 
     def expose(self, experiment='ig_android_profile_contextual_feed'):
+        warnings.warn(
+            'This endpoint is believed to be obsolete. Do not use.',
+            ClientDeprecationWarning)
+
         params = {
             'id': self.authenticated_user_id,
             'experiment': experiment
