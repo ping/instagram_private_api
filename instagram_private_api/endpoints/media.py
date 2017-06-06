@@ -4,7 +4,7 @@ import warnings
 import time
 from random import randint
 
-from .common import ClientExperimentalWarning
+from .common import ClientExperimentalWarning, MediaTypes
 from ..utils import gen_user_breadcrumb
 from ..compatpatch import ClientCompatPatch
 
@@ -480,3 +480,37 @@ class MediaEndpointsMixin(object):
         }
         res = self._call_api(endpoint, params=params, unsigned=True)
         return res
+
+    def media_only_me(self, media_id, media_type, undo=False):
+        """
+        Archive/unarchive a media so that it is only viewable by the owner.
+
+        :param media_id:
+        :param media_type: One of :attr:`MediaTypes.PHOTO`, :attr:`MediaTypes.VIDEO`, or :attr:`MediaTypes.CAROUSEL`
+        :param undo: bool
+
+        :return:
+            .. code-block:: javascript
+
+                {"status": "ok"}
+        """
+        if media_type not in MediaTypes.ALL:
+            raise ValueError('Invalid media type.')
+
+        endpoint = 'media/{media_id!s}/{only_me!s}/'.format(**{
+            'media_id': media_id,
+            'only_me': 'only_me' if not undo else 'undo_only_me'
+        })
+        params = {'media_id': media_id}
+        params.update(self.authenticated_params)
+        res = self._call_api(endpoint, params=params, query={'media_type': media_type})
+        return res
+
+    def media_undo_only_me(self, media_id, media_type):
+        """
+        Undo making a media only me.
+
+        :param media_id:
+        :param media_type: One of :attr:`MediaTypes.PHOTO`, :attr:`MediaTypes.VIDEO`, or :attr:`MediaTypes.CAROUSEL`
+        """
+        return self.media_only_me(media_id, media_type, undo=True)

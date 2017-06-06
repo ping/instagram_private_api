@@ -65,6 +65,10 @@ class FeedTests(ApiTestBase):
                 'name': 'test_feed_popular',
                 'test': FeedTests('test_feed_popular', api)
             },
+            {
+                'name': 'test_feed_only_me',
+                'test': FeedTests('test_feed_only_me', api)
+            },
         ]
 
     def test_feed_liked(self):
@@ -120,17 +124,25 @@ class FeedTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
         self.assertGreater(len(results.get('ranked_items', [])), 0, 'No ranked_items returned.')
+        if results.get('story'):    # Returned only in version >= 10.22.0
+            self.assertGreater(len(results.get('story', {}).get('items', [])), 0, 'No story items returned.')
 
     def test_user_story_feed(self):
         results = self.api.user_story_feed(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
 
     def test_location_feed(self):
-        results = self.api.feed_location(229573811)
+        results = self.api.feed_location(213012122)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
         self.assertGreater(len(results.get('ranked_items', [])), 0, 'No ranked_items returned.')
+        if results.get('story'):    # Returned only in version >= 10.22.0
+            self.assertGreater(len(results.get('story', {}).get('items', [])), 0, 'No story items returned.')
 
     def test_saved_feed(self):
         results = self.api.saved_feed()
+        self.assertEqual(results.get('status'), 'ok')
+
+    def test_feed_only_me(self):
+        results = self.api.feed_only_me()
         self.assertEqual(results.get('status'), 'ok')

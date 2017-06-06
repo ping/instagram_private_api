@@ -167,6 +167,9 @@ class FeedEndpointsMixin(object):
             if res.get('ranked_items'):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
                  for m in res.get('ranked_items', [])]
+            if res.get('story', {}).get('items'):
+                [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
+                 for m in res.get('story', {}).get('items', [])]
         return res
 
     def user_story_feed(self, user_id):
@@ -199,6 +202,9 @@ class FeedEndpointsMixin(object):
             if res.get('ranked_items'):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
                  for m in res.get('ranked_items', [])]
+            if res.get('story', {}).get('items'):
+                [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
+                 for m in res.get('story', {}).get('items', [])]
         return res
 
     def saved_feed(self, **kwargs):
@@ -213,4 +219,16 @@ class FeedEndpointsMixin(object):
         if self.auto_patch:
             [ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', []) if m.get('media')]
+        return res
+
+    def feed_only_me(self, **kwargs):
+        """
+        Get feed of archived media
+
+        :param kwargs
+        """
+        res = self._call_api('feed/only_me_feed/', query=kwargs)
+        if self.auto_patch:
+            [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
+             for m in res.get('items', [])]
         return res

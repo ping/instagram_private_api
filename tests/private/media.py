@@ -1,5 +1,6 @@
 import unittest
 import json
+import time
 
 from ..common import (
     ClientError,
@@ -152,6 +153,14 @@ class MediaTests(ApiTestBase):
             {
                 'name': 'test_media_seen2_mock',
                 'test': MediaTests('test_media_seen2_mock', api)
+            },
+            {
+                'name': 'test_media_only_me',
+                'test': MediaTests('test_media_only_me', api)
+            },
+            {
+                'name': 'test_media_only_me_mock',
+                'test': MediaTests('test_media_only_me_mock', api)
             },
         ]
 
@@ -487,3 +496,35 @@ class MediaTests(ApiTestBase):
         call_api.assert_called_with(
             'media/{media_id!s}/comment/bulk_delete/'.format(**{'media_id': media_id}),
             params=params)
+
+    @unittest.skip('Modifies data.')
+    def test_media_only_me(self):
+        results = self.api.self_feed()
+        first_media = results.get('items', [{}])[0]
+        time.sleep(self.sleep_interval)
+
+        results = self.api.media_only_me(first_media['id'], first_media['media_type'])
+        self.assertEqual(results.get('status'), 'ok')
+        time.sleep(self.sleep_interval)
+
+        results = self.api.media_only_me(
+            first_media['id'], first_media['media_type'], undo=True)
+        self.assertEqual(results.get('status'), 'ok')
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_media_only_me_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        media_id = '123_123'
+        params = {
+            'media_id': media_id
+        }
+        params.update(self.api.authenticated_params)
+        self.api.media_only_me(media_id, 2)
+        call_api.assert_called_with(
+            'media/{media_id!s}/only_me/'.format(**{'media_id': media_id}),
+            params=params, query={'media_type': 2})
+
+        self.api.media_only_me(media_id, 2, undo=True)
+        call_api.assert_called_with(
+            'media/{media_id!s}/undo_only_me/'.format(**{'media_id': media_id}),
+            params=params, query={'media_type': 2})
