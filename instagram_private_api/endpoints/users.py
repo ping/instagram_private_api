@@ -55,7 +55,7 @@ class UsersEndpointsMixin(object):
              for m in res.get('user_story', {}).get('reel', {}).get('items', [])]
         return res
 
-    def user_map(self, user_id):
+    def user_map(self, user_id):    # pragma: no cover
         """
         Get a list of geo-tagged media from a user
 

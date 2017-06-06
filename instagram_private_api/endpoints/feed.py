@@ -44,7 +44,7 @@ class FeedEndpointsMixin(object):
              for m in res.get('feed_items', [])]
         return res
 
-    def feed_popular(self, **kwargs):
+    def feed_popular(self, **kwargs):   # pragma: no cover
         """Get popular feed. This endpoint is believed to be obsolete. Do not use."""
         warnings.warn(
             'This endpoint is believed to be obsolete. Do not use.',

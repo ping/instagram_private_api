@@ -80,7 +80,7 @@ class UploadEndpointsMixin(object):
         return media_loc
 
     @staticmethod
-    def standard_ratios():
+    def standard_ratios():  # pragma: no cover
         """
         Deprecated. Use MediaRatios.standard instead.
         Acceptable min, max values of with/height ratios for a standard media upload
@@ -95,7 +95,7 @@ class UploadEndpointsMixin(object):
         return MediaRatios.standard
 
     @staticmethod
-    def reel_ratios():
+    def reel_ratios():  # pragma: no cover
         """
         Deprecated. Use MediaRatios.reel instead.
         Acceptable min, max values of with/height ratios for a story upload

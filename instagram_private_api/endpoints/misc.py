@@ -23,7 +23,7 @@ class MiscEndpointsMixin(object):
             params.update(self.authenticated_params)
         return self._call_api('qe/sync/', params=params)
 
-    def expose(self, experiment='ig_android_profile_contextual_feed'):
+    def expose(self, experiment='ig_android_profile_contextual_feed'):  # pragma: no cover
         warnings.warn(
             'This endpoint is believed to be obsolete. Do not use.',
             ClientDeprecationWarning)
