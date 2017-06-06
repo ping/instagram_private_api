@@ -1,3 +1,4 @@
+import unittest
 
 from ..common import (
     ApiTestBase, compat_mock
@@ -67,6 +68,7 @@ class UsersTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('feed', {}).get('items', [])), 0, 'No items returned.')
 
+    @unittest.skip('Deprecated.')
     def test_user_map(self):
         results = self.api.user_map(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')

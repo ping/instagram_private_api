@@ -1,3 +1,4 @@
+import unittest
 
 from ..common import ApiTestBase
 
@@ -67,6 +68,7 @@ class MiscTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('experiments', [])), 0, 'No experiments returned.')
 
+    @unittest.skip('Deprecated.')
     def test_expose(self):
         results = self.api.expose()
         self.assertEqual(results.get('status'), 'ok')

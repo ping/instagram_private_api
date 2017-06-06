@@ -1,3 +1,4 @@
+import unittest
 
 from ..common import ApiTestBase, ClientError
 
@@ -76,6 +77,7 @@ class FeedTests(ApiTestBase):
         self.assertGreater(len(results.get('feed_items', [])), 0, 'No items returned.')
         self.assertIsNotNone(results.get('feed_items', [])[0]['media_or_ad'].get('link'))
 
+    @unittest.skip('Deprecated.')
     def test_feed_popular(self):
         results = self.api.feed_popular()
         self.assertEqual(results.get('status'), 'ok')
