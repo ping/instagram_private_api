@@ -310,11 +310,13 @@ class ClientCompatPatch(object):
             cls._drop_keys(
                 media,
                 [
+                    'can_viewer_save',
                     'caption_is_edited',
                     'client_cache_key',
                     'code',
                     'comment_count',
-                    'comments_disabled'
+                    'comments_disabled',
+                    'comment_likes_enabled',
                     'device_timestamp',
                     'filter_type',
                     'has_audio',
@@ -337,9 +339,11 @@ class ClientCompatPatch(object):
                     'reel_mentions',
                     'saved_collection_ids',
                     'taken_at',
+                    'top_likers',
                     'video_duration',
                     'video_versions',
                     'view_count',
+                    'visibility',
                 ]
             )
             if media['location']:
