@@ -8,13 +8,16 @@ from io import BytesIO
 import time
 import warnings
 from functools import wraps
+import string
+import random
 
 from .compat import (
-    compat_pickle, compat_cookiejar, compat_urllib_request,
-    compat_urllib_parse, compat_urllib_parse_urlparse, compat_urllib_error
+    compat_urllib_request, compat_urllib_parse,
+    compat_urllib_parse_urlparse, compat_urllib_error
 )
 from .compatpatch import ClientCompatPatch
 from .errors import ClientError, ClientLoginError, ClientCookieExpiredError
+from .http import ClientCookieJar, MultipartFormDataEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +38,8 @@ class Client(object):
     GRAPHQL_API_URL = 'https://www.instagram.com/graphql/query/'
     USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) ' \
                  'Version/9.1.1 Safari/601.6.17'
+    MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) ' \
+                        'AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
 
     def __init__(self, user_agent=None, **kwargs):
         """
@@ -64,6 +69,9 @@ class Client(object):
         self.on_login = kwargs.pop('on_login', None)
         user_settings = kwargs.pop('settings', None) or {}
         self.user_agent = user_agent or user_settings.get('user_agent') or self.USER_AGENT
+        self.mobile_user_agent = (kwargs.pop('mobile_user_agent', None)
+                                  or user_settings.get('mobile_user_agent')
+                                  or self.MOBILE_USER_AGENT)
 
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
@@ -147,6 +155,20 @@ class Client(object):
             'created_ts': int(time.time())
         }
 
+    def _read_response(self, response):
+        """
+        Extract the response body from a http response.
+
+        :param response:
+        :return:
+        """
+        if response.info().get('Content-Encoding') == 'gzip':
+            buf = BytesIO(response.read())
+            res = gzip.GzipFile(fileobj=buf).read().decode('utf8')
+        else:
+            res = response.read().decode('utf8')
+        return res
+
     def _make_request(self, url, params=None, headers=None, query=None, return_response=False, get_method=None):
         """
         Calls the web API.
@@ -196,11 +218,7 @@ class Client(object):
             if return_response:
                 return res
 
-            if res.info().get('Content-Encoding') == 'gzip':
-                buf = BytesIO(res.read())
-                response_content = gzip.GzipFile(fileobj=buf).read().decode('utf8')
-            else:
-                response_content = res.read().decode('utf8')
+            response_content = self._read_response(res)
 
             self.logger.debug('RESPONSE: {0!s}'.format(response_content))
             return json.loads(response_content)
@@ -586,23 +604,67 @@ class Client(object):
                 ClientCompatPatch.list_user(u['user'])
         return res
 
+    @login_required
+    def post_photo(self, photo_data, caption=''):
+        """
+        Post a photo
 
-class ClientCookieJar(compat_cookiejar.CookieJar):
-    """Custom CookieJar that can be pickled to/from strings
-    """
-    def __init__(self, cookie_string=None, policy=None):
-        compat_cookiejar.CookieJar.__init__(self, policy)
-        if cookie_string:
-            if isinstance(cookie_string, bytes):
-                self._cookies = compat_pickle.loads(cookie_string)
-            else:
-                self._cookies = compat_pickle.loads(cookie_string.encode('utf-8'))
+        :param photo_data: byte string of the image
+        :param caption: caption text
+        """
+        warnings.warn('This endpoint has not been fully tested.', UserWarning)
 
-    @property
-    def expires_earliest(self):
-        if len(self) > 0:
-            return min([cookie.expires for cookie in self if cookie.expires])
-        return None
+        upload_id = int(time.time() * 1000)
+        boundary = '----WebKitFormBoundary{}'.format(
+            ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(16)))
+        fields = [
+            ('upload_id', upload_id),
+            ('media_type', 1),
+        ]
+        files = [
+            ('photo', 'photo.jpg', 'application/octet-stream', photo_data)
+        ]
+        content_type, body = MultipartFormDataEncoder(boundary=boundary).encode(
+            fields, files)
+        headers = {
+            'User-Agent': self.mobile_user_agent,
+            'Accept': '*/*',
+            'Accept-Language': 'en-US',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'close',
+            'x-csrftoken': self.csrftoken,
+            'x-requested-with': 'XMLHttpRequest',
+            'x-instagram-ajax': '1',
+            'Origin': 'https://www.instagram.com',
+            'Referer': 'https://www.instagram.com/create/crop/',
+            'Content-Type': content_type,
+            'Content-Length': len(body)
+        }
+        endpoint = 'https://www.instagram.com/create/upload/photo/'
+        req = compat_urllib_request.Request(endpoint, body, headers=headers)
+        self.logger.debug('REQUEST: {0!s}'.format(endpoint))
 
-    def dump(self):
-        return compat_pickle.dumps(self._cookies)
+        try:
+            res = self.opener.open(req, timeout=self.timeout)
+            response_content = self._read_response(res)
+
+            self.logger.debug('RESPONSE: {0!s}'.format(response_content))
+            upload_res = json.loads(response_content)
+            if upload_res.get('status', '') != 'ok':
+                raise ClientError('Upload status: {}'.format(upload_res.get('status', '')))
+            upload_id = upload_res['upload_id']
+
+            headers['Referer'] = 'https://www.instagram.com/create/details/'
+            headers['Content-Type'] = 'application/x-www-form-urlencoded'
+            del headers['Content-Length']
+            endpoint = 'https://www.instagram.com/create/configure/'
+            res = self._make_request(
+                endpoint, headers=headers,
+                params={'upload_id': upload_id, 'caption': caption},
+                get_method=lambda: 'POST')
+            return res
+
+        except compat_urllib_error.HTTPError as e:
+            raise ClientError('HTTPError "{0!s}" while opening {1!s}'.format(e.reason, endpoint), e.code)
+        except compat_urllib_error.URLError as e:
+            raise ClientError('URLError "{0!s}" while opening {1!s}'.format(e.reason, endpoint))

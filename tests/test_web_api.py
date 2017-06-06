@@ -15,8 +15,10 @@ from .common import (
     WebClientLoginError as ClientLoginError,
     WebClientCookieExpiredError as ClientCookieExpiredError
 )
-from .web import ClientTests, MediaTests, UserTests, CompatPatchTests
-
+from .web import (
+    ClientTests, MediaTests, UserTests,
+    CompatPatchTests, UploadTests
+)
 
 if __name__ == '__main__':
 
@@ -90,6 +92,7 @@ if __name__ == '__main__':
     tests.extend(MediaTests.init_all(api))
     tests.extend(UserTests.init_all(api))
     tests.extend(CompatPatchTests.init_all(api))
+    tests.extend(UploadTests.init_all(api))
 
     def match_regex(test_name):
         for test_re in args.tests:
