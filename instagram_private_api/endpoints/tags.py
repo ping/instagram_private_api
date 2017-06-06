@@ -25,7 +25,7 @@ class TagsEndpointsMixin(object):
         endpoint = 'tags/{tag!s}/related/'.format(**{'tag': tag})
         query = {
             'visited': json.dumps([{'id': tag, 'type': 'hashtag'}], separators=(',', ':')),
-            'related_types': json.dumps(['hashtag'], separators=(',', ':'))}
+            'related_types': json.dumps(['hashtag', 'location'], separators=(',', ':'))}
         res = self._call_api(endpoint, query=query)
         return res
 
