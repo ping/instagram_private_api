@@ -13,6 +13,7 @@ from ..utils import (
 )
 from ..compatpatch import ClientCompatPatch
 from .common import ClientDeprecationWarning
+from .common import MediaTypes
 
 
 class MediaRatios(object):
@@ -416,7 +417,7 @@ class UploadEndpointsMixin(object):
         if is_sidecar:
             fields.append(('is_sidecar', '1'))
             if for_video:
-                fields.append(('media_type', '2'))
+                fields.append(('media_type', MediaTypes.VIDEO))
 
         files = [
             ('photo', 'pending_media_{0!s}{1!s}'.format(str(int(time.time() * 1000)), '.jpg'),
@@ -534,7 +535,7 @@ class UploadEndpointsMixin(object):
             params['is_sidecar'] = '1'
         else:
             params.update({
-                'media_type': '2',
+                'media_type': MediaTypes.VIDEO,
                 'upload_media_duration_ms': int(duration * 1000),
                 'upload_media_width': width,
                 'upload_media_height': height

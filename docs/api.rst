@@ -15,6 +15,7 @@ The api currently has two main interfaces:
     - :class:`instagram_private_api.ClientLoginRequiredError`
     - :class:`instagram_private_api.ClientCookieExpiredError`
     - :class:`instagram_private_api.MediaRatios`
+    - :class:`instagram_private_api.MediaTypes`
 
 - `Web API`_
     - :class:`instagram_web_api.Client`
@@ -42,6 +43,9 @@ App API
 .. autoexception:: ClientCookieExpiredError
 
 .. autoclass:: MediaRatios
+   :members:
+
+.. autoclass:: MediaTypes
    :members:
 
 Web API

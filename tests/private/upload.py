@@ -498,7 +498,7 @@ class UploadTests(ApiTestBase):
                 upload_params['is_sidecar'] = '1'
             else:
                 upload_params.update({
-                    'media_type': '2',
+                    'media_type': 2,
                     'upload_media_duration_ms': int(duration * 1000),
                     'upload_media_width': size[0],
                     'upload_media_height': size[1]

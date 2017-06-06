@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .endpoints.common import MediaTypes
 
 
 class ClientCompatPatch(object):
@@ -126,11 +127,11 @@ class ClientCompatPatch(object):
         media['link'] = 'https://www.instagram.com/p/{0!s}/'.format(media['code'])
         media['created_time'] = str(int(media.get('taken_at') or media.get('device_timestamp')))
 
-        if media['media_type'] == 1:
+        if media['media_type'] == MediaTypes.PHOTO:
             media['type'] = 'image'
-        elif media['media_type'] == 2:
+        elif media['media_type'] == MediaTypes.VIDEO:
             media['type'] = 'video'
-        elif media['media_type'] == 8:
+        elif media['media_type'] == MediaTypes.CAROUSEL:
             media['type'] = 'carousel'  # will be patched over below
 
         if media['caption']:
@@ -160,12 +161,12 @@ class ClientCompatPatch(object):
                     ]
                 )
         media['user'] = cls.list_user(media['user'], drop_incompat_keys=drop_incompat_keys)
-        if media['media_type'] == 8 and media.get('carousel_media', []):
+        if media['media_type'] == MediaTypes.CAROUSEL and media.get('carousel_media', []):
             # patch carousel media
             for carousel_media in media.get('carousel_media', []):
-                if carousel_media['media_type'] == 1:
+                if carousel_media['media_type'] == MediaTypes.PHOTO:
                     carousel_media['type'] = 'image'
-                elif carousel_media['media_type'] == 2:
+                elif carousel_media['media_type'] == MediaTypes.VIDEO:
                     carousel_media['type'] = 'video'
                 image_versions2 = carousel_media.get('image_versions2', {}).get('candidates', [])
                 images = {
@@ -175,7 +176,7 @@ class ClientCompatPatch(object):
                         image_versions2, carousel_media.get('original_width', 1000)),
                 }
                 carousel_media['images'] = images
-                if carousel_media['media_type'] == 2:
+                if carousel_media['media_type'] == MediaTypes.VIDEO:
                     video_versions = carousel_media.get('video_versions', [])
                     videos = {
                         'low_bandwidth': cls._get_closest_size(video_versions, 480),
@@ -215,7 +216,7 @@ class ClientCompatPatch(object):
             first_carousel_media = media['carousel_media'][0]
             media['images'] = first_carousel_media['images']
             media['type'] = first_carousel_media['type']
-            if first_carousel_media['media_type'] == 2:
+            if first_carousel_media['media_type'] == MediaTypes.VIDEO:
                 media['videos'] = first_carousel_media['videos']
         else:
             image_versions2 = media.get('image_versions2', {}).get('candidates', [])
@@ -226,7 +227,7 @@ class ClientCompatPatch(object):
             }
             media['images'] = images
 
-        if media['media_type'] == 2:
+        if media['media_type'] == MediaTypes.VIDEO:
             video_versions = media.get('video_versions', [])
             videos = {
                 'low_bandwidth': cls._get_closest_size(video_versions, 480),
