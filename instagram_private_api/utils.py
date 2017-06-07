@@ -157,7 +157,10 @@ def ig_chunk_generator(file_data, max_chunk_size=(500 * 1024)):
             chunks_generated.append(chunk.length)
         else:
             chunk_elapsed_time = datetime.now() - last_yield_dt
-            new_chunk_size = 5000 * chunks_generated[-1] / int(chunk_elapsed_time.total_seconds() * 1000)
+            try:
+                new_chunk_size = 5000 * chunks_generated[-1] / int(chunk_elapsed_time.total_seconds() * 1000)
+            except ZeroDivisionError:
+                new_chunk_size = max_chunk_size
             new_chunk_size = min(max_chunk_size, new_chunk_size)
             chunk_start = sum(chunks_generated)
             chunk_end = min(chunk_start + new_chunk_size, total_len)
