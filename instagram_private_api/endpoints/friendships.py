@@ -329,3 +329,27 @@ class FriendshipsEndpointsMixin(object):
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
         return res
+
+    def enable_post_notifications(self, user_id):
+        """
+        Turn on post notifications for specified user.
+
+        :param user_id:
+        :return:
+        """
+        res = self._call_api(
+            'friendships/favorite/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=self.authenticated_params)
+        return res
+
+    def disable_post_notifications(self, user_id):
+        """
+        Turn off post notifications for specified user.
+
+        :param user_id:
+        :return:
+        """
+        res = self._call_api(
+            'friendships/unfavorite/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=self.authenticated_params)
+        return res

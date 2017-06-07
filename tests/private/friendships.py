@@ -87,6 +87,14 @@ class FriendshipTests(ApiTestBase):
                 'name': 'test_set_reel_block_status_mock',
                 'test': FriendshipTests('test_set_reel_block_status_mock', api)
             },
+            {
+                'name': 'test_enable_post_notifications_mock',
+                'test': FriendshipTests('test_enable_post_notifications_mock', api)
+            },
+            {
+                'name': 'test_disable_post_notifications_mock',
+                'test': FriendshipTests('test_enable_post_notifications_mock', api)
+            },
         ]
 
     @unittest.skip('Heavily throttled.')
@@ -231,3 +239,21 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         call_api.assert_called_with(
             'friendships/set_reel_block_status/', params=params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_enable_post_notifications_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        user_id = '123456789'
+        self.api.enable_post_notifications(user_id)
+        call_api.assert_called_with(
+            'friendships/favorite/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=self.api.authenticated_params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_disable_post_notifications_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        user_id = '123456789'
+        self.api.disable_post_notifications(user_id)
+        call_api.assert_called_with(
+            'friendships/unfavorite/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=self.api.authenticated_params)
