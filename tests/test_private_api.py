@@ -24,7 +24,7 @@ from .common import (
 if __name__ == '__main__':
 
     warnings.simplefilter('ignore', UserWarning)
-    logging.basicConfig()
+    logging.basicConfig(format='%(name)s %(message)s')
     logger = logging.getLogger('instagram_private_api')
     logger.setLevel(logging.WARNING)
 
@@ -163,4 +163,5 @@ if __name__ == '__main__':
         sys.exit(not result.wasSuccessful())
 
     except ClientError as e:
-        print('Unexpected ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response))
+        print('Unexpected ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(
+            e.msg, e.code, e.error_response))

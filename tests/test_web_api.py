@@ -23,7 +23,7 @@ from .web import (
 if __name__ == '__main__':
 
     warnings.simplefilter('ignore', UserWarning)
-    logging.basicConfig()
+    logging.basicConfig(format='%(name)s %(message)s')
     logger = logging.getLogger('instagram_web_api')
     logger.setLevel(logging.WARNING)
 
