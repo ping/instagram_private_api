@@ -666,5 +666,3 @@ class Client(object):
 
         except compat_urllib_error.HTTPError as e:
             raise ClientError('HTTPError "{0!s}" while opening {1!s}'.format(e.reason, endpoint), e.code)
-        except compat_urllib_error.URLError as e:
-            raise ClientError('URLError "{0!s}" while opening {1!s}'.format(e.reason, endpoint))
