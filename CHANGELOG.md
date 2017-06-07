@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.3.2 (pending)
+- App API:
+    * New endpoints: ``feed_only_me()``, ``media_only_me()``, ``media_undo_only_me()``
+    * Deprecated: ``user_map()``, ``expose()``
+- Web API:
+    * New endpoint: ``post_photo()``
+
 ## 1.3.1
 - App API:
     * ``Client.standard_ratios()`` and ``Client.reel_ratios()`` is deprecated and replaced with ``MediaRatios.standard`` and ``MediaRatios.reel`` respectively.
