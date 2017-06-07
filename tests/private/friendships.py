@@ -93,7 +93,7 @@ class FriendshipTests(ApiTestBase):
             },
             {
                 'name': 'test_disable_post_notifications_mock',
-                'test': FriendshipTests('test_enable_post_notifications_mock', api)
+                'test': FriendshipTests('test_disable_post_notifications_mock', api)
             },
         ]
 
