@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.3.2 (pending)
+## 1.3.2
 - App API:
     * New endpoints: ``feed_only_me()``, ``media_only_me()``, ``media_undo_only_me()``, ``enable_post_notifications()``, ``disable_post_notifications()``
     * Deprecated: ``user_map()``, ``expose()``
