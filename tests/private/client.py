@@ -162,10 +162,7 @@ class ClientTests(ApiTestBase):
     def test_settings(self):
         self.sleep_interval = 0
         results = self.api.settings
-        for k in ('uuid', 'device_id', 'ad_id', 'signature_key', 'key_version',
-                  'ig_capabilities', 'app_version', 'android_release', 'android_version',
-                  'phone_manufacturer', 'phone_device', 'phone_model', 'phone_dpi', 'phone_resolution',
-                  'phone_chipset', 'cookie', 'created_ts'):
+        for k in ('uuid', 'device_id', 'ad_id', 'cookie', 'created_ts'):
             self.assertIsNotNone(results.get(k))
 
     def test_user_agent(self):

@@ -51,7 +51,7 @@ class UploadTests(WebApiTestBase):
             time_mock.return_value = ts_now
             rand_choice.return_value = 'x'
             read_response.return_value = json.dumps({'status': 'ok', 'upload_id': '123456789'})
-            self.api.post_photo('...', caption='Test')
+            self.api.post_photo('...'.encode('ascii'), caption='Test')
 
             headers = {
                 'Accept-Language': 'en-US',

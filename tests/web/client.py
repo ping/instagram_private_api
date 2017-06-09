@@ -63,7 +63,7 @@ class ClientTests(WebApiTestBase):
         self.assertIsNone(self.api.authenticated_user_name)
         self.assertTrue(self.api.is_authenticated)
         settings = self.api.settings
-        for k in ('user_agent', 'cookie', 'created_ts'):
+        for k in ('cookie', 'created_ts'):
             self.assertIsNotNone(settings.get(k))
         self.assertIsNotNone(self.api.cookie_jar.dump())
 
