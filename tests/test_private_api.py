@@ -52,6 +52,18 @@ if __name__ == '__main__':
         with open(args.settings_file_path) as file_data:
             cached_auth = json.load(file_data, object_hook=from_json)
 
+    # Optional. You can custom the device settings instead of using the default one
+    my_custom_device = {
+        'phone_manufacturer': 'LGE/lge',
+        'phone_model': 'RS988',
+        'phone_device': 'h1',
+        'android_release': '6.0.1',
+        'android_version': 23,
+        'phone_dpi': '640dpi',
+        'phone_resolution': '1440x2392',
+        'phone_chipset': 'h1'
+    }
+
     api = None
     if not cached_auth:
 
@@ -72,18 +84,6 @@ if __name__ == '__main__':
         else:
             device_id = args.device_id
 
-        # Optional. You can custom the device settings instead of using the default one
-        my_custom_device = {
-            'manufacturer': 'LGE/lge',
-            'model': 'RS988',
-            'device': 'h1',
-            'android_release': '6.0.1',
-            'android_version': 23,
-            'dpi': '640dpi',
-            'resolution': '1440x2392',
-            'chipset': 'h1'
-        }
-
         # start afresh without existing auth
         try:
             api = Client(
@@ -91,14 +91,7 @@ if __name__ == '__main__':
                 auto_patch=True, drop_incompat_keys=False,
                 guid=uuid, device_id=device_id,
                 # custom device settings
-                android_release=my_custom_device['android_release'],
-                android_version=my_custom_device['android_version'],
-                phone_manufacturer=my_custom_device['manufacturer'],
-                phone_device=my_custom_device['device'],
-                phone_model=my_custom_device['model'],
-                phone_dpi=my_custom_device['dpi'],
-                phone_resolution=my_custom_device['resolution'],
-                phone_chipset=my_custom_device['chipset'])
+                **my_custom_device)
 
         except ClientLoginError:
             print('Login Error. Please check your username and password.')
@@ -120,7 +113,8 @@ if __name__ == '__main__':
             api = Client(
                 args.username, args.password,
                 auto_patch=True, drop_incompat_keys=False,
-                settings=cached_auth)
+                settings=cached_auth,
+                **my_custom_device)
 
         except ClientCookieExpiredError:
             print('Cookie Expired. Please discard cached auth and login again.')
