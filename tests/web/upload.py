@@ -56,7 +56,6 @@ class UploadTests(WebApiTestBase):
             headers = {
                 'Accept-Language': 'en-US',
                 'Accept-Encoding': 'gzip, deflate',
-                'Connection': 'close',
                 'Origin': 'https://www.instagram.com',
                 'x-csrftoken': self.api.csrftoken,
                 'x-instagram-ajax': '1',
@@ -64,6 +63,7 @@ class UploadTests(WebApiTestBase):
                 'User-Agent': self.api.mobile_user_agent,
                 'Referer': 'https://www.instagram.com/create/details/',
                 'x-requested-with': 'XMLHttpRequest',
+                'Connection': 'close',
                 'Content-Type': 'application/x-www-form-urlencoded'}
 
             body = '--{boundary}\r\n' \
@@ -80,4 +80,4 @@ class UploadTests(WebApiTestBase):
                        upload_id=int(ts_now * 1000))
             request.assert_called_with(
                 'https://www.instagram.com/create/upload/photo/',
-                body, headers=headers)
+                body.encode('utf-8'), headers=headers)
