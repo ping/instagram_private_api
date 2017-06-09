@@ -168,7 +168,8 @@ class Client(object):
             res = response.read().decode('utf8')
         return res
 
-    def _make_request(self, url, params=None, headers=None, query=None, return_response=False, get_method=None):
+    def _make_request(self, url, params=None, headers=None, query=None,
+                      return_response=False, get_method=None):
         """
         Calls the web API.
 
@@ -665,3 +666,34 @@ class Client(object):
 
         except compat_urllib_error.HTTPError as e:
             raise ClientError('HTTPError "{0!s}" while opening {1!s}'.format(e.reason, endpoint), e.code)
+
+    def tag_feed(self, tag, **kwargs):
+        """
+        Get a tag feed.
+
+        :param tag:
+        :param kwargs:
+            - **max_id**: For pagination
+        :return:
+        """
+        query = {'__a': '1'}
+        if kwargs:
+            query.update(kwargs)
+        endpoint = 'https://www.instagram.com/explore/tags/{0!s}/'.format(
+            compat_urllib_parse.quote(tag))
+        return self._make_request(endpoint, query=query)
+
+    def location_feed(self, location_id, **kwargs):
+        """
+        Get a location feed.
+
+        :param location_id:
+        :param kwargs:
+            - **max_id**: For pagination
+        :return:
+        """
+        query = {'__a': '1'}
+        if kwargs:
+            query.update(kwargs)
+        endpoint = 'https://www.instagram.com/explore/locations/{0!s}/'.format(location_id)
+        return self._make_request(endpoint, query=query)

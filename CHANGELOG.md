@@ -6,7 +6,7 @@
     * Deprecated: ``user_map()``, ``expose()``
     * Removed device info, keys, etc from ``settings`` property.
 - Web API:
-    * New endpoint: ``post_photo()``
+    * New endpoints: ``post_photo()``, ``tag_feed()``, ``location_feed()``
     * Removed user-agent from ``settings`` property.
 
 ## 1.3.1

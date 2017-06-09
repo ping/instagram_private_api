@@ -17,7 +17,8 @@ from .common import (
 )
 from .web import (
     ClientTests, MediaTests, UserTests,
-    CompatPatchTests, UploadTests
+    CompatPatchTests, UploadTests,
+    FeedTests
 )
 
 if __name__ == '__main__':
@@ -93,6 +94,7 @@ if __name__ == '__main__':
     tests.extend(UserTests.init_all(api))
     tests.extend(CompatPatchTests.init_all(api))
     tests.extend(UploadTests.init_all(api))
+    tests.extend(FeedTests.init_all(api))
 
     def match_regex(test_name):
         for test_re in args.tests:
