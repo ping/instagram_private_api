@@ -150,7 +150,6 @@ class Client(object):
         """Helper property that extracts the settings that you should cache
         in addition to username and password."""
         return {
-            'user_agent': self.user_agent,
             'cookie': self.opener.cookie_jar.dump(),
             'created_ts': int(time.time())
         }
