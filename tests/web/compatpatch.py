@@ -1,5 +1,6 @@
 import copy
 import re
+import time
 
 from ..common import WebApiTestBase, WebClientCompatPatch as ClientCompatPatch
 
@@ -31,7 +32,7 @@ class CompatPatchTests(WebApiTestBase):
 
     def test_compat_media(self):
         self.api.auto_patch = False
-        media = self.api.media_info(self.test_media_shortcode)
+        media = self.api.media_info2(self.test_media_shortcode)
         media_patched = copy.deepcopy(media)
         ClientCompatPatch.media(media_patched)
         self.api.auto_patch = True
@@ -51,6 +52,12 @@ class CompatPatchTests(WebApiTestBase):
         self.assertIsNone(media_dropped.get('code'))
         self.assertIsNone(media_dropped.get('dimensions'))
 
+        time.sleep(self.sleep_interval)
+        # Test fix for Issue #20
+        # https://github.com/ping/instagram_private_api/issues/20
+        media2 = self.api.media_info2(self.test_media_shortcode2)
+        ClientCompatPatch.media(media2)
+
     def test_compat_comment(self):
         self.api.auto_patch = False
         comment = self.api.media_comments(self.test_media_shortcode, count=1)[0]
@@ -68,7 +75,7 @@ class CompatPatchTests(WebApiTestBase):
 
     def test_compat_user(self):
         self.api.auto_patch = False
-        user = self.api.user_info(self.test_user_id)
+        user = self.api.user_info2(self.test_user_name)
         user_patched = copy.deepcopy(user)
         ClientCompatPatch.user(user_patched)
         self.api.auto_patch = True

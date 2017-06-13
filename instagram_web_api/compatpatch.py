@@ -48,8 +48,14 @@ class ClientCompatPatch(object):
         """Patch a media object"""
         media_shortcode = media.get('code') or media.get('shortcode')   # for media_info2
         media['link'] = 'https://www.instagram.com/p/{0!s}/'.format(media_shortcode)
-        caption = (media.get('caption') or
-                   media.get('edge_media_to_caption', {}).get('edges', [{}])[0].get('node', {}).get('text'))
+        try:
+            caption = (media.get('caption') or
+                       media.get('edge_media_to_caption', {}).get('edges', [{}])[0].get(
+                           'node', {}).get('text'))
+        except IndexError:
+            # no caption - edge_media_to_caption: { edges: [] }
+            caption = None
+
         if not caption:
             media['caption'] = None
         else:

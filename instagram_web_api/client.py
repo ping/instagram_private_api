@@ -18,8 +18,10 @@ from .compat import (
 from .compatpatch import ClientCompatPatch
 from .errors import ClientError, ClientLoginError, ClientCookieExpiredError
 from .http import ClientCookieJar, MultipartFormDataEncoder
+from .common import ClientDeprecationWarning
 
 logger = logging.getLogger(__name__)
+warnings.simplefilter('always', ClientDeprecationWarning)
 
 
 def login_required(fn):
@@ -256,14 +258,17 @@ class Client(object):
             on_login_callback(self)
         return login_res
 
-    def user_info(self, user_id, **kwargs):
+    def user_info(self, user_id, **kwargs):     # pragma: no cover
         """
-        Get user info
+        OBSOLETE. Get user info.
 
         :param user_id: User id
         :param kwargs:
         :return:
         """
+        warnings.warn(
+            'This endpoint is obsolete. Do not use.', ClientDeprecationWarning)
+
         params = {
             'q': 'ig_user(%(user_id)s) {id, username, full_name, profile_pic_url, '
                  'biography, external_url, is_private, is_verified, '
@@ -277,6 +282,20 @@ class Client(object):
         if self.auto_patch:
             user = ClientCompatPatch.user(user, drop_incompat_keys=self.drop_incompat_keys)
         return user
+
+    def user_info2(self, user_name, **kwargs):
+        """
+        Get user info.
+
+        :param username: User name (not numeric ID)
+        :param kwargs:
+        :return:
+        """
+        endpoint = 'https://www.instagram.com/{username!s}/'.format(**{'username': user_name})
+        info = self._make_request(endpoint, query={'__a': '1'})
+        if self.auto_patch:
+            ClientCompatPatch.user(info['user'], drop_incompat_keys=self.drop_incompat_keys)
+        return info['user']
 
     def user_feed(self, user_id, **kwargs):
         """
@@ -323,14 +342,17 @@ class Client(object):
                 'edge_owner_to_timeline_media', {}).get('edges', [])
         return info
 
-    def media_info(self, short_code, **kwargs):
+    def media_info(self, short_code, **kwargs):     # pragma: no cover
         """
-        Get media info. Does not properly extract carousel media.
+        OBSOLETE. Get media info. Does not properly extract carousel media.
 
         :param short_code: A media's shortcode
         :param kwargs:
         :return:
         """
+        warnings.warn(
+            'This endpoint is obsolete. Do not use.', ClientDeprecationWarning)
+
         params = {
             'q': 'ig_shortcode(%(media_code)s) { caption, code, comments {count}, date, '
                  'dimensions {height, width}, comments_disabled, '

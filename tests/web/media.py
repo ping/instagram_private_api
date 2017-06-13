@@ -77,12 +77,14 @@ class MediaTests(WebApiTestBase):
             }
         ]
 
+    @unittest.skip('Deprecated.')
     def test_media_info(self):
         results = self.api.media_info(self.test_media_shortcode)
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('link'))
         self.assertIsNotNone(results.get('images'))
 
+    @unittest.skip('Deprecated.')
     def test_notfound_media_info(self):
         self.assertRaises(ClientError, lambda: self.api.media_info('BSgmaRDg-xX'))
 

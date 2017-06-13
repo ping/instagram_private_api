@@ -113,7 +113,9 @@ class WebApiTestBase(unittest.TestCase):
 
     def setUp(self):
         self.test_user_id = '25025320'
+        self.test_user_name = 'instagram'
         self.test_media_shortcode = 'BJL-gjsDyo1'
+        self.test_media_shortcode2 = 'BVRqQxmj2TA'
         self.test_media_id = '1009392755603152985'
         self.test_comment_id = '1234567890'
 

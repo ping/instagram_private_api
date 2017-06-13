@@ -61,6 +61,7 @@ class UserTests(WebApiTestBase):
             },
         ]
 
+    @unittest.skip('Deprecated.')
     def test_user_info(self):
         results = self.api.user_info(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
