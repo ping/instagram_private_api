@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.3
+- Web API:
+    * New endpoints: ``user_info2()``
+    * Deprecate all remaining endpoints using ``query/``: ``user_info()``, ``media_info()``
+
 ## 1.3.2
 - App API:
     * New endpoints: ``feed_only_me()``, ``media_only_me()``, ``media_undo_only_me()``, ``enable_post_notifications()``, ``disable_post_notifications()``
