@@ -271,15 +271,19 @@ class FriendshipTests(ApiTestBase):
         call_api.return_value = {'status': 'ok'}
         user_id = '123456789'
         self.api.ignore_user(user_id)
+        params = {'user_id': user_id, 'radio_type': self.api.radio_type}
+        params.update(self.api.authenticated_params)
         call_api.assert_called_with(
             'friendships/ignore/{user_id!s}/'.format(**{'user_id': user_id}),
-            params=self.api.authenticated_params)
+            params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
     def test_remove_follower_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         user_id = '123456789'
         self.api.remove_follower(user_id)
+        params = {'user_id': user_id, 'radio_type': self.api.radio_type}
+        params.update(self.api.authenticated_params)
         call_api.assert_called_with(
             'friendships/remove_follower/{user_id!s}/'.format(**{'user_id': user_id}),
-            params=self.api.authenticated_params)
+            params=params)
