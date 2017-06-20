@@ -353,3 +353,27 @@ class FriendshipsEndpointsMixin(object):
             'friendships/unfavorite/{user_id!s}/'.format(**{'user_id': user_id}),
             params=self.authenticated_params)
         return res
+
+    def ignore_user(self, user_id):
+        """
+        Ignore a user's follow request.
+
+        :param user_id:
+        :return:
+        """
+        res = self._call_api(
+            'friendships/ignore/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=self.authenticated_params)
+        return res
+
+    def remove_follower(self, user_id):
+        """
+        Remove a follower.
+
+        :param user_id:
+        :return:
+        """
+        res = self._call_api(
+            'friendships/remove_follower/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=self.authenticated_params)
+        return res

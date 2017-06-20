@@ -95,6 +95,14 @@ class FriendshipTests(ApiTestBase):
                 'name': 'test_disable_post_notifications_mock',
                 'test': FriendshipTests('test_disable_post_notifications_mock', api)
             },
+            {
+                'name': 'test_ignore_user_mock',
+                'test': FriendshipTests('test_ignore_user_mock', api)
+            },
+            {
+                'name': 'test_remove_follower_mock',
+                'test': FriendshipTests('test_remove_follower_mock', api)
+            },
         ]
 
     @unittest.skip('Heavily throttled.')
@@ -256,4 +264,22 @@ class FriendshipTests(ApiTestBase):
         self.api.disable_post_notifications(user_id)
         call_api.assert_called_with(
             'friendships/unfavorite/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=self.api.authenticated_params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_ignore_user_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        user_id = '123456789'
+        self.api.ignore_user(user_id)
+        call_api.assert_called_with(
+            'friendships/ignore/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=self.api.authenticated_params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_remove_follower_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        user_id = '123456789'
+        self.api.remove_follower(user_id)
+        call_api.assert_called_with(
+            'friendships/remove_follower/{user_id!s}/'.format(**{'user_id': user_id}),
             params=self.api.authenticated_params)
