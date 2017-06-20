@@ -402,7 +402,7 @@ class Client(object):
         :param short_code:
         :param kwargs:
             - **count**: Number of comments to return. Default: 16. Maximum: 1000
-            - **before_comment_id**: For pagination
+            - **end_cursor**: For pagination
             - **extract**: bool. Return a simple list of comments
         :return:
         """

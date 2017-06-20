@@ -62,7 +62,8 @@ class ClientCompatPatch(object):
             media['caption'] = {
                 'text': caption,
                 'from': media['owner'],
-                'id': str(abs(hash(caption + media_shortcode)) % (10 ** 12)),       # generate a psuedo 12-char ID
+                # generate a psuedo 12-char ID
+                'id': str(abs(hash(caption + media_shortcode)) % (10 ** 12)),
             }
         media['tags'] = []
         media['filter'] = ''
@@ -100,20 +101,24 @@ class ClientCompatPatch(object):
             }
             media['videos'] = videos
         media['likes'] = {
-            'count': (media.get('likes', {}) or media.get('edge_liked_by', {})).get('count', 0),
+            'count': (media.get('likes', {})
+                      or media.get('edge_liked_by', {})).get('count', 0),
             'data': []
         }
         media['comments'] = {
-            'count': (media.get('comments', {}) or media.get('edge_media_to_comment', {})).get('count', 0),
+            'count': (media.get('comments', {})
+                      or media.get('edge_media_to_comment', {})).get('count', 0),
             'data': []
         }
-        if 'location' not in media or not media['location'] or not media['location'].get('lat'):
+        # Try to preserve location even if there's no lat/lng
+        if 'location' not in media or not media['location']:
             media['location'] = None
-        else:
+        elif media.get('location', {}).get('lat') and media.get('location', {}).get('lng'):
             media['location']['latitude'] = media['location']['lat']
             media['location']['longitude'] = media['location']['lng']
         media['id'] = '{0!s}_{1!s}'.format(media['id'], media['owner']['id'])
-        media['created_time'] = str(media.get('date', '') or media.get('taken_at_timestamp', ''))
+        media['created_time'] = str(
+            media.get('date', '') or media.get('taken_at_timestamp', ''))
 
         usertags = (
             media.get('usertags', {}).get('nodes', []) or
@@ -138,8 +143,10 @@ class ClientCompatPatch(object):
                         'url': node['display_url'],
                         'width': node['dimensions']['width'],
                         'height': node['dimensions']['height']},
-                    'low_resolution': {'url': cls._generate_image_url(node['display_url'], '320', 'p')},
-                    'thumbnail': {'url': cls._generate_image_url(node['display_url'], '150', 's')},
+                    'low_resolution': {
+                        'url': cls._generate_image_url(node['display_url'], '320', 'p')},
+                    'thumbnail': {
+                        'url': cls._generate_image_url(node['display_url'], '150', 's')},
                 }
                 node['images'] = images
                 node['type'] = 'image'
