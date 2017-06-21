@@ -51,6 +51,14 @@ class LiveTests(ApiTestBase):
                 'name': 'test_broadcast_comment_mock',
                 'test': LiveTests('test_broadcast_comment_mock', api)
             },
+            {
+                'name': 'test_replay_broadcast_comments_mock',
+                'test': LiveTests('test_replay_broadcast_comments_mock', api)
+            },
+            {
+                'name': 'test_replay_broadcast_likes_mock',
+                'test': LiveTests('test_replay_broadcast_likes_mock', api)
+            },
         ]
 
     def test_user_broadcast(self):
@@ -174,3 +182,27 @@ class LiveTests(ApiTestBase):
         results = self.api.suggested_broadcasts()
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('broadcasts', [])), 0, 'No broadcasts returned.')
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_replay_broadcast_comments_mock(self, call_api):
+        broadcast_id = 123
+        query = {
+            'starting_offset': 0,
+            'encoding_tag': 'instagram_dash_remuxed',
+        }
+        self.api.replay_broadcast_comments(broadcast_id, **query)
+        call_api.assert_called_with(
+            'live/{broadcast_id!s}/get_post_live_comments/'.format(**{'broadcast_id': broadcast_id}),
+            query=query)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_replay_broadcast_likes_mock(self, call_api):
+        broadcast_id = 123
+        query = {
+            'starting_offset': 0,
+            'encoding_tag': 'instagram_dash_remuxed',
+        }
+        self.api.replay_broadcast_likes(broadcast_id, **query)
+        call_api.assert_called_with(
+            'live/{broadcast_id!s}/get_post_live_likes/'.format(**{'broadcast_id': broadcast_id}),
+            query=query)

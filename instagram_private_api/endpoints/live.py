@@ -149,3 +149,43 @@ class LiveEndpointsMixin(object):
         :return:
         """
         return self._call_api('live/get_suggested_broadcasts/', query=kwargs)
+
+    def replay_broadcast_comments(
+            self, broadcast_id, starting_offset=0,
+            encoding_tag='instagram_dash_remuxed'):
+        """
+        Get comments for a post live broadcast.
+
+        :param broadcast_id:
+        :param starting_offset:
+        :param encoding_tag:
+        :return:
+        """
+        broadcast_id = str(broadcast_id)
+        query = {
+            'starting_offset': starting_offset,
+            'encoding_tag': encoding_tag,
+        }
+        endpoint = 'live/{broadcast_id!s}/get_post_live_comments/'.format(
+            **{'broadcast_id': broadcast_id})
+        return self._call_api(endpoint, query=query)
+
+    def replay_broadcast_likes(
+            self, broadcast_id, starting_offset=0,
+            encoding_tag='instagram_dash_remuxed'):
+        """
+        Get likes for a post live broadcast.
+
+        :param broadcast_id:
+        :param starting_offset:
+        :param encoding_tag:
+        :return:
+        """
+        broadcast_id = str(broadcast_id)
+        query = {
+            'starting_offset': starting_offset,
+            'encoding_tag': encoding_tag,
+        }
+        endpoint = 'live/{broadcast_id!s}/get_post_live_likes/'.format(
+            **{'broadcast_id': broadcast_id})
+        return self._call_api(endpoint, query=query)
