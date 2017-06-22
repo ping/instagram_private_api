@@ -7,4 +7,4 @@ from .endpoints.upload import MediaRatios
 from .endpoints.common import MediaTypes
 
 
-__version__ = '1.3.3'
+__version__ = '1.3.4'

@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.4
+- App API:
+    * New endpoints: ``ignore_user()``, ``remove_follower()``, ``replay_broadcast_comments()``, ``replay_broadcast_likes()``
+- Minor fixes
+
 ## 1.3.3
 - Web API:
     * New endpoints: ``user_info2()``
