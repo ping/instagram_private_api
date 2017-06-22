@@ -168,7 +168,11 @@ class LiveEndpointsMixin(object):
         }
         endpoint = 'live/{broadcast_id!s}/get_post_live_comments/'.format(
             **{'broadcast_id': broadcast_id})
-        return self._call_api(endpoint, query=query)
+        res = self._call_api(endpoint, query=query)
+        if self.auto_patch and res.get('comments'):
+            [ClientCompatPatch.comment(c['comment']) for c in res.get('comments', [])
+             if c.get('comment')]
+        return res
 
     def replay_broadcast_likes(
             self, broadcast_id, starting_offset=0,
