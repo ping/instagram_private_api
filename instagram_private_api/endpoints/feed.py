@@ -174,7 +174,7 @@ class FeedEndpointsMixin(object):
 
     def user_story_feed(self, user_id):
         """
-        Get a user's story feed and current broadcast (if currently live)
+        Get a user's story feed and current/replay broadcasts (if available)
 
         :param user_id:
         :return:
