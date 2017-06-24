@@ -279,7 +279,7 @@ class ClientCompatPatch(object):
                 and media.get('story_locations')
                 and media.get('story_locations', [{}])[0].get('location')):
             story_location = media['story_locations'][0]['location']
-            if (story_location.get.get('lat')
+            if (story_location.get('lat')
                     and story_location.get('lng')
                     and story_location.get('pk')):
                 media['location'] = story_location
