@@ -264,12 +264,25 @@ class ClientCompatPatch(object):
         else:
             media['filter'] = ''
         media['user_has_liked'] = media.get('has_liked', False)
-        if 'location' not in media or not media['location'].get('lat'):
+
+        # Try to preserve location even if there's no lat/lng/pk
+        if 'location' not in media or not media['location']:
             media['location'] = None
-        else:
+        elif (media.get('location', {}).get('lat')
+              and media.get('location', {}).get('lng')
+              and media.get('location', {}).get('pk')):
             media['location']['latitude'] = media['location']['lat']
             media['location']['longitude'] = media['location']['lng']
             media['location']['id'] = media['location']['pk']
+        # For stories
+        if (not media.get('location')
+                and media.get('story_locations')
+                and media.get('story_locations', [{}])[0].get('location')):
+            story_location = media['story_locations'][0]['location']
+            if (story_location.get.get('lat')
+                    and story_location.get('lng')
+                    and story_location.get('pk')):
+                media['location'] = story_location
 
         media['tags'] = []
         if media.get('usertags', {}).get('in', []):
