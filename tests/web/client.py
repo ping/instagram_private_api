@@ -60,7 +60,6 @@ class ClientTests(WebApiTestBase):
         self.sleep_interval = 0
         self.assertIsNotNone(self.api.csrftoken)
         self.assertIsNotNone(self.api.authenticated_user_id)
-        self.assertIsNone(self.api.authenticated_user_name)
         self.assertTrue(self.api.is_authenticated)
         settings = self.api.settings
         for k in ('cookie', 'created_ts'):
