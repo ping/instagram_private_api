@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.3.5
+- App API:
+    * Fix video upload retry logic
+    * Fix compatpatch typo
+    * Improve app compatpatch for media location
+
 ## 1.3.4
 - App API:
     * New endpoints: ``ignore_user()``, ``remove_follower()``, ``replay_broadcast_comments()``, ``replay_broadcast_likes()``
