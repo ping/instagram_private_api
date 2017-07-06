@@ -2,6 +2,7 @@
 from ..common import (
     WebApiTestBase, WebClientError as ClientError,
     WebClientLoginError as ClientLoginError,
+    WebClient as Client,
     compat_mock, compat_urllib_error
 )
 
@@ -33,6 +34,10 @@ class ClientTests(WebApiTestBase):
                 'name': 'test_login_mock',
                 'test': ClientTests('test_login_mock', api)
             },
+            {
+                'name': 'test_unauthed_client',
+                'test': ClientTests('test_unauthed_client', api)
+            }
         ]
 
     @compat_mock.patch('instagram_web_api.Client._make_request')
@@ -84,3 +89,11 @@ class ClientTests(WebApiTestBase):
     def test_client_init(self, csrftoken):
         with self.assertRaises(ClientError):
             self.api.init()
+
+    def test_unauthed_client(self):
+        api = Client()
+        self.assertFalse(api.is_authenticated)
+
+        with self.assertRaises(ClientError):
+            # Test authenticated method
+            api.user_following(self.test_user_id)
