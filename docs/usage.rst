@@ -10,13 +10,13 @@ Install via pip
 
 .. code-block:: bash
 
-    $ pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.3.4
+    $ pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.3.5
 
 Update your install with the latest release
 
 .. code-block:: bash
 
-    $ pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.3.4 --upgrade
+    $ pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.3.5 --upgrade
 
 Force an update from source
 

@@ -6,4 +6,4 @@ from .errors import ClientError, ClientLoginError, ClientCookieExpiredError
 from .common import ClientDeprecationWarning
 
 
-__version__ = '1.3.4'
+__version__ = '1.3.5'
