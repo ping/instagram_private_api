@@ -366,7 +366,6 @@ class AccountTests(ApiTestBase):
                    'Content-Transfer-Encoding: binary\r\n\r\n...\r\n' \
                    '--%(boundary)s--\r\n' % {
                        'boundary': 'x' * 30,
-                       'uuid': self.api.uuid,
                        'signed_body': signed_body,
                        'sig_version': self.api.key_version
                    }

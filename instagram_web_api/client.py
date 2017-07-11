@@ -156,7 +156,8 @@ class Client(object):
             'created_ts': int(time.time())
         }
 
-    def _read_response(self, response):
+    @staticmethod
+    def _read_response(response):
         """
         Extract the response body from a http response.
 

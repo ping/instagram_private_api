@@ -78,6 +78,6 @@ class MultipartFormDataEncoder(object):
 
     def encode(self, fields, files):
         body = BytesIO()
-        for chunk, chunk_len in self.iter(fields, files):
+        for chunk, _ in self.iter(fields, files):
             body.write(chunk)
         return self.content_type, body.getvalue()

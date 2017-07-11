@@ -405,7 +405,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             modified_seed = sha2.hexdigest()
         return self.generate_uuid(False, modified_seed)
 
-    def _read_response(self, response):
+    @staticmethod
+    def _read_response(response):
         """
         Extract the response body from a http response.
 
