@@ -176,6 +176,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 raise ClientLoginRequiredError('login_required', code=400)
             self.login()
 
+        self.logger.debug('USERAGENT: {0!s}'.format(self.user_agent))
         super(Client, self).__init__()
 
     @property
