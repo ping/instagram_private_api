@@ -106,7 +106,7 @@ class MediaEndpointsMixin(object):
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
              for c in comments]
 
-        return sorted(comments, key=lambda k: k['created_time'], reverse=reverse)
+        return sorted(comments, key=lambda k: k['created_at_utc'], reverse=reverse)
 
     def edit_media(self, media_id, caption, usertags=None):
         """
