@@ -3,7 +3,7 @@
 - Issues submitted without this template format will be **ignored**.
 - You will be asked some questions and requested to provide some information, please read them **carefully** and answer completely.
 - Do not post screenshots of error messages or code.
-- Put an `x` into all the boxes [ ] relevant to your issue (like so [x]).
+- Put an `x` into all the boxes [ ] relevant to your issue (like so [x] no spaces).
 - Use the *Preview* tab to see how your issue will actually look like.
 - Issues about reverse engineering is out of scope and will be closed without response.
 
