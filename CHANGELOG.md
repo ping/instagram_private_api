@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.6
+- App API:
+    * Minor fixes
+
 ## 1.3.5
 - App API:
     * Fix video upload retry logic
