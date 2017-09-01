@@ -442,7 +442,7 @@ class UploadEndpointsMixin(object):
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):
                     error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
-            except Exception as e:
+            except ValueError as e:
                 # do nothing else, prob can't parse json
                 self.logger.warn('Error parsing error response: {}'.format(str(e)))
             raise ClientError(error_msg, e.code, error_response)
