@@ -2,7 +2,10 @@
 
 from .client import Client
 from .compatpatch import ClientCompatPatch
-from .errors import ClientError, ClientLoginError, ClientLoginRequiredError, ClientCookieExpiredError, ClientThrottledError
+from .errors import (
+    ClientError, ClientLoginError, ClientLoginRequiredError,
+    ClientCookieExpiredError, ClientThrottledError, ClientConnectionError
+)
 from .endpoints.upload import MediaRatios
 from .endpoints.common import MediaTypes
 

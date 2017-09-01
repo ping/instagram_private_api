@@ -12,13 +12,17 @@ from datetime import datetime
 import gzip
 from io import BytesIO
 import warnings
-
+from socket import timeout, error as SocketError
+from ssl import SSLError
 from .compat import (
     compat_urllib_parse, compat_urllib_error,
-    compat_urllib_request, compat_urllib_parse_urlparse)
+    compat_urllib_request, compat_urllib_parse_urlparse,
+    compat_http_client)
 from .errors import (
-    ClientErrorCodes, ClientError, ClientLoginError, ClientLoginRequiredError,
-    ClientCookieExpiredError, ClientThrottledError)
+    ClientErrorCodes, ClientError, ClientLoginError,
+    ClientLoginRequiredError, ClientCookieExpiredError,
+    ClientThrottledError, ClientConnectionError
+)
 from .constants import Constants
 from .http import ClientCookieJar
 from .endpoints import (
@@ -483,6 +487,13 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 # do nothing else, prob can't parse json
                 self.logger.warn('Error parsing error response: {}'.format(str(ex)))
             raise ClientError(error_msg, e.code, error_response)
+        except (SSLError, timeout, SocketError,
+                compat_urllib_error.URLError,   # URLError is base of HTTPError
+                compat_http_client.HTTPException) as connection_error:
+            # ConnectionError is py3-specific. Hm.
+            # https://docs.python.org/3/library/exceptions.html#ConnectionError
+            raise ClientConnectionError('{} {}'.format(
+                connection_error.__class__.__name__, str(connection_error)))
 
         if return_response:
             return response

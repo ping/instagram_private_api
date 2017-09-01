@@ -41,3 +41,8 @@ class ClientCookieExpiredError(ClientError):
 class ClientThrottledError(ClientError):
     """Raised when client detects a 429 http response."""
     pass
+
+
+class ClientConnectionError(ClientError):
+    """Raised due to network connectivity-related issues"""
+    pass
