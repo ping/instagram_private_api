@@ -55,43 +55,6 @@ ZeroDivisionError: integer division or modulo by zero
 
 ---
 
-### For a new endpoint *feature request*, you should include the *capture of the request and response*.
-
-Request:
-
-```http
-# Please provide your capture below
-GET /api/v1/si/fetch_headers/?guid=123456abcdeff19cc2f123456&challenge_type=signup HTTP/1.1
-Host: i.instagram.com
-Connection: keep-alive
-X-IG-Connection-Type: mobile(UMTS)
-X-IG-Capabilities: 3ToAAA==
-Accept-Language: en-US
-Cookie: csrftoken=g79dofDBlVEA37II3LI7YdHeiMrd9ylj; mid=WFI52QABAAGrbKL-OZ4DtgLd9QIf
-User-Agent: Instagram 10.3.0 Android (18/4.3; 320dpi; 720x1280; Xiaomi; HM 1SW; armani; qcom; en_US)
-Accept-Encoding: gzip, deflate, sdch
-```
-
-Response:
-
-```http
-# Please provide your capture below
-HTTP/1.1 200 OK
-Content-Language: en
-Expires: Sat, 01 Jan 2000 00:00:00 GMT
-Vary: Cookie, Accept-Language
-Pragma: no-cache
-Cache-Control: private, no-cache, no-store, must-revalidate
-Date: Thu, 15 Dec 2016 08:50:19 GMT
-Content-Type: application/json
-Set-Cookie: csrftoken=g79dofABCDEFGII3LI7YdHei1234567; expires=Thu, 14-Dec-2017 08:50:19 GMT; Max-Age=31449600; Path=/; secure
-Connection: keep-alive
-Content-Length: 16
-
-{"status": "ok"}
-```
----
-
 ### Describe your issue
 
 Explanation of your issue goes here. Please make sure the description is worded well enough to be understood with as much context and examples as possible.
