@@ -410,10 +410,16 @@ class Client(object):
         count = kwargs.pop('count', 16)
         end_cursor = kwargs.pop('end_cursor', None)
 
+        variables = {
+            'shortcode': short_code,
+            'first': int(count)
+        }
+        if end_cursor:
+            variables['after'] = end_cursor
         query = {
             'query_id': '17852405266163336',
-            'shortcode': short_code,
-            'first': count}
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
 
         if end_cursor:
             query['after'] = end_cursor
@@ -448,13 +454,17 @@ class Client(object):
         """
         count = kwargs.pop('count', 10)
         end_cursor = kwargs.pop('end_cursor', None)
-        query = {
-            'query_id': '17874545323001329',
+        variables = {
             'id': user_id,
-            'first': count,
+            'first': int(count)
         }
         if end_cursor:
-            query['after'] = end_cursor
+            variables['after'] = end_cursor
+
+        query = {
+            'query_id': '17874545323001329',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
 
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
         if self.auto_patch:
@@ -481,13 +491,17 @@ class Client(object):
         """
         count = kwargs.pop('count', 10)
         end_cursor = kwargs.pop('end_cursor', None)
-        query = {
-            'query_id': '17851374694183129',
+        variables = {
             'id': user_id,
-            'first': count,
+            'first': int(count)
         }
         if end_cursor:
-            query['after'] = end_cursor
+            variables['after'] = end_cursor
+
+        query = {
+            'query_id': '17851374694183129',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
 
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
         if self.auto_patch:
