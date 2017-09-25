@@ -152,9 +152,9 @@ class AccountsEndpointsMixin(object):
                 error_obj = json.loads(error_response)
                 if error_obj.get('message'):
                     error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
-            except ValueError as e:
+            except ValueError as ve:
                 # do nothing else, prob can't parse json
-                self.logger.warn('Error parsing error response: {}'.format(str(e)))
+                self.logger.warn('Error parsing error response: {}'.format(str(ve)))
             raise ClientError(error_msg, e.code, error_response)
 
         post_response = self._read_response(response)

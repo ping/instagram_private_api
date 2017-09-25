@@ -490,9 +490,9 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                     error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
             except (ClientLoginError, ClientLoginRequiredError, ClientThrottledError):
                 raise
-            except ValueError as ex:
+            except ValueError as ve:
                 # do nothing else, prob can't parse json
-                self.logger.warn('Error parsing error response: {}'.format(str(ex)))
+                self.logger.warn('Error parsing error response: {}'.format(str(ve)))
             raise ClientError(error_msg, e.code, error_response)
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
