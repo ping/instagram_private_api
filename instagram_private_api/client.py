@@ -23,6 +23,13 @@ from .errors import (
     ClientLoginRequiredError, ClientCookieExpiredError,
     ClientThrottledError, ClientConnectionError
 )
+try:  # Python 3:
+    # Not a no-op, we're adding this to the namespace so it can be imported.
+    ConnectionError = ConnectionError
+except NameError:  # Python 2:
+    class ConnectionError(Exception):
+        pass
+
 from .constants import Constants
 from .http import ClientCookieJar
 from .endpoints import (
@@ -489,9 +496,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             raise ClientError(error_msg, e.code, error_response)
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
-                compat_http_client.HTTPException) as connection_error:
-            # ConnectionError is py3-specific. Hm.
-            # https://docs.python.org/3/library/exceptions.html#ConnectionError
+                compat_http_client.HTTPException,
+                ConnectionError) as connection_error:
             raise ClientConnectionError('{} {}'.format(
                 connection_error.__class__.__name__, str(connection_error)))
 
