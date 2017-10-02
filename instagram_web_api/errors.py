@@ -21,3 +21,8 @@ class ClientLoginError(ClientError):
 class ClientCookieExpiredError(ClientError):
     """Raised when cookies have expired."""
     pass
+
+
+class ClientConnectionError(ClientError):
+    """Raised due to network connectivity-related issues"""
+    pass

@@ -15,13 +15,24 @@ import warnings
 from functools import wraps
 import string
 import random
-
+from socket import timeout, error as SocketError
+from ssl import SSLError
 from .compat import (
     compat_urllib_request, compat_urllib_parse,
-    compat_urllib_parse_urlparse, compat_urllib_error
+    compat_urllib_parse_urlparse, compat_urllib_error,
+    compat_http_client
 )
 from .compatpatch import ClientCompatPatch
-from .errors import ClientError, ClientLoginError, ClientCookieExpiredError
+from .errors import (
+    ClientError, ClientLoginError, ClientCookieExpiredError,
+    ClientConnectionError
+)
+try:  # Python 3:
+    # Not a no-op, we're adding this to the namespace so it can be imported.
+    ConnectionError = ConnectionError
+except NameError:  # Python 2:
+    class ConnectionError(Exception):
+        pass
 from .http import ClientCookieJar, MultipartFormDataEncoder
 from .common import ClientDeprecationWarning
 
@@ -233,8 +244,12 @@ class Client(object):
 
         except compat_urllib_error.HTTPError as e:
             raise ClientError('HTTPError "{0!s}" while opening {1!s}'.format(e.reason, url), e.code)
-        except compat_urllib_error.URLError as e:
-            raise ClientError('URLError "{0!s}" while opening {1!s}'.format(e.reason, url))
+        except (SSLError, timeout, SocketError,
+                compat_urllib_error.URLError,   # URLError is base of HTTPError
+                compat_http_client.HTTPException,
+                ConnectionError) as connection_error:
+            raise ClientConnectionError('{} {}'.format(
+                connection_error.__class__.__name__, str(connection_error)))
 
     @staticmethod
     def _sanitise_media_id(media_id):

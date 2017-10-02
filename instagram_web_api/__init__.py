@@ -2,7 +2,10 @@
 
 from .client import Client
 from .compatpatch import ClientCompatPatch
-from .errors import ClientError, ClientLoginError, ClientCookieExpiredError
+from .errors import (
+    ClientError, ClientLoginError, ClientCookieExpiredError,
+    ClientConnectionError
+)
 from .common import ClientDeprecationWarning
 
 
