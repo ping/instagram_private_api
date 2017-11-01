@@ -1,7 +1,7 @@
 import unittest
 
 from ..common import (
-    ApiTestBase, compat_mock
+    ApiTestBase, compat_mock, ClientError
 )
 
 
@@ -16,8 +16,13 @@ class UsersTests(ApiTestBase):
                 'test': UsersTests('test_user_info', api, user_id='124317')
             },
             {
+                # private user
                 'name': 'test_user_info2',
-                'test': UsersTests('test_user_info', api, user_id='322244991')
+                'test': UsersTests('test_user_info', api, user_id='426095486')
+            },
+            {
+                'name': 'test_deleted_user_info',
+                'test': UsersTests('test_deleted_user_info', api, user_id='322244991')
             },
             {
                 'name': 'test_username_info',
@@ -57,6 +62,11 @@ class UsersTests(ApiTestBase):
         results = self.api.user_info(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('user', {}).get('profile_picture'))
+
+    def test_deleted_user_info(self):
+        with self.assertRaises(ClientError) as ce:
+            self.api.user_info(self.test_user_id)
+        self.assertEqual(ce.exception.code, 404)
 
     def test_username_info(self):
         results = self.api.username_info(self.test_user_id)

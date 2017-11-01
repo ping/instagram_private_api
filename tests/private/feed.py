@@ -31,7 +31,7 @@ class FeedTests(ApiTestBase):
             },
             {
                 'name': 'test_private_user_feed',
-                'test': FeedTests('test_private_user_feed', api, user_id='322244991')
+                'test': FeedTests('test_private_user_feed', api, user_id='426095486')
             },
             {
                 'name': 'test_reels_tray',
