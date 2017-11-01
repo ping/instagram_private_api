@@ -4,8 +4,11 @@ from random import randint
 import re
 import warnings
 
-from ..compat import compat_urllib_error, compat_urllib_request
-from ..errors import ClientError
+from ..compat import (
+    compat_urllib_error, compat_urllib_request,
+    compat_http_client
+)
+from ..errors import ClientError, ClientConnectionError
 from ..http import MultipartFormDataEncoder
 from ..utils import (
     max_chunk_count_generator, max_chunk_size_generator,
@@ -14,6 +17,13 @@ from ..utils import (
 from ..compatpatch import ClientCompatPatch
 from .common import ClientDeprecationWarning
 from .common import MediaTypes
+from socket import timeout, error as SocketError
+from ssl import SSLError
+try:
+    ConnectionError = ConnectionError
+except NameError:  # Python 2:
+    class ConnectionError(Exception):
+        pass
 
 
 class MediaRatios(object):
@@ -446,6 +456,11 @@ class UploadEndpointsMixin(object):
                 # do nothing else, prob can't parse json
                 self.logger.warn('Error parsing error response: {}'.format(str(ve)))
             raise ClientError(error_msg, e.code, error_response)
+        except (SSLError, timeout, SocketError,
+                compat_urllib_error.URLError,   # URLError is base of HTTPError
+                compat_http_client.HTTPException) as connection_error:
+                raise ClientConnectionError('{} {}'.format(
+                    connection_error.__class__.__name__, str(connection_error)))
 
         post_response = self._read_response(response)
         self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, post_response))
@@ -551,81 +566,98 @@ class UploadEndpointsMixin(object):
         max_retry_count = kwargs.pop('max_retry_count', 10)
         configure_delay = 0
         for _ in range(max_retry_count + 1):
-            # Prevent excessively small chunks
-            if video_file_len > 1 * 1024 * 1000:
-                # max num of chunks = 4
-                chunk_generator = max_chunk_count_generator(4, video_data)
-            else:
-                # max chunk size = 350,000 so that we'll always have
-                # <4 chunks when it's <1mb
-                chunk_generator = max_chunk_size_generator(350000, video_data)
 
-            for chunk, data in chunk_generator:
-                skip_chunk = False
-                for received_chunk in successful_chunk_ranges:
-                    if received_chunk[0] <= chunk.start and received_chunk[1] >= (chunk.end - 1):
-                        skip_chunk = True
-                        break
-                if skip_chunk:
-                    self.logger.debug('Skipped chunk: {0:d} - {1:d}'.format(chunk.start, chunk.end - 1))
-                    continue
+            try:
+                # Prevent excessively small chunks
+                if video_file_len > 1 * 1024 * 1000:
+                    # max num of chunks = 4
+                    chunk_generator = max_chunk_count_generator(4, video_data)
+                else:
+                    # max chunk size = 350,000 so that we'll always have
+                    # <4 chunks when it's <1mb
+                    chunk_generator = max_chunk_size_generator(350000, video_data)
 
-                headers = self.default_headers
-                headers['Connection'] = 'keep-alive'
-                headers['Content-Type'] = 'application/octet-stream'
-                headers['Content-Disposition'] = 'attachment; filename="video.mov"'
-                headers['Session-ID'] = upload_id
-                if is_sidecar:
-                    headers['Cookie'] = 'sessionid=' + self.get_cookie_value('sessionid')
-                headers['job'] = upload_job
-                headers['Content-Length'] = chunk.length
-                headers['Content-Range'] = 'bytes {0:d}-{1:d}/{2:d}'.format(chunk.start, chunk.end - 1, video_file_len)
-                self.logger.debug('POST {0!s}'.format(upload_url))
-                self.logger.debug('Uploading Content-Range: {0!s}'.format(headers['Content-Range']))
+                for chunk, data in chunk_generator:
+                    skip_chunk = False
+                    for received_chunk in successful_chunk_ranges:
+                        if received_chunk[0] <= chunk.start and received_chunk[1] >= (chunk.end - 1):
+                            skip_chunk = True
+                            break
+                    if skip_chunk:
+                        self.logger.debug('Skipped chunk: {0:d} - {1:d}'.format(chunk.start, chunk.end - 1))
+                        continue
 
-                req = compat_urllib_request.Request(
-                    str(upload_url), data=data, headers=headers)
+                    headers = self.default_headers
+                    headers['Connection'] = 'keep-alive'
+                    headers['Content-Type'] = 'application/octet-stream'
+                    headers['Content-Disposition'] = 'attachment; filename="video.mov"'
+                    headers['Session-ID'] = upload_id
+                    if is_sidecar:
+                        headers['Cookie'] = 'sessionid=' + self.get_cookie_value('sessionid')
+                    headers['job'] = upload_job
+                    headers['Content-Length'] = chunk.length
+                    headers['Content-Range'] = 'bytes {0:d}-{1:d}/{2:d}'.format(
+                        chunk.start, chunk.end - 1, video_file_len)
+                    self.logger.debug('POST {0!s}'.format(upload_url))
+                    self.logger.debug('Uploading Content-Range: {0!s}'.format(headers['Content-Range']))
 
-                try:
-                    res = self.opener.open(req, timeout=self.timeout)
-                    post_response = self._read_response(res)
-                    self.logger.debug('RESPONSE: {0:d} {1!s}'.format(res.code, post_response))
-                    if res.info().get('Content-Type') == 'application/json':
-                        # last chunk
-                        upload_res = json.loads(post_response)
-                        configure_delay = int(upload_res.get('configure_delay_ms', 0)) / 1000.0
-                        all_done = True
-                        break
-                    else:
-                        successful_chunk_ranges = []
-                        post_progress = post_response.split(',')
-                        for progress in post_progress:
-                            mobj = re.match(r'(?P<start>[0-9]+)\-(?P<end>[0-9]+)/(?P<total>[0-9]+)', progress)
-                            if mobj:
-                                successful_chunk_ranges.append((int(mobj.group('start')), int(mobj.group('end'))))
-                            else:
-                                self.logger.error(
-                                    'Received unexpected chunk upload response: {0!s}'.format(post_response))
-                                raise ClientError(
-                                    'Upload has failed due to unexpected upload response: {0!s}'.format(post_response),
-                                    code=500)
+                    req = compat_urllib_request.Request(
+                        str(upload_url), data=data, headers=headers)
 
-                except compat_urllib_error.HTTPError as e:
-                    error_msg = e.reason
-                    error_response = self._read_response(e)
-                    self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
                     try:
-                        error_obj = json.loads(error_response)
-                        if error_obj.get('message'):
-                            error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
-                    except ValueError as ve:
-                        # do nothing else, prob can't parse json
-                        self.logger.warn('Error parsing error response: {}'.format(str(ve)))
-                    raise ClientError(error_msg, e.code, error_response)
-            else:
-                # if not break due to completed chunks then continue with next chunk
+                        res = self.opener.open(req, timeout=self.timeout)
+                        post_response = self._read_response(res)
+                        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(res.code, post_response))
+                        if res.info().get('Content-Type') == 'application/json':
+                            # last chunk
+                            upload_res = json.loads(post_response)
+                            configure_delay = int(upload_res.get('configure_delay_ms', 0)) / 1000.0
+                            all_done = True
+                            break
+                        else:
+                            successful_chunk_ranges = []
+                            post_progress = post_response.split(',')
+                            for progress in post_progress:
+                                mobj = re.match(r'(?P<start>[0-9]+)\-(?P<end>[0-9]+)/(?P<total>[0-9]+)', progress)
+                                if mobj:
+                                    successful_chunk_ranges.append((int(mobj.group('start')), int(mobj.group('end'))))
+                                else:
+                                    self.logger.error(
+                                        'Received unexpected chunk upload response: {0!s}'.format(post_response))
+                                    raise ClientError(
+                                        'Upload has failed due to unexpected upload response: {0!s'.forma(
+                                            post_response),
+                                        code=500)
+
+                    except compat_urllib_error.HTTPError as e:
+                        error_msg = e.reason
+                        error_response = self._read_response(e)
+                        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
+                        try:
+                            error_obj = json.loads(error_response)
+                            if error_obj.get('message'):
+                                error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
+                        except ValueError as ve:
+                            # do nothing else, prob can't parse json
+                            self.logger.warn('Error parsing error response: {}'.format(str(ve)))
+                        raise ClientError(error_msg, e.code, error_response)
+
+                    except (SSLError, timeout, SocketError,
+                            compat_urllib_error.URLError,   # URLError is base of HTTPError
+                            compat_http_client.HTTPException) as connection_error:
+                            raise ClientConnectionError('{} {}'.format(
+                                connection_error.__class__.__name__, str(connection_error)))
+
+                else:
+                    # if not break due to completed chunks then continue with next chunk
+                    continue
+                break
+
+            except ClientConnectionError as cce:
+                # connectivity prob, so let's just continue with another attempt
+                self.logger.warn('ClientConnectionError posting chunks: {}'.format(
+                    str(cce)))
                 continue
-            break
 
         if not all_done:
             raise ClientError('Upload has failed due to incomplete chunk uploads.', code=500)
@@ -644,6 +676,14 @@ class UploadEndpointsMixin(object):
                     result = self.configure_video_to_reel(
                         upload_id, size, duration, thumbnail_data)
                 return result
+            except ClientConnectionError as cce:
+                if i < configure_retry_max:
+                    self.logger.warn(
+                        'Retry configure after {0:f} seconds: {}'.format(
+                            configure_delay, cce.msg))
+                    time.sleep(configure_delay)
+                else:
+                    raise
             except ClientError as ce:
                 if (ce.code == 202 or ce.msg == 'Transcode timeout') and i < configure_retry_max:
                     self.logger.warn('Retry configure after {0:f} seconds'.format(configure_delay))
