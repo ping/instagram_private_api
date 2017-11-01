@@ -1,9 +1,21 @@
 import json
 
-from ..compat import compat_urllib_request, compat_urllib_error
-from ..errors import ClientError, ClientLoginError
+from ..compat import (
+    compat_urllib_request, compat_urllib_error,
+    compat_http_client
+)
+from ..errors import (
+    ClientError, ClientLoginError, ClientConnectionError
+)
 from ..http import MultipartFormDataEncoder
 from ..compatpatch import ClientCompatPatch
+from socket import timeout, error as SocketError
+from ssl import SSLError
+try:
+    ConnectionError = ConnectionError
+except NameError:  # Python 2:
+    class ConnectionError(Exception):
+        pass
 
 
 class AccountsEndpointsMixin(object):
@@ -156,6 +168,11 @@ class AccountsEndpointsMixin(object):
                 # do nothing else, prob can't parse json
                 self.logger.warn('Error parsing error response: {}'.format(str(ve)))
             raise ClientError(error_msg, e.code, error_response)
+        except (SSLError, timeout, SocketError,
+                compat_urllib_error.URLError,   # URLError is base of HTTPError
+                compat_http_client.HTTPException) as connection_error:
+                raise ClientConnectionError('{} {}'.format(
+                    connection_error.__class__.__name__, str(connection_error)))
 
         post_response = self._read_response(response)
         self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, post_response))
