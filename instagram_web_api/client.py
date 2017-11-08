@@ -728,15 +728,24 @@ class Client(object):
 
         :param tag:
         :param kwargs:
-            - **max_id**: For pagination
+            - **end_cursor**: For pagination
         :return:
         """
-        query = {'__a': '1'}
-        if kwargs:
-            query.update(kwargs)
-        endpoint = 'https://www.instagram.com/explore/tags/{0!s}/'.format(
-            compat_urllib_parse.quote(tag))
-        return self._make_request(endpoint, query=query)
+        count = kwargs.pop('count', 16)
+        end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
+
+        variables = {
+            'tag_name': tag,
+            'first': int(count)
+        }
+        if end_cursor:
+            variables['after'] = end_cursor
+        query = {
+            'query_id': '17875800862117404',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+
+        return self._make_request(self.GRAPHQL_API_URL, query=query)
 
     def location_feed(self, location_id, **kwargs):
         """
@@ -747,8 +756,19 @@ class Client(object):
             - **max_id**: For pagination
         :return:
         """
-        query = {'__a': '1'}
-        if kwargs:
-            query.update(kwargs)
-        endpoint = 'https://www.instagram.com/explore/locations/{0!s}/'.format(location_id)
-        return self._make_request(endpoint, query=query)
+        count = kwargs.pop('count', 16)
+        end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
+
+        variables = {
+            'id': location_id,
+            'first': int(count)
+        }
+        if end_cursor:
+            variables['after'] = end_cursor
+
+        query = {
+            'query_id': '17865274345132052',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+
+        return self._make_request(self.GRAPHQL_API_URL, query=query)

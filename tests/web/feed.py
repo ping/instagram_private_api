@@ -19,13 +19,17 @@ class FeedTests(WebApiTestBase):
         ]
 
     def test_tag_feed(self):
-        results = self.api.tag_feed('catsofinstagram')
-        self.assertIsNotNone(results.get('tag'))
-        self.assertGreater(len(results.get('tag', {}).get('media', {}).get('nodes', [])), 0)
-        self.assertGreater(len(results.get('tag', {}).get('top_posts', {}).get('nodes', [])), 0)
+        results = self.api.tag_feed('catsofinstagram').get('data', {})
+        self.assertIsNotNone(results.get('hashtag', {}).get('name'))
+        self.assertGreater(
+            len(results.get('hashtag', {}).get('edge_hashtag_to_media', {}).get('edges', [])), 0)
+        self.assertGreater(
+            len(results.get('hashtag', {}).get('edge_hashtag_to_top_posts', {}).get('edges', [])), 0)
 
     def test_location_feed(self):
-        results = self.api.location_feed('212988663')
-        self.assertIsNotNone(results.get('location'))
-        self.assertGreater(len(results.get('location', {}).get('media', {}).get('nodes', [])), 0)
-        self.assertGreater(len(results.get('location', {}).get('top_posts', {}).get('nodes', [])), 0)
+        results = self.api.location_feed('212988663').get('data', {})
+        self.assertIsNotNone(results.get('location', {}).get('name'))
+        self.assertGreater(
+            len(results.get('location', {}).get('edge_location_to_media', {}).get('edges', [])), 0)
+        self.assertGreater(
+            len(results.get('location', {}).get('edge_location_to_top_posts', {}).get('edges', [])), 0)
