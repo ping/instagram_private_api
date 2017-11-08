@@ -728,6 +728,7 @@ class Client(object):
 
         :param tag:
         :param kwargs:
+            - **count**: Number of records to return
             - **end_cursor**: For pagination
         :return:
         """
@@ -753,7 +754,8 @@ class Client(object):
 
         :param location_id:
         :param kwargs:
-            - **max_id**: For pagination
+            - **count**: Number of records to return
+            - **end_cursor**: For pagination
         :return:
         """
         count = kwargs.pop('count', 16)
