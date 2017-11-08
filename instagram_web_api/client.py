@@ -338,7 +338,7 @@ class Client(object):
         end_cursor = kwargs.pop('end_cursor', None)
 
         query = {
-            'query_id': '17880160963012870',
+            'query_id': '17888483320059182',
             'id': user_id,
             'first': count}
 
