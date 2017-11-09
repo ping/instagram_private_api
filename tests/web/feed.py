@@ -16,6 +16,10 @@ class FeedTests(WebApiTestBase):
                 'name': 'test_location_feed',
                 'test': FeedTests('test_location_feed', api),
             },
+            {
+                'name': 'test_timeline_feed',
+                'test': FeedTests('test_timeline_feed', api),
+            },
         ]
 
     def test_tag_feed(self):
@@ -33,3 +37,9 @@ class FeedTests(WebApiTestBase):
             len(results.get('location', {}).get('edge_location_to_media', {}).get('edges', [])), 0)
         self.assertGreater(
             len(results.get('location', {}).get('edge_location_to_top_posts', {}).get('edges', [])), 0)
+
+    def test_timeline_feed(self):
+        results = self.api.timeline_feed().get('data', {})
+        self.assertIsNotNone(results.get('user', {}).get('username'))
+        self.assertGreater(
+            len(results.get('user', {}).get('edge_web_feed_timeline', {}).get('edges', [])), 0)

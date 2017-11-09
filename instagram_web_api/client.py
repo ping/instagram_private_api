@@ -774,3 +774,29 @@ class Client(object):
         }
 
         return self._make_request(self.GRAPHQL_API_URL, query=query)
+
+    @login_required
+    def timeline_feed(self, **kwargs):
+        """
+        :param kwargs:
+            - **count**: Number of records to return
+            - **end_cursor**: For pagination
+        """
+        end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
+        fetch_media_item_count = int(kwargs.pop('count', 12))
+        fetch_comment_count = int(kwargs.pop('fetch_comment_count', 4))
+        fetch_like = int(kwargs.pop('fetch_like', 10))
+        has_stories = bool(kwargs.pop('has_stories', False))
+        variables = {
+            'fetch_media_item_count': fetch_media_item_count,
+            'fetch_comment_count': fetch_comment_count,
+            'fetch_like': fetch_like,
+            'has_stories': has_stories,
+        }
+        if end_cursor:
+            variables['fetch_media_item_cursor'] = end_cursor
+        query = {
+            'query_id': '17842794232208280',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+        return self._make_request(self.GRAPHQL_API_URL, query=query)
