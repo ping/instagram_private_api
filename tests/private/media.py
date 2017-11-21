@@ -162,6 +162,10 @@ class MediaTests(ApiTestBase):
                 'name': 'test_media_only_me_mock',
                 'test': MediaTests('test_media_only_me_mock', api)
             },
+            {
+                'name': 'test_comment_replies',
+                'test': MediaTests('test_comment_replies', api)
+            },
         ]
 
     def test_media_info(self):
@@ -202,6 +206,12 @@ class MediaTests(ApiTestBase):
         num_of_comments = 50
         results = self.api.media_n_comments(self.test_media_id, n=num_of_comments)
         self.assertGreaterEqual(len(results), num_of_comments, 'No comment returned.')
+
+    def test_comment_replies(self):
+        results = self.api.comment_replies(
+            '1652531711743017348_184692323', '17881229782160892')
+        self.assertGreater(
+            len(results.get('child_comments', [])), 0, 'No replies returned.')
 
     @unittest.skip('Modifies data.')
     def test_edit_media(self):

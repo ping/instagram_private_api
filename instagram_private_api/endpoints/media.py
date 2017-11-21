@@ -108,6 +108,28 @@ class MediaEndpointsMixin(object):
 
         return sorted(comments, key=lambda k: k['created_at_utc'], reverse=reverse)
 
+    def comment_replies(self, media_id, comment_id, **kwargs):
+        """
+        Get comment replies. Fixed at 20 replies returned per page.
+        Check for 'has_more_tail_child_comments', 'next_max_child_cursor' to determine
+        if there are more replies to page through.
+
+        :param media_id: Media id
+        :param comment_id: Comment id
+        :param kwargs:
+            **max_id**: For pagination
+        :return:
+        """
+        endpoint = 'media/{media_id!s}/comments/{comment_id!s}/child_comments/'.format(
+            **{'media_id': media_id, 'comment_id': comment_id})
+        res = self._call_api(endpoint, query=kwargs)
+
+        if self.auto_patch:
+            [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
+             for c in res.get('child_comments', [])]
+            ClientCompatPatch.comment(res.get('parent_comment'))
+        return res
+
     def edit_media(self, media_id, caption, usertags=None):
         """
         Edit a media's caption
