@@ -79,10 +79,9 @@ class UsersEndpointsMixin(object):
         :return:
         """
         query_params = {
-            'rank_token': self.rank_token,
-            'ig_sig_key_version': self.key_version,
-            'is_typeahead': 'true',
-            'query': query
+            'q': query,
+            'timezone_offset': self.timezone_offset,
+            'count': 30,
         }
         query_params.update(kwargs)
         res = self._call_api('users/search/', query=query_params)
