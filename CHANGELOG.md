@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.4.0 (pending)
+- Common:
+    * New ClientConnectionError for network-related errors
+- App API:
+    * Add comment replies endpoint
+    * Update user and tag search endpoints
+- Web API:
+    * __Breaking Change__: Tag and Location feeds updated to use graphql endpoints.
+    * Add timeline feed
+
 ## 1.3.6
 - App API:
     * Minor fixes
