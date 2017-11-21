@@ -38,9 +38,9 @@ class TagsEndpointsMixin(object):
         :return:
         """
         query = {
-            'is_typeahead': True,
             'q': text,
-            'rank_token': self.rank_token,
+            'timezone_offset': self.timezone_offset,
+            'count': 30,
         }
         query.update(kwargs)
         res = self._call_api('tags/search/', query=query)
