@@ -23,6 +23,7 @@ class FriendshipsEndpointsMixin(object):
 
         :param user_id:
         :param kwargs:
+            - **query**: Search within the user following
             - **max_id**: For pagination
         :return:
         """
@@ -43,6 +44,7 @@ class FriendshipsEndpointsMixin(object):
 
         :param user_id:
         :param kwargs:
+            - **query**: Search within the user followers
             - **max_id**: For pagination
         :return:
         """
