@@ -778,6 +778,8 @@ class Client(object):
     @login_required
     def timeline_feed(self, **kwargs):
         """
+        Get logged-in user's timeline feed.
+
         :param kwargs:
             - **count**: Number of records to return
             - **end_cursor**: For pagination
@@ -797,6 +799,34 @@ class Client(object):
             variables['fetch_media_item_cursor'] = end_cursor
         query = {
             'query_id': '17842794232208280',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+        return self._make_request(self.GRAPHQL_API_URL, query=query)
+
+    @login_required
+    def reels_tray(self):
+        """
+        Get a logged-in users reels tray.
+        """
+        query = {
+            'query_id': '17890626976041463',
+            'variables': json.dumps({}, separators=(',', ':'))
+        }
+        return self._make_request(self.GRAPHQL_API_URL, query=query)
+
+    @login_required
+    def reels_feed(self, reel_ids):
+        """
+        Get the stories feed for the specified user IDs
+
+        :param reel_ids: List of reel user IDs
+        """
+        variables = {
+            'reel_ids': reel_ids,
+            'precomposed_overlay': False,
+        }
+        query = {
+            'query_id': '17873473675158481',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)
