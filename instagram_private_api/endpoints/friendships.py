@@ -203,7 +203,7 @@ class FriendshipsEndpointsMixin(object):
 
     def friendships_unblock(self, user_id):
         """
-        Block a user
+        Unblock a user
 
         :param user_id: User id
         :return:
