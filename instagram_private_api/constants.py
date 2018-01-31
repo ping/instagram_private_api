@@ -2,11 +2,12 @@
 class Constants(object):
     """Constants holder class that stores the bulk of the fixed strings used in the library."""
 
-    IG_SIG_KEY = 'b4946d296abf005163e72346a6d33dd083cadde638e6ad9c5eb92e381b35784a'
-    IG_CAPABILITIES = '3boDAA=='    # = base64.b64encode(struct.pack('<i', 244445)).decode('ascii')
+    IG_SIG_KEY = '99e16edcca71d7c1f3fd74d447f6281bd5253a623000a55ed0b60014467a53b1'
+    IG_CAPABILITIES = '3brTBw=='    # = base64.b64encode(struct.pack('<i', 131316445)).decode('ascii')
     SIG_KEY_VERSION = '4'
+    APP_VERSION = '26.0.0.10.86'
+    APPLICATION_ID = '567067343352427'
 
-    APP_VERSION = '12.0.0.7.91'
     ANDROID_VERSION = 23
     ANDROID_RELEASE = '6.0.1'
     PHONE_MANUFACTURER = 'samsung'
