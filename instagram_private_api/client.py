@@ -67,6 +67,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     IG_SIG_KEY = Constants.IG_SIG_KEY
     IG_CAPABILITIES = Constants.IG_CAPABILITIES
     SIG_KEY_VERSION = Constants.SIG_KEY_VERSION
+    APPLICATION_ID = Constants.APPLICATION_ID
 
     def __init__(self, username, password, **kwargs):
         """
@@ -111,6 +112,9 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         self.ig_capabilities = (
             kwargs.pop('ig_capabilities', None) or user_settings.get('ig_capabilities') or
             self.IG_CAPABILITIES)
+        self.application_id = (
+            kwargs.pop('application_id', None) or user_settings.get('application_id') or
+            self.APPLICATION_ID)
 
         # to maintain backward compat for user_agent kwarg
         custom_ua = kwargs.pop('user_agent', '') or user_settings.get('user_agent')
@@ -360,6 +364,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'X-IG-Capabilities': self.ig_capabilities,
             'X-IG-Connection-Type': 'WIFI',
             'X-IG-Connection-Speed': '{0:d}kbps'.format(random.randint(1000, 5000)),
+            'X-IG-App-ID': self.application_id,
+            'X-IG-Bandwidth-Speed-KBPS': '-1.000',
+            'X-IG-Bandwidth-TotalBytes-B': '0',
+            'X-IG-Bandwidth-TotalTime-MS': '0',
         }
 
     @property
