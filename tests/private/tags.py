@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 
-from ..common import ApiTestBase
+import time
+from ..common import ApiTestBase, compat_mock, compat_urllib_parse
 
 
 class TagsTests(ApiTestBase):
@@ -20,10 +22,32 @@ class TagsTests(ApiTestBase):
                 'name': 'test_tag_search',
                 'test': TagsTests('test_tag_search', api)
             },
+            {
+                'name': 'test_tag_follow_suggestions',
+                'test': TagsTests('test_tag_follow_suggestions', api)
+            },
+            {
+                'name': 'test_tags_user_following',
+                'test': TagsTests('test_tags_user_following', api, user_id='25025320')
+            },
+            {
+                'name': 'test_tag_follow_mock',
+                'test': TagsTests('test_tag_follow_mock', api)
+            },
+            {
+                'name': 'test_tag_unfollow_mock',
+                'test': TagsTests('test_tag_unfollow_mock', api)
+            },
         ]
 
     def test_tag_info(self):
         results = self.api.tag_info('catsofinstagram')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(results.get('media_count'), 0, 'No media_count returned.')
+
+        time.sleep(self.sleep_interval)
+
+        results = self.api.tag_info(u'日本')
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(results.get('media_count'), 0, 'No media_count returned.')
 
@@ -36,3 +60,38 @@ class TagsTests(ApiTestBase):
         results = self.api.tag_search('cats')
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('results', [])), 0, 'No results returned.')
+
+    def test_tag_follow_suggestions(self):
+        results = self.api.tag_follow_suggestions()
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertGreater(len(results.get('tags', [])), 0, 'No results returned.')
+
+    def test_tags_user_following(self):
+        results = self.api.tags_user_following(self.test_user_id)
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIn('tags', results)
+        self.assertGreater(len(results.get('tags', [])), 0, 'No results returned.')
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_tag_follow_mock(self, call_api):
+        tag = 'catsofinstagram'
+        call_api.return_value = {
+            'status': 'ok',
+        }
+        self.api.tag_follow(tag)
+        call_api.assert_called_with(
+            'tags/follow/{hashtag!s}/'.format(
+                hashtag=compat_urllib_parse.quote(tag.encode('utf-8'))),
+            params=self.api.authenticated_params)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_tag_unfollow_mock(self, call_api):
+        tag = 'catsofinstagram'
+        call_api.return_value = {
+            'status': 'ok',
+        }
+        self.api.tag_unfollow(tag)
+        call_api.assert_called_with(
+            'tags/unfollow/{hashtag!s}/'.format(
+                hashtag=compat_urllib_parse.quote(tag.encode('utf-8'))),
+            params=self.api.authenticated_params)

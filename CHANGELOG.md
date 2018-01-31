@@ -6,6 +6,7 @@
 - App API:
     * Add comment replies endpoint
     * Add presence endpoints
+    * Add tag following endpoints
     * Update user and tag search endpoints
     * Update app version to 26
 - Web API:

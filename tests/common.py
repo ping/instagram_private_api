@@ -19,6 +19,7 @@ try:
         ig_chunk_generator
     )   # noqa
     from instagram_private_api.constants import Constants
+    from instagram_private_api.compat import compat_urllib_parse
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
@@ -31,6 +32,7 @@ except ImportError:
         ig_chunk_generator
     )   # noqa
     from instagram_private_api.constants import Constants
+    from instagram_private_api.compat import compat_urllib_parse
 
 try:
     from instagram_web_api import (
