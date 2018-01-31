@@ -611,7 +611,7 @@ class Client(object):
                         "id": "1234567890",
                         "full_name": "Somebody"
                     },
-                    "id": "1785811280000000"
+                    "id": "1785800000"
                 }
         """
         if len(comment_text) > 300:
