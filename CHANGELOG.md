@@ -2,7 +2,7 @@
 
 ## 1.4.0 (pending)
 - Common:
-    * __Breaking Change__: New ClientConnectionError for network-related errors
+    * __BREAKING CHANGE__: New ClientConnectionError for network-related errors
 - App API:
     * Add comment replies endpoint
     * Add presence endpoints
@@ -10,7 +10,7 @@
     * Update user and tag search endpoints
     * Update app version to 26
 - Web API:
-    * __Breaking Change__: Tag and Location feeds updated to use graphql endpoints.
+    * __BREAKING CHANGE__: Tag and Location feeds updated to use graphql endpoints.
     * Add timeline feed, reels tray, reels (stories) feed
 
 ## 1.3.6
