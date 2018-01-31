@@ -5,7 +5,9 @@
     * __Breaking Change__: New ClientConnectionError for network-related errors
 - App API:
     * Add comment replies endpoint
+    * Add presence endpoints
     * Update user and tag search endpoints
+    * Update app version to 26
 - Web API:
     * __Breaking Change__: Tag and Location feeds updated to use graphql endpoints.
     * Add timeline feed, reels tray, reels (stories) feed
