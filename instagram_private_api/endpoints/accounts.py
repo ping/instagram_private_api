@@ -207,3 +207,32 @@ class AccountsEndpointsMixin(object):
             '_uuid': self.uuid
         }
         return self._call_api('accounts/logout/', params=params, unsigned=True)
+
+    def presence_status(self):
+        """Get presence status setting"""
+        json_params = json.dumps({}, separators=(',', ':'))
+        query = {
+            'ig_sig_key_version': self.key_version,
+            'signed_body': self._generate_signature(json_params) + '.' + json_params
+        }
+        return self._call_api('accounts/get_presence_disabled/', query=query)
+
+    def set_presence_status(self, disabled):
+        """
+        Set presence status setting
+
+        :param disabled: True if disabling, else False
+        """
+        params = {
+            'disabled': '1' if disabled else '0'
+        }
+        params.update(self.authenticated_params)
+        return self._call_api('accounts/set_presence_disabled/', params=params)
+
+    def enable_presence_status(self):
+        """Enable presence status setting"""
+        return self.set_presence_status(False)
+
+    def disable_presence_status(self):
+        """Disable presence status setting"""
+        return self.set_presence_status(True)

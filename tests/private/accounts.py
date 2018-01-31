@@ -87,7 +87,19 @@ class AccountTests(ApiTestBase):
             {
                 'name': 'test_change_profile_picture_mock',
                 'test': AccountTests('test_change_profile_picture_mock', api)
-            }
+            },
+            {
+                'name': 'test_presence_status',
+                'test': AccountTests('test_presence_status', api)
+            },
+            {
+                'name': 'test_enable_presence_status_mock',
+                'test': AccountTests('test_enable_presence_status_mock', api)
+            },
+            {
+                'name': 'test_disable_presence_status_mock',
+                'test': AccountTests('test_disable_presence_status_mock', api)
+            },
         ]
 
     @unittest.skip('Unwise to run frequently.')
@@ -378,3 +390,33 @@ class AccountTests(ApiTestBase):
             with self.assertRaises(ClientError) as he:
                 self.api.change_profile_picture(photo_data)
             self.assertEqual(str(he.exception), 'Internal Server Error')
+
+    def test_presence_status(self):
+        results = self.api.presence_status()
+        self.assertIn('disabled', results)
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_enable_presence_status_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        self.api.enable_presence_status()
+        call_api.assert_called_with(
+            'accounts/set_presence_disabled/',
+            params={
+                '_csrftoken': self.api.csrftoken,
+                '_uuid': self.api.uuid,
+                '_uid': self.api.authenticated_user_id,
+                'disabled': '0',
+            })
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_disable_presence_status_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        self.api.disable_presence_status()
+        call_api.assert_called_with(
+            'accounts/set_presence_disabled/',
+            params={
+                '_csrftoken': self.api.csrftoken,
+                '_uuid': self.api.uuid,
+                '_uid': self.api.authenticated_user_id,
+                'disabled': '1',
+            })
