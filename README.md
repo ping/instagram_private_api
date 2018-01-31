@@ -42,15 +42,15 @@ Documentation is available at https://instagram-private-api.readthedocs.io/en/la
 
 Install with pip:
 
-``pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.4.0``
+``pip install git+https://git@github.com/ping/instagram_private_api.git@1.4.0``
 
 To update:
 
-``pip install git+ssh://git@github.com/ping/instagram_private_api.git@1.4.0 --upgrade``
+``pip install git+https://git@github.com/ping/instagram_private_api.git@1.4.0 --upgrade``
 
 To update with latest repo code:
 
-``pip install git+ssh://git@github.com/ping/instagram_private_api.git --upgrade --force-reinstall``
+``pip install git+https://git@github.com/ping/instagram_private_api.git --upgrade --force-reinstall``
 
 Tested on Python 2.7 and 3.5.
 
