@@ -275,7 +275,9 @@ class ClientTests(ApiTestBase):
         with self.assertRaises(ClientCheckpointRequiredError) as ce:
             self.api.feed_timeline()
         self.assertEqual(ce.exception.msg, 'checkpoint_challenge_required')
+        self.assertIsNotNone(ce.exception.challenge_url)
 
         with self.assertRaises(ClientChallengeRequiredError) as ce:
             self.api.feed_timeline()
         self.assertEqual(ce.exception.msg, 'challenge_required')
+        self.assertIsNotNone(ce.exception.challenge_url)
