@@ -8,8 +8,8 @@ class Constants(object):
     APP_VERSION = '26.0.0.10.86'
     APPLICATION_ID = '567067343352427'
 
-    ANDROID_VERSION = 23
-    ANDROID_RELEASE = '6.0.1'
+    ANDROID_VERSION = 24
+    ANDROID_RELEASE = '7.0'
     PHONE_MANUFACTURER = 'samsung'
     PHONE_DEVICE = 'SM-G930F'
     PHONE_MODEL = 'herolte'
