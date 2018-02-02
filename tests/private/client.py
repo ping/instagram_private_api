@@ -2,7 +2,10 @@ from io import BytesIO
 import json
 
 from ..common import (
-    ApiTestBase, Client, ClientThrottledError, ClientError, ClientLoginRequiredError, Constants,
+    ApiTestBase, Client, ClientThrottledError,
+    ClientError, ClientLoginRequiredError,
+    ClientSentryBlockError, ClientCheckpointRequiredError,
+    ClientChallengeRequiredError, Constants,
     gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator,
     compat_mock, compat_urllib_error
 )
@@ -221,7 +224,38 @@ class ClientTests(ApiTestBase):
             compat_urllib_error.HTTPError(
                 '', 500, 'Internal Server Error', {},
                 BytesIO('Internal Server Error'.encode('ascii'))),
+
+            compat_urllib_error.HTTPError(
+                '', 400, 'Bad Request', {},
+                BytesIO(json.dumps(
+                    {
+                        'status': 'fail',
+                        'message': 'Sorry, there was a problem with your request.',
+                        'error_type': 'sentry_block'
+                    }).encode('ascii'))),
+
+            compat_urllib_error.HTTPError(
+                '', 400, 'Bad Request', {},
+                BytesIO(json.dumps(
+                    {
+                        'status': 'fail',
+                        'message': 'challenge_required',
+                        'error_type': 'checkpoint_challenge_required',
+                        'challenge': {'url': 'https://i.instagram.com/challenge/x/y/'}
+                    }).encode('ascii'))),
+
+            compat_urllib_error.HTTPError(
+                '', 400, 'Bad Request', {},
+                BytesIO(json.dumps(
+                    {
+                        'status': 'fail',
+                        'message': 'challenge_required',
+                        'error_type': 'challenge_required',
+                        'challenge': {'url': 'https://i.instagram.com/challenge/x/y/'}
+                    }).encode('ascii'))),
+
         ]
+
         with self.assertRaises(ClientLoginRequiredError) as ce:
             self.api.feed_timeline()
         self.assertEqual(ce.exception.msg, 'login_required')
@@ -233,3 +267,15 @@ class ClientTests(ApiTestBase):
         with self.assertRaises(ClientError) as ce:
             self.api.feed_timeline()
         self.assertEqual(ce.exception.msg, 'Internal Server Error')
+
+        with self.assertRaises(ClientSentryBlockError) as ce:
+            self.api.feed_timeline()
+        self.assertEqual(ce.exception.msg, 'sentry_block')
+
+        with self.assertRaises(ClientCheckpointRequiredError) as ce:
+            self.api.feed_timeline()
+        self.assertEqual(ce.exception.msg, 'checkpoint_challenge_required')
+
+        with self.assertRaises(ClientChallengeRequiredError) as ce:
+            self.api.feed_timeline()
+        self.assertEqual(ce.exception.msg, 'challenge_required')

@@ -12,7 +12,9 @@ try:
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientThrottledError, ClientCompatPatch,
-        ClientLoginRequiredError, MediaTypes)
+        ClientLoginRequiredError, MediaTypes,
+        ClientSentryBlockError, ClientCheckpointRequiredError,
+        ClientChallengeRequiredError)
     from instagram_private_api.utils import (
         InstagramID, gen_user_breadcrumb,
         max_chunk_size_generator, max_chunk_count_generator, get_file_size,
@@ -25,7 +27,9 @@ except ImportError:
     from instagram_private_api import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientThrottledError, ClientCompatPatch,
-        ClientLoginRequiredError, MediaTypes)
+        ClientLoginRequiredError, MediaTypes,
+        ClientSentryBlockError, ClientCheckpointRequiredError,
+        ClientChallengeRequiredError)
     from instagram_private_api.utils import (
         InstagramID, gen_user_breadcrumb,
         max_chunk_size_generator, max_chunk_count_generator, get_file_size,
