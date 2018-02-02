@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
+import json
+import re
+
+logger = logging.getLogger(__name__)
 
 
 class ClientErrorCodes(object):
@@ -46,3 +51,75 @@ class ClientThrottledError(ClientError):
 class ClientConnectionError(ClientError):
     """Raised due to network connectivity-related issues"""
     pass
+
+
+class ClientCheckpointRequiredError(ClientError):
+    """Raise when IG detects suspicious activity from your account"""
+
+    @property
+    def challenge_url(self):
+        try:
+            error_info = json.loads(self.error_response)
+            return error_info.get('challenge', {}).get('url')
+        except ValueError as ve:
+            logger.warn('Error parsing error response: {}'.format(str(ve)))
+        return None
+
+
+class ClientChallengeRequiredError(ClientCheckpointRequiredError):
+    """Raise when IG detects suspicious activity from your account"""
+
+
+class ClientSentryBlockError(ClientError):
+    """Raise when IG has flagged your account for spam or abusive behavior"""
+    pass
+
+
+class ErrorHandler(object):
+
+    KNOWN_ERRORS_MAP = [
+        {'patterns': ['bad_password', 'invalid_user'], 'error': ClientLoginError},
+        {'patterns': ['login_required'], 'error': ClientLoginRequiredError},
+        {
+            'patterns': ['checkpoint_required', 'checkpoint_challenge_required'],
+            'error': ClientCheckpointRequiredError
+        },
+        {'patterns': ['challenge_required'], 'error': ClientChallengeRequiredError},
+        {'patterns': ['sentry_block'], 'error': ClientSentryBlockError},
+    ]
+
+    @staticmethod
+    def process(http_error, error_response):
+        """
+        Tries to process an error meaningfully
+
+        :param http_error: an instance of compat_urllib_error.HTTPError
+        :param error_response: body of the error response
+        """
+        error_msg = http_error.reason
+        try:
+            error_obj = json.loads(error_response)
+            error_message_type = error_obj.get('error_type', '') or error_obj.get('message', '')
+            if http_error.code == ClientErrorCodes.TOO_MANY_REQUESTS:
+                raise ClientThrottledError(
+                    error_obj.get('message'), code=http_error.code,
+                    error_response=json.dumps(error_obj))
+
+            for error_info in ErrorHandler.KNOWN_ERRORS_MAP:
+                for p in error_info['patterns']:
+                    if re.search(p, error_message_type):
+                        raise error_info['error'](
+                            error_message_type, code=http_error.code,
+                            error_response=json.dumps(error_obj)
+                        )
+            if error_message_type:
+                error_msg = '{0!s}: {1!s}'.format(http_error.reason, error_message_type)
+            else:
+                error_msg = http_error.reason
+        except ValueError as ve:
+            # do nothing else, prob can't parse json
+            logger.warn('Error parsing error response: {}'.format(str(ve)))
+        except ClientError:
+            raise
+
+        raise ClientError(error_msg, http_error.code, error_response)

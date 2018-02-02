@@ -1,6 +1,10 @@
 # Change Log
 
-## 1.4.0 (pending)
+## 1.4.1 (pending)
+- App API:
+    * Refactored error detection. New ``ClientCheckpointRequiredError``, ``ClientChallengeRequiredError``, ``ClientSentryBlockError``
+
+## 1.4.0
 - Common:
     * __BREAKING CHANGE__: New ClientConnectionError for network-related errors
 - App API:

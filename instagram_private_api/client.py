@@ -24,9 +24,9 @@ from .compat import (
     compat_urllib_request, compat_urllib_parse_urlparse,
     compat_http_client)
 from .errors import (
-    ClientErrorCodes, ClientError, ClientLoginError,
+    ErrorHandler, ClientError,
     ClientLoginRequiredError, ClientCookieExpiredError,
-    ClientThrottledError, ClientConnectionError
+    ClientConnectionError
 )
 try:  # Python 3:
     # Not a no-op, we're adding this to the namespace so it can be imported.
@@ -486,27 +486,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             self.logger.debug('DATA: {0!s}'.format(data))
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
-            error_msg = e.reason
             error_response = self._read_response(e)
             self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
-            try:
-                error_obj = json.loads(error_response)
-                if error_obj.get('message') == 'login_required':
-                    raise ClientLoginRequiredError(
-                        error_obj.get('message'), code=e.code,
-                        error_response=json.dumps(error_obj))
-                elif e.code == ClientErrorCodes.TOO_MANY_REQUESTS:
-                    raise ClientThrottledError(
-                        error_obj.get('message'), code=e.code,
-                        error_response=json.dumps(error_obj))
-                elif error_obj.get('message'):
-                    error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
-            except (ClientLoginError, ClientLoginRequiredError, ClientThrottledError):
-                raise
-            except ValueError as ve:
-                # do nothing else, prob can't parse json
-                self.logger.warn('Error parsing error response: {}'.format(str(ve)))
-            raise ClientError(error_msg, e.code, error_response)
+            ErrorHandler.process(e, error_response)
+
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
                 compat_http_client.HTTPException,

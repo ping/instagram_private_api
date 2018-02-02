@@ -164,13 +164,13 @@ class AccountTests(ApiTestBase):
                 '',     # Test 1
                 '',     # Test 1
                 '',     # Test 2
-                compat_urllib_error.HTTPError(      # Test 2
-                    self.api.api_url, 500, 'Internal Server Error', {},
-                    BytesIO('Internal Server Error'.encode('utf-8'))),
+                ClientError(        # Test 2
+                    'Internal Server Error', code=500,
+                    error_response='Internal Server Error'),
                 '',     # Test 3
-                compat_urllib_error.HTTPError(      # Test 2
-                    self.api.api_url, 400, 'Invalid', {},
-                    BytesIO('Invalid'.encode('utf-8'))),
+                ClientLoginError(       # Test 2
+                    'Invalid', code=400,
+                    error_response='Invalid'),
             ]
             read_response.return_value = json.dumps({'status': 'fail'})
 
@@ -185,9 +185,9 @@ class AccountTests(ApiTestBase):
             self.assertEqual(ce.exception.msg, 'Internal Server Error')
 
             # Test 3
-            with self.assertRaises(ClientLoginError) as cle:
+            with self.assertRaises(ClientError) as cle:
                 self.api.login()
-            self.assertEqual(cle.exception.msg, 'Unable to login: HTTP Error 400: Invalid')
+            self.assertEqual(cle.exception.msg, 'Invalid')
 
     def test_current_user(self):
         results = self.api.current_user()

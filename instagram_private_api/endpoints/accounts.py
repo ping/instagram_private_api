@@ -5,7 +5,7 @@ from ..compat import (
     compat_http_client
 )
 from ..errors import (
-    ClientError, ClientLoginError, ClientConnectionError
+    ErrorHandler, ClientError, ClientLoginError, ClientConnectionError
 )
 from ..http import MultipartFormDataEncoder
 from ..compatpatch import ClientCompatPatch
@@ -46,14 +46,8 @@ class AccountsEndpointsMixin(object):
             'login_attempt_count': '0',
         }
 
-        try:
-            login_response = self._call_api(
-                'accounts/login/', params=login_params, return_response=True)
-        except compat_urllib_error.HTTPError as e:
-            error_response = self._read_response(e)
-            if e.code == 400:
-                raise ClientLoginError('Unable to login: {0!s}'.format(e))
-            raise ClientError(e.reason, e.code, error_response)
+        login_response = self._call_api(
+            'accounts/login/', params=login_params, return_response=True)
 
         if not self.csrftoken:
             raise ClientError(
@@ -157,22 +151,14 @@ class AccountsEndpointsMixin(object):
             self.logger.debug('POST {0!s}'.format(endpoint_url))
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
-            error_msg = e.reason
             error_response = self._read_response(e)
             self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
-            try:
-                error_obj = json.loads(error_response)
-                if error_obj.get('message'):
-                    error_msg = '{0!s}: {1!s}'.format(e.reason, error_obj['message'])
-            except ValueError as ve:
-                # do nothing else, prob can't parse json
-                self.logger.warn('Error parsing error response: {}'.format(str(ve)))
-            raise ClientError(error_msg, e.code, error_response)
+            ErrorHandler.process(e, error_response)
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
                 compat_http_client.HTTPException) as connection_error:
-                raise ClientConnectionError('{} {}'.format(
-                    connection_error.__class__.__name__, str(connection_error)))
+            raise ClientConnectionError('{} {}'.format(
+                connection_error.__class__.__name__, str(connection_error)))
 
         post_response = self._read_response(response)
         self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, post_response))
