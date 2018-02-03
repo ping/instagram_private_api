@@ -193,3 +193,96 @@ class LiveEndpointsMixin(object):
         endpoint = 'live/{broadcast_id!s}/get_post_live_likes/'.format(
             **{'broadcast_id': broadcast_id})
         return self._call_api(endpoint, query=query)
+
+    def broadcast_create(
+            self, broadcast_message = '',
+            preview_width=720, preview_height=1184):
+        """
+        Create a live broadcast
+
+        Read the description of `broadcast_start()` for proper usage
+
+        :param preview_width     (optional) Width.
+        :param preview_height    (optional) Height.
+        :param broadcast_message (optional) Message to use for the broadcast.
+        
+        :return:
+        """
+        endpoint = 'live/create/'
+        params = {'preview_height': preview_height, 'preview_width':preview_width, 'broadcast_message':broadcast_message, 'broadcast_type': 'RTMP', 'internal_only': 0}
+        params.update(self.authenticated_params)
+        return self._call_api(endpoint, params=params)
+
+    def broadcast_start(
+            self, broadcast_id, send_notifications=True):
+        """
+        Start a live broadcast.
+        
+        Note that you MUST first call `broadcast_create()` to get a broadcast-ID and its
+        RTMP upload-URL. Next, simply begin sending your actual video broadcast
+        to the stream-upload URL. And then call `start()` with the broadcast-ID
+        to make the stream available to viewers.
+        
+        Also note that broadcasting to the video stream URL must be done via
+        other software, since it ISN'T (and won't be) handled by this library!
+        
+        Lastly, note that stopping the stream is done either via RTMP signals,
+        which your broadcasting software MUST output properly (FFmpeg DOESN'T do
+        it without special patching!), OR by calling the `broadcast_end()` function.
+        
+        :param broadcast_id        The broadcast ID in Instagram's internal format (ie "17854587811139572").
+        :param send_notifications  (optional) Whether to send notifications about the broadcast to your followers.
+
+        :return:
+        """
+        broadcast_id = str(broadcast_id)
+        endpoint = 'live/{broadcast_id!s}/start/'.format(**{'broadcast_id': broadcast_id})
+        params = {'should_send_notifications': int(send_notifications)}
+        params.update(self.authenticated_params)
+        return self._call_api(endpoint, params=params)
+
+    def broadcast_end(self, broadcast_id):
+        """
+        End a live broadcast.
+        
+        `NOTE:` To end your broadcast, you MUST use the `broadcast_id` value
+        which was assigned to you in the `broadcast_create()` response.
+        
+        :param broadcast_id
+        
+        :return:
+        """
+        broadcast_id = str(broadcast_id)
+        endpoint = 'live/{broadcast_id!s}/end_broadcast/'.format(**{'broadcast_id': broadcast_id})
+        params = self.authenticated_params
+        return self._call_api(endpoint, params=params)
+
+    def add_to_post_live(self, broadcast_id): 
+        """
+        Add a finished broadcast to your post-live feed (saved replay).
+		
+	The broadcast must have ended before you can call this function.
+        
+        :param broadcast_id
+        
+        :return:
+        """
+        broadcast_id = str(broadcast_id)
+        endpoint = 'live/{broadcast_id!s}/add_to_post_live/'.format(**{'broadcast_id': broadcast_id})
+        params = self.authenticated_params
+        return self._call_api(endpoint, params=params)
+	
+    def delete_post_live(self, broadcast_id):
+        """
+        Delete a saved post-live broadcast.
+		
+		The broadcast must have ended before you can call this function.
+        
+        :param broadcast_id
+        
+        :return:
+        """
+        broadcast_id = str(broadcast_id)
+        endpoint = 'live/{broadcast_id!s}/delete_post_live/'.format(**{'broadcast_id': broadcast_id})
+        params = self.authenticated_params
+        return self._call_api(endpoint, params=params)
