@@ -126,11 +126,17 @@ class UsersEndpointsMixin(object):
              for u in res.get('blocked_reels', {}).get('users', [])]
         return res
 
-    def set_reel_settings(self, message_prefs):
+    def set_reel_settings(
+            self, message_prefs,
+            allow_story_reshare=None, reel_auto_archive=None,
+            save_to_camera_roll=None):
         """
         Set story message replies settings
 
         :param message_prefs: One of 'anyone', 'following', 'off'
+        :param allow_story_reshare: bool
+        :param auto_archive: One of 'on', 'off'
+        :param save_to_camera_roll: bool
         :return:
             .. code-block:: javascript
 
@@ -142,5 +148,13 @@ class UsersEndpointsMixin(object):
         if message_prefs not in ['anyone', 'following', 'off']:
             raise ValueError('Invalid message_prefs: {0!s}'.format(message_prefs))
         params = {'message_prefs': message_prefs}
+        if allow_story_reshare is not None:
+            params['allow_story_reshare'] = '1' if allow_story_reshare else '0'
+        if reel_auto_archive is not None:
+            if reel_auto_archive not in ['on', 'off']:
+                raise ValueError('Invalid auto_archive: {0!s}'.format(reel_auto_archive))
+            params['reel_auto_archive'] = reel_auto_archive
+        if save_to_camera_roll is not None:
+            params['save_to_camera_roll'] = '1' if save_to_camera_roll else '0'
         params.update(self.authenticated_params)
         return self._call_api('users/set_reel_settings/', params=params)
