@@ -368,6 +368,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'X-IG-Bandwidth-Speed-KBPS': '-1.000',
             'X-IG-Bandwidth-TotalBytes-B': '0',
             'X-IG-Bandwidth-TotalTime-MS': '0',
+            'X-FB-HTTP-Engine': Constants.FB_HTTP_ENGINE,
         }
 
     @property

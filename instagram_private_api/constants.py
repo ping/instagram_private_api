@@ -7,6 +7,7 @@ class Constants(object):
     SIG_KEY_VERSION = '4'
     APP_VERSION = '26.0.0.10.86'
     APPLICATION_ID = '567067343352427'
+    FB_HTTP_ENGINE = 'Liger'
 
     ANDROID_VERSION = 24
     ANDROID_RELEASE = '7.0'
