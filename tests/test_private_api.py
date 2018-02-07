@@ -12,7 +12,7 @@ from .private import (
     FeedTests, FriendshipTests, LiveTests,
     LocationTests, MediaTests, MiscTests,
     TagsTests, UploadTests, UsersTests,
-    UsertagsTests,
+    UsertagsTests, HighlightsTests,
     ClientTests, ApiUtilsTests, CompatPatchTests
 )
 from .common import (
@@ -134,6 +134,7 @@ if __name__ == '__main__':
     tests.extend(UploadTests.init_all(api))
     tests.extend(UsersTests.init_all(api))
     tests.extend(UsertagsTests.init_all(api))
+    tests.extend(HighlightsTests.init_all(api))
 
     tests.extend(ClientTests.init_all(api))
     tests.extend(CompatPatchTests.init_all(api))

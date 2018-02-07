@@ -12,6 +12,7 @@ from .upload import UploadEndpointsMixin
 from .users import UsersEndpointsMixin
 from .usertags import UsertagsEndpointsMixin
 from .collections import CollectionsEndpointsMixin
+from .highlights import HighlightsEndpointsMixin
 
 from .common import (
     ClientDeprecationWarning,

@@ -12,6 +12,7 @@ from .tags import TagsTests
 from .upload import UploadTests
 from .users import UsersTests
 from .usertags import UsertagsTests
+from .highlights import HighlightsTests
 
 from .apiutils import ApiUtilsTests
 from .client import ClientTests

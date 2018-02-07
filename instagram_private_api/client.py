@@ -42,7 +42,7 @@ from .endpoints import (
     FriendshipsEndpointsMixin, LiveEndpointsMixin, MediaEndpointsMixin,
     MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
     UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
-    CollectionsEndpointsMixin,
+    CollectionsEndpointsMixin, HighlightsEndpointsMixin,
     ClientDeprecationWarning, ClientPendingDeprecationWarning,
     ClientExperimentalWarning
 )
@@ -58,7 +58,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
              FriendshipsEndpointsMixin, LiveEndpointsMixin, MediaEndpointsMixin,
              MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
              UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
-             CollectionsEndpointsMixin, object):
+             CollectionsEndpointsMixin, HighlightsEndpointsMixin, object):
     """Main API client class for the private app api."""
 
     API_URL = 'https://i.instagram.com/api/{version!s}/'
