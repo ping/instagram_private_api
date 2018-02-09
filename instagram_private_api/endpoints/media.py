@@ -71,7 +71,12 @@ class MediaEndpointsMixin(object):
         :return:
         """
         endpoint = 'media/{media_id!s}/comments/'.format(**{'media_id': media_id})
-        res = self._call_api(endpoint, query=kwargs)
+        query = {
+            'can_support_threading': 'true'
+        }
+        if kwargs:
+            query.update(kwargs)
+        res = self._call_api(endpoint, query=query)
 
         if self.auto_patch:
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
@@ -124,6 +129,29 @@ class MediaEndpointsMixin(object):
             **{'media_id': media_id, 'comment_id': comment_id})
         res = self._call_api(endpoint, query=kwargs)
 
+        if self.auto_patch:
+            [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
+             for c in res.get('child_comments', [])]
+            ClientCompatPatch.comment(res.get('parent_comment'))
+        return res
+
+    def comment_inline_replies(self, media_id, comment_id, max_id, **kwargs):
+        """
+        Get inline comment replies.
+        Check for 'next_max_child_cursor' from ``media_comments()``
+        to determine if there are inline comment replies to retrieve.
+
+        :param media_id: Media id
+        :param comment_id: Comment id
+        :param max_id: The comment's 'next_max_child_cursor' value from``media_comments()``
+        :return:
+        """
+        endpoint = 'media/{media_id!s}/comments/{comment_id!s}/inline_child_comments/'.format(
+            **{'media_id': media_id, 'comment_id': comment_id})
+        query = {'max_id': max_id}
+        if kwargs:
+            query.update(kwargs)
+        res = self._call_api(endpoint, query=query)
         if self.auto_patch:
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
              for c in res.get('child_comments', [])]

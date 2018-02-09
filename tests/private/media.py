@@ -166,6 +166,10 @@ class MediaTests(ApiTestBase):
                 'name': 'test_comment_replies',
                 'test': MediaTests('test_comment_replies', api)
             },
+            {
+                'name': 'test_comment_inline_replies',
+                'test': MediaTests('test_comment_inline_replies', api)
+            },
         ]
 
     def test_media_info(self):
@@ -210,6 +214,13 @@ class MediaTests(ApiTestBase):
     def test_comment_replies(self):
         results = self.api.comment_replies(
             '1652531711743017348_184692323', '17881229782160892')
+        self.assertGreater(
+            len(results.get('child_comments', [])), 0, 'No replies returned.')
+
+    def test_comment_inline_replies(self):
+        results = self.api.comment_inline_replies(
+            # max_id should not be '' but...
+            '1652531711743017348_184692323', '17881229782160892', max_id='')
         self.assertGreater(
             len(results.get('child_comments', [])), 0, 'No replies returned.')
 
