@@ -71,6 +71,14 @@ class HighlightsTests(ApiTestBase):
             'highlights/create_reel/',
             params=params)
 
+        with self.assertRaises(ValueError):
+            self.api.highlight_create(
+                media_ids, title='A title that is much too long'
+            )
+
+        with self.assertRaises(ValueError):
+            self.api.highlight_create('x')
+
     @compat_mock.patch('instagram_private_api.Client._call_api')
     def test_highlight_edit_mock(self, call_api):
         call_api.return_value = {
@@ -106,6 +114,21 @@ class HighlightsTests(ApiTestBase):
             added_media_ids=[], removed_media_ids=[],
             title=params['title'], source=params['source'])
         call_api.assert_called_with(endpoint, params=params)
+
+        with self.assertRaises(ValueError):
+            self.api.highlight_edit(
+                highlight_id, title='A title that is much too long'
+            )
+
+        with self.assertRaises(ValueError):
+            self.api.highlight_edit(
+                highlight_id, added_media_ids='x'
+            )
+
+        with self.assertRaises(ValueError):
+            self.api.highlight_edit(
+                highlight_id, removed_media_ids='x'
+            )
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
     def test_highlight_delete_mock(self, call_api):
