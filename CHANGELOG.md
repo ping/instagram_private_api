@@ -4,6 +4,8 @@
 - App API:
     * Refactored error detection. New ``ClientCheckpointRequiredError``, ``ClientChallengeRequiredError``, ``ClientSentryBlockError``
     * New highlight endpoints
+    * New ``comment_inline_replies()`` endpoint
+    * Updates for user feed and comments endpoints
 
 ## 1.4.0
 - Common:
