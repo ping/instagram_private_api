@@ -279,7 +279,7 @@ class MediaTests(ApiTestBase):
             'comment': {'created_at': '1234567890', 'pk': 100000,
                         'user': {'pk': 123, 'username': 'x', 'full_name': 'X', 'profile_pic_url': 'x.jpg'}}}
         media_id = '123_123'
-        comment_text = '<3'
+        comment_text = '<3 #heart https://google.com'
         breadcrumb = gen_user_breadcrumb(len(comment_text))
         generated_uuid = self.api.generate_uuid()
         with compat_mock.patch('instagram_private_api.endpoints.media.gen_user_breadcrumb') \
@@ -300,6 +300,16 @@ class MediaTests(ApiTestBase):
             call_api.assert_called_with(
                 'media/{media_id!s}/comment/'.format(**{'media_id': media_id}),
                 params=params)
+
+        test_comments = [
+            'x' * 301,      # Test max length
+            'X' * 300,      # Test all caps
+            '#test #test #test #test #test'     # Test hashtags limit
+            'https://google.com http://google.com'      # Test urls limit
+        ]
+        for t in test_comments:
+            with self.assertRaises(ValueError):
+                self.api.post_comment(media_id, t)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
     def test_delete_comment_mock(self, call_api):
