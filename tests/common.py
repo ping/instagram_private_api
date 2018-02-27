@@ -132,9 +132,13 @@ class WebApiTestBase(unittest.TestCase):
 class MockResponse(object):
     """A mock class to emulate api responses."""
 
-    def __init__(self, code=200, content_type=''):
+    def __init__(self, code=200, content_type='', body=''):
         self.code = 200
         self.content_type = content_type
+        self.body = body
 
     def info(self):
         return {'Content-Type': self.content_type}
+
+    def read(self):
+        return self.body.encode('utf8')

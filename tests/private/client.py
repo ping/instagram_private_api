@@ -7,7 +7,8 @@ from ..common import (
     ClientSentryBlockError, ClientCheckpointRequiredError,
     ClientChallengeRequiredError, Constants,
     gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator,
-    compat_mock, compat_urllib_error
+    compat_mock, compat_urllib_error,
+    MockResponse
 )
 
 
@@ -253,6 +254,8 @@ class ClientTests(ApiTestBase):
                         'error_type': 'challenge_required',
                         'challenge': {'url': 'https://i.instagram.com/challenge/x/y/'}
                     }).encode('ascii'))),
+            MockResponse(body=json.dumps({'message': 'login_required'})),
+            MockResponse(body=json.dumps({'status': 'error'})),
 
         ]
 
@@ -281,3 +284,11 @@ class ClientTests(ApiTestBase):
             self.api.feed_timeline()
         self.assertEqual(ce.exception.msg, 'challenge_required')
         self.assertIsNotNone(ce.exception.challenge_url)
+
+        with self.assertRaises(ClientLoginRequiredError) as ce:
+            self.api.feed_timeline()
+        self.assertEqual(ce.exception.msg, 'login_required')
+
+        with self.assertRaises(ClientError) as ce:
+            self.api.feed_timeline()
+        self.assertEqual(ce.exception.msg, 'Unknown error')
