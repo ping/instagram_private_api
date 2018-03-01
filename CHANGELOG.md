@@ -5,6 +5,7 @@
     * Refactored error detection. New ``ClientCheckpointRequiredError``, ``ClientChallengeRequiredError``, ``ClientSentryBlockError``
     * New highlight endpoints
     * New ``comment_inline_replies()`` endpoint
+    * New ``story_viewers()`` endpoint
     * Updates for user feed and comments endpoints
 
 ## 1.4.0

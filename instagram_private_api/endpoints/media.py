@@ -564,3 +564,16 @@ class MediaEndpointsMixin(object):
         :param media_type: One of :attr:`MediaTypes.PHOTO`, :attr:`MediaTypes.VIDEO`, or :attr:`MediaTypes.CAROUSEL`
         """
         return self.media_only_me(media_id, media_type, undo=True)
+
+    def story_viewers(self, story_pk, **kwargs):
+        """
+        Get list of story viewers
+
+        :param story_pk: Story media's PK identifier, e.g. "1700000123"
+        :param kwargs:
+            **max_id**: For pagination
+        :return:
+        """
+        endpoint = 'media/{story_pk!s}/list_reel_media_viewer/'.format(
+            story_pk=story_pk)
+        return self._call_api(endpoint, query=kwargs)

@@ -170,6 +170,14 @@ class MediaTests(ApiTestBase):
                 'name': 'test_comment_inline_replies',
                 'test': MediaTests('test_comment_inline_replies', api)
             },
+            {
+                'name': 'test_story_viewers_mock',
+                'test': MediaTests('test_story_viewers_mock', api)
+            },
+            {
+                'name': 'test_story_viewers',
+                'test': MediaTests('test_story_viewers', api)
+            },
         ]
 
     def test_media_info(self):
@@ -559,3 +567,20 @@ class MediaTests(ApiTestBase):
         call_api.assert_called_with(
             'media/{media_id!s}/undo_only_me/'.format(**{'media_id': media_id}),
             params=params, query={'media_type': 2})
+
+    @compat_mock.patch('instagram_private_api.Client._call_api')
+    def test_story_viewers_mock(self, call_api):
+        call_api.return_value = {'status': 'ok'}
+        story_pk = '170000000'
+        self.api.story_viewers(story_pk)
+        call_api.assert_called_with(
+            'media/{story_pk!s}/list_reel_media_viewer/'.format(story_pk=story_pk),
+            query={})
+
+    @unittest.skip('Requires valid story PK.')
+    def test_story_viewers(self):
+        results = self.api.story_viewers('170000000123')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIn('users', results)
+        self.assertIn('total_viewer_count', results)
+        self.assertIn('user_count', results)

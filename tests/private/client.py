@@ -256,7 +256,6 @@ class ClientTests(ApiTestBase):
                     }).encode('ascii'))),
             MockResponse(body=json.dumps({'message': 'login_required'})),
             MockResponse(body=json.dumps({'status': 'error'})),
-
         ]
 
         with self.assertRaises(ClientLoginRequiredError) as ce:
