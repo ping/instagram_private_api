@@ -102,7 +102,8 @@ class ClientCompatPatch(object):
             media['videos'] = videos
         media['likes'] = {
             'count': (media.get('likes', {})
-                      or media.get('edge_liked_by', {})).get('count', 0),
+                      or media.get('edge_liked_by', {})
+                      or media.get('edge_media_preview_like', {})).get('count', 0),
             'data': []
         }
         media['comments'] = {
