@@ -81,32 +81,38 @@ class AccountsEndpointsMixin(object):
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def edit_profile(self, first_name, biography, external_url, email, phone_number, gender):
+    def edit_profile(self, username=None, first_name=None, biography=None,
+                     external_url=None, email=None, phone_number=None, gender=None):
         """
         Edit profile
-
+        
+        :param username:
         :param first_name:
         :param biography:
         :param external_url:
-        :param email: Required.
+        :param email:
         :param phone_number:
         :param gender: male: 1, female: 2, unspecified: 3
         :return:
         """
-        if int(gender) not in [1, 2, 3]:
-            raise ValueError('Invalid gender: {0:d}'.format(int(gender)))
-        if not email:
-            raise ValueError('Email is required.')
-
+        current_user = self.current_user()['user']
+    
+        if gender is None:
+            gender = current_user['gender']
+        else:
+            if int(gender) not in [1, 2, 3]:
+                raise ValueError('Invalid gender: {0:d}'.format(int(gender)))
+    
         params = {
-            'username': self.authenticated_user_name,
+            'username': username or self.authenticated_user_name,
             'gender': int(gender),
-            'phone_number': phone_number or '',
-            'first_name': first_name or '',
-            'biography': biography or '',
-            'external_url': external_url or '',
-            'email': email,
+            'phone_number': current_user['phone_number'] if phone_number is None else phone_number,
+            'first_name': current_user['full_name'] if first_name is None else first_name,
+            'biography': current_user['biography'] if biography is None else biography,
+            'external_url': current_user['external_url'] if external_url is None else external_url,
+            'email': current_user['email'] if email is None else email,
         }
+        
         params.update(self.authenticated_params)
         res = self._call_api('accounts/edit_profile/', params=params)
         if self.auto_patch:

@@ -251,15 +251,6 @@ class AccountTests(ApiTestBase):
                 gender='9',
                 phone_number=''
             )
-        with self.assertRaises(ValueError):
-            self.api.edit_profile(
-                first_name='',
-                biography='',
-                external_url='',
-                email='',
-                gender='1',
-                phone_number=''
-            )
 
     @unittest.skip('Modifies data.')
     def test_remove_profile_picture(self):
