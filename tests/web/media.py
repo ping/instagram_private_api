@@ -93,6 +93,9 @@ class MediaTests(WebApiTestBase):
         self.assertIsNotNone(results.get('link'))
         self.assertIsNotNone(results.get('type'))
         self.assertIsNotNone(results.get('images'))
+        # Check like and comment counts are returned
+        self.assertGreater(results.get('likes', {}).get('count', 0), 0)
+        self.assertGreater(results.get('comments', {}).get('count', 0), 0)
 
     def test_media_comments(self):
         results = self.api.media_comments(self.test_media_shortcode, count=20)
