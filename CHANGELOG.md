@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.4.1 (pending)
+## 1.4.1
 - App API:
     * Refactored error detection. New ``ClientCheckpointRequiredError``, ``ClientChallengeRequiredError``, ``ClientSentryBlockError``
     * New highlight endpoints
