@@ -6,9 +6,11 @@ from io import BytesIO
 try:
     # python 2.x
     from urllib2 import urlopen
+    import urllib2 as compat_urllib_request
 except ImportError:
     # python 3.x
     from urllib.request import urlopen
+    import urllib.request as compat_urllib_request
 
 from ..common import (
     ClientError, ApiTestBase, compat_mock, compat_urllib_error, MockResponse,
@@ -86,7 +88,10 @@ class UploadTests(ApiTestBase):
         thumbnail_url = ('https:' if video_info['thumbnail_url'].startswith('//') else '') + video_info['thumbnail_url']
         duration = mp4_info['duration']
 
-        video_res = urlopen(video_url)
+        # requires UA
+        video_req = compat_urllib_request.Request(
+            video_url, headers={'user-agent': 'Mozilla/5.0'})
+        video_res = urlopen(video_req)
         video_data = video_res.read()
         thumb_res = urlopen(thumbnail_url)
         thumb_data = thumb_res.read()
@@ -130,7 +135,10 @@ class UploadTests(ApiTestBase):
         thumbnail_url = ('https:' if video_info['thumbnail_url'].startswith('//') else '') + video_info['thumbnail_url']
         duration = mp4_info['duration']
 
-        video_res = urlopen(video_url)
+        # requires UA
+        video_req = compat_urllib_request.Request(
+            video_url, headers={'user-agent': 'Mozilla/5.0'})
+        video_res = urlopen(video_req)
         video_data = video_res.read()
         thumb_res = urlopen(thumbnail_url)
         thumb_data = thumb_res.read()
@@ -150,7 +158,10 @@ class UploadTests(ApiTestBase):
         thumbnail_url = ('https:' if video_info['thumbnail_url'].startswith('//') else '') + video_info['thumbnail_url']
         duration = mp4_info['duration']
 
-        video_res = urlopen(video_url)
+        # requires UA
+        video_req = compat_urllib_request.Request(
+            video_url, headers={'user-agent': 'Mozilla/5.0'})
+        video_res = urlopen(video_req)
         video_data = video_res.read()
         thumb_res = urlopen(thumbnail_url)
         thumb_data = thumb_res.read()
