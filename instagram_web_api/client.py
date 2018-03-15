@@ -313,8 +313,8 @@ class Client(object):
         endpoint = 'https://www.instagram.com/{username!s}/'.format(**{'username': user_name})
         info = self._make_request(endpoint, query={'__a': '1'})
         if self.auto_patch:
-            ClientCompatPatch.user(info['user'], drop_incompat_keys=self.drop_incompat_keys)
-        return info['user']
+            ClientCompatPatch.user(info['graphql']['user'], drop_incompat_keys=self.drop_incompat_keys)
+        return info['graphql']['user']
 
     def user_feed(self, user_id, **kwargs):
         """

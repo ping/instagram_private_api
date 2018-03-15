@@ -214,9 +214,15 @@ class ClientCompatPatch(object):
         user['profile_picture'] = user['profile_pic_url']
         user['website'] = user['external_url']
         counts = {
-            'media': user['media']['count'],
-            'followed_by': user['followed_by']['count'],
-            'follows': user['follows']['count'],
+            'media': (
+                user.get('media', {}).get('count')
+                or user.get('edge_owner_to_timeline_media', {}).get('count')),
+            'followed_by': (
+                user.get('followed_by', {}).get('count')
+                or user.get('edge_followed_by', {}).get('count')),
+            'follows': (
+                user.get('follows', {}).get('count')
+                or user.get('edge_follow', {}).get('count')),
         }
         user['counts'] = counts
         if drop_incompat_keys:

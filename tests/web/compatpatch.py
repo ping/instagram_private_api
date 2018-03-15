@@ -84,7 +84,8 @@ class CompatPatchTests(WebApiTestBase):
         self.assertIsNone(user.get('profile_picture'))
         self.assertIsNotNone(user_patched.get('profile_picture'))
         self.assertIsNone(user.get('website'))
-        self.assertIsNotNone(user_patched.get('website'))
+        # no bio link for test account
+        # self.assertIsNotNone(user_patched.get('website'))
         self.assertIsNone(user.get('counts'))
         self.assertIsNotNone(user_patched.get('counts'))
         user_dropped = copy.deepcopy(user)
