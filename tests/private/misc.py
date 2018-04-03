@@ -73,8 +73,9 @@ class MiscTests(ApiTestBase):
         results = self.api.expose()
         self.assertEqual(results.get('status'), 'ok')
 
+    @unittest.skip('Posts data')
     def test_megaphone_log(self):
-        results = self.api.megaphone_log()
+        results = self.api.megaphone_log('turn_on_push')
         self.assertEqual(results.get('status'), 'ok')
         self.assertTrue(results.get('success'))
 
