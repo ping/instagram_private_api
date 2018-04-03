@@ -5,6 +5,17 @@ import hashlib
 from random import randint
 import os
 from datetime import datetime
+import re
+
+
+VALID_UUID_RE = r'^[a-f\d]{8}\-[a-f\d]{4}\-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$'
+
+
+def raise_if_invalid_rank_token(val, required=True):
+    if required and not val:
+        raise ValueError('rank_token is required')
+    if not re.match(VALID_UUID_RE, val):
+        raise ValueError('Invalid rank_token: {}'.format(val))
 
 
 def gen_user_breadcrumb(size):

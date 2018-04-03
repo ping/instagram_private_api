@@ -3,6 +3,7 @@ import warnings
 
 from .common import ClientExperimentalWarning, ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
+from ..utils import raise_if_invalid_rank_token
 
 
 class UsersEndpointsMixin(object):
@@ -81,6 +82,8 @@ class UsersEndpointsMixin(object):
             - **max_id**: For pagination
         :return:
         """
+        raise_if_invalid_rank_token(rank_token)
+
         query_params = {
             'q': query,
             'timezone_offset': self.timezone_offset,

@@ -1,6 +1,7 @@
 import json
 
 from ..compat import compat_urllib_parse
+from ..utils import raise_if_invalid_rank_token
 
 
 class TagsEndpointsMixin(object):
@@ -43,8 +44,7 @@ class TagsEndpointsMixin(object):
         :param kwargs:
         :return:
         """
-        if not rank_token:
-            raise ValueError('rank_token is required')
+        raise_if_invalid_rank_token(rank_token)
         if not exclude_list:
             exclude_list = []
         query = {

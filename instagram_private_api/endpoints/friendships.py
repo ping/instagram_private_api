@@ -2,6 +2,7 @@ import warnings
 
 from .common import ClientExperimentalWarning
 from ..compatpatch import ClientCompatPatch
+from ..utils import raise_if_invalid_rank_token
 
 
 class FriendshipsEndpointsMixin(object):
@@ -29,6 +30,8 @@ class FriendshipsEndpointsMixin(object):
             - **max_id**: For pagination
         :return:
         """
+        raise_if_invalid_rank_token(rank_token)
+
         endpoint = 'friendships/{user_id!s}/following/'.format(**{'user_id': user_id})
         query_params = {
             'rank_token': rank_token,
@@ -52,6 +55,8 @@ class FriendshipsEndpointsMixin(object):
             - **max_id**: For pagination
         :return:
         """
+        raise_if_invalid_rank_token(rank_token)
+
         endpoint = 'friendships/{user_id!s}/followers/'.format(**{'user_id': user_id})
         query_params = {
             'rank_token': rank_token,
