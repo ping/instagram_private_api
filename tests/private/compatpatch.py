@@ -99,7 +99,8 @@ class CompatPatchTests(ApiTestBase):
 
     def test_compat_user_list(self):
         self.api.auto_patch = False
-        results = self.api.user_following(self.test_user_id)
+        rank_token = self.api.generate_uuid()
+        results = self.api.user_following(self.test_user_id, rank_token)
         self.api.auto_patch = True
         user = results.get('users', [{}])[0]
         user_patched = copy.deepcopy(user)
