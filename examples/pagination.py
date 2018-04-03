@@ -32,6 +32,7 @@ if __name__ == '__main__':
     print('Client version: {0!s}'.format(client_version))
     api = Client(args.username, args.password)
 
+    # ---------- Pagination with max_id ----------
     user_id = '2958144170'
     followers = []
     results = api.user_followers(user_id)
@@ -48,3 +49,15 @@ if __name__ == '__main__':
     followers.sort(key=lambda x: x['pk'])
     # print list of user IDs
     print(json.dumps([u['pk'] for u in followers], indent=2))
+
+    # ---------- Pagination with rank_token and exclusion list ----------
+    rank_token = Client.generate_uuid()
+    has_more = True
+    tag_results = []
+    while has_more and rank_token and len(tag_results) < 60:
+        results = api.tag_search(
+            'cats', rank_token, exclude_list=[t['id'] for t in tag_results])
+        tag_results.extend(results.get('results', []))
+        has_more = results.get('has_more')
+        rank_token = results.get('rank_token')
+    print(json.dumps([t['name'] for t in tag_results], indent=2))

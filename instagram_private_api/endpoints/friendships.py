@@ -17,43 +17,47 @@ class FriendshipsEndpointsMixin(object):
              for user in res['users']]
         return res
 
-    def user_following(self, user_id, **kwargs):
+    def user_following(self, user_id, rank_token, **kwargs):
         """
         Get user followings
 
         :param user_id:
+        :param rank_token: Required for paging through a single feed and can be generated with
+            :meth:`generate_uuid`. You should use the same rank_token for paging through a single user following.
         :param kwargs:
             - **query**: Search within the user following
             - **max_id**: For pagination
         :return:
         """
         endpoint = 'friendships/{user_id!s}/following/'.format(**{'user_id': user_id})
-        query = {
-            'rank_token': self.rank_token,
+        query_params = {
+            'rank_token': rank_token,
         }
-        query.update(kwargs)
-        res = self._call_api(endpoint, query=query)
+        query_params.update(kwargs)
+        res = self._call_api(endpoint, query=query_params)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
         return res
 
-    def user_followers(self, user_id, **kwargs):
+    def user_followers(self, user_id, rank_token, **kwargs):
         """
         Get user followers
 
         :param user_id:
+        :param rank_token: Required for paging through a single feed and can be generated with
+            :meth:`generate_uuid`. You should use the same rank_token for paging through a single user followers.
         :param kwargs:
             - **query**: Search within the user followers
             - **max_id**: For pagination
         :return:
         """
         endpoint = 'friendships/{user_id!s}/followers/'.format(**{'user_id': user_id})
-        query = {
-            'rank_token': self.rank_token,
+        query_params = {
+            'rank_token': rank_token,
         }
-        query.update(kwargs)
-        res = self._call_api(endpoint, query=query)
+        query_params.update(kwargs)
+        res = self._call_api(endpoint, query=query_params)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]

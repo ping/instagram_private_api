@@ -120,7 +120,8 @@ class FeedTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
 
     def test_feed_tag(self):
-        results = self.api.feed_tag('catsofinstagram')
+        rank_token = self.api.generate_uuid()
+        results = self.api.feed_tag('catsofinstagram', rank_token)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
         self.assertGreater(len(results.get('ranked_items', [])), 0, 'No ranked_items returned.')

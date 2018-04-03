@@ -42,6 +42,7 @@ class LocationTests(ApiTestBase):
         self.assertGreater(len(results.get('venues', [])), 0, 'No venues returned.')
 
     def test_location_fb_search(self):
-        results = self.api.location_fb_search('Paris, France')
+        rank_token = self.api.generate_uuid()
+        results = self.api.location_fb_search('Paris, France', rank_token)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')

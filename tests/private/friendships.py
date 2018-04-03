@@ -123,13 +123,15 @@ class FriendshipTests(ApiTestBase):
                                     query={'followinfo': 'True', 'version': '2'})
 
     def test_user_following(self):
-        results = self.api.user_following(self.test_user_id)
+        rank_token = self.api.generate_uuid()
+        results = self.api.user_following(self.test_user_id, rank_token)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('users', [])), 0, 'No users returned.')
         self.assertIsNotNone(results.get('users', [])[0].get('id'), 'Is not patched.')
 
     def test_user_followers(self):
-        results = self.api.user_followers(self.test_user_id)
+        rank_token = self.api.generate_uuid()
+        results = self.api.user_followers(self.test_user_id, rank_token)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('users', [])), 0, 'No users returned.')
         self.assertIsNotNone(results.get('users', [])[0].get('id'), 'Is not patched.')

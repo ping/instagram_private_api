@@ -33,18 +33,26 @@ class TagsEndpointsMixin(object):
         res = self._call_api(endpoint, query=query)
         return res
 
-    def tag_search(self, text, **kwargs):
+    def tag_search(self, text, rank_token, exclude_list=[], **kwargs):
         """
         Search tag
 
-        :param text:
+        :param text: Search term
+        :param rank_token: Required for paging through a single feed. See examples/pagination.py
+        :param exclude_list: List of numerical tag IDs to exclude
         :param kwargs:
         :return:
         """
+        if not rank_token:
+            raise ValueError('rank_token is required')
+        if not exclude_list:
+            exclude_list = []
         query = {
             'q': text,
             'timezone_offset': self.timezone_offset,
             'count': 30,
+            'exclude_list': json.dumps(exclude_list, separators=(',', ':')),
+            'rank_token': rank_token,
         }
         query.update(kwargs)
         res = self._call_api('tags/search/', query=query)

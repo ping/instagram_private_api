@@ -57,7 +57,8 @@ class TagsTests(ApiTestBase):
         self.assertGreater(len(results.get('related', [])), 0, 'No media_count returned.')
 
     def test_tag_search(self):
-        results = self.api.tag_search('cats')
+        rank_token = self.api.generate_uuid()
+        results = self.api.tag_search('cats', rank_token)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('results', [])), 0, 'No results returned.')
 

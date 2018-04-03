@@ -2,6 +2,7 @@ import warnings
 
 from .common import ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
+from ..compat import compat_urllib_parse
 
 
 class FeedEndpointsMixin(object):
@@ -149,15 +150,26 @@ class FeedEndpointsMixin(object):
                  for m in reel.get('items', [])]
         return res
 
-    def feed_tag(self, tag, **kwargs):
+    def feed_tag(self, tag, rank_token, **kwargs):
         """
         Get tag feed
 
         :param tag:
+        :param rank_token: Required for paging through a single feed and can be generated with
+            :meth:`generate_uuid`. You should use the same rank_token for paging through a single tag feed.
+        :param kwargs:
         :return:
         """
-        endpoint = 'feed/tag/{tag!s}/'.format(**{'tag': tag})
-        res = self._call_api(endpoint, query=kwargs)
+        if not rank_token:
+            raise ValueError('rank_token is required')
+
+        query_params = {
+            'rank_token': rank_token
+        }
+        query_params.update(kwargs)
+        endpoint = 'feed/tag/{tag!s}/'.format(
+            **{'tag': compat_urllib_parse.quote(tag.encode('utf8'))})
+        res = self._call_api(endpoint, query=query_params)
         if self.auto_patch:
             if res.get('items'):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)

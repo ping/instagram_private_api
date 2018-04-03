@@ -64,13 +64,27 @@ class LocationsEndpointsMixin(object):
         query_params.update(kwargs)
         return self._call_api('location_search/', query=query_params)
 
-    def location_fb_search(self, query):
+    def location_fb_search(self, query, rank_token, exclude_list=[], **kwargs):
         """
         Search for locations by query text
 
         :param query: search terms
+        :param rank_token: Required for paging through a single feed. See examples/pagination.py
+        :param exclude_list: List of numerical location IDs to exclude
+        :param kwargs:
         :return:
         """
-        return self._call_api(
-            'fbsearch/places/',
-            query={'ranked_token': self.rank_token, 'query': query})
+        if not rank_token:
+            raise ValueError('rank_token is required')
+        if not exclude_list:
+            exclude_list = []
+
+        query_params = {
+            'query': query,
+            'timezone_offset': self.timezone_offset,
+            'count': 30,
+            'exclude_list': json.dumps(exclude_list, separators=(',', ':')),
+            'rank_token': rank_token,
+        }
+        query_params.update(kwargs)
+        return self._call_api('fbsearch/places/', query=query_params)

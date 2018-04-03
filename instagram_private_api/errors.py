@@ -13,6 +13,7 @@ class ClientErrorCodes(object):
     BAD_REQUEST = 400
     NOT_FOUND = 404
     TOO_MANY_REQUESTS = 429
+    REQ_HEADERS_TOO_LARGE = 431
 
 
 class ClientError(Exception):
@@ -44,7 +45,12 @@ class ClientCookieExpiredError(ClientError):
 
 
 class ClientThrottledError(ClientError):
-    """Raised when client detects a 429 http response."""
+    """Raised when client detects an http 429 Too Many Requests response."""
+    pass
+
+
+class ClientReqHeadersTooLargeError(ClientError):
+    """Raised when client detects an http 431 Request Header Fields Too Large response."""
     pass
 
 
@@ -97,6 +103,12 @@ class ErrorHandler(object):
         :param error_response: body of the error response
         """
         error_msg = http_error.reason
+        if http_error.code == ClientErrorCodes.REQ_HEADERS_TOO_LARGE:
+            raise ClientReqHeadersTooLargeError(
+                error_msg,
+                code=http_error.code,
+                error_response=error_response)
+
         try:
             error_obj = json.loads(error_response)
             error_message_type = error_obj.get('error_type', '') or error_obj.get('message', '')

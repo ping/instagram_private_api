@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.5.0 (pending)
+- App API:
+    * __BREAKING CHANGE__: New arguments are needed for ``feed_tag()``, ``tag_search()``, ``user_following()``, ``user_followers()``, ``search_users()``, ``location_fb_search()``
+    * New ``ClientReqHeadersTooLargeError`` error
+- Web API:
+    * Fix ``user_info2()``
+
 ## 1.4.1
 - App API:
     * Refactored error detection. New ``ClientCheckpointRequiredError``, ``ClientChallengeRequiredError``, ``ClientSentryBlockError``

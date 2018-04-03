@@ -6,7 +6,7 @@ from .errors import (
     ClientError, ClientLoginError, ClientLoginRequiredError,
     ClientCookieExpiredError, ClientThrottledError, ClientConnectionError,
     ClientCheckpointRequiredError, ClientChallengeRequiredError,
-    ClientSentryBlockError,
+    ClientSentryBlockError, ClientReqHeadersTooLargeError,
 )
 from .endpoints.upload import MediaRatios
 from .endpoints.common import MediaTypes
