@@ -617,7 +617,7 @@ class UploadEndpointsMixin(object):
                                     self.logger.error(
                                         'Received unexpected chunk upload response: {0!s}'.format(post_response))
                                     raise ClientError(
-                                        'Upload has failed due to unexpected upload response: {0!s'.forma(
+                                        'Upload has failed due to unexpected upload response: {0!s'.format(
                                             post_response),
                                         code=500)
 
