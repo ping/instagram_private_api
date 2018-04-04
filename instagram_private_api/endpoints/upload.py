@@ -451,8 +451,8 @@ class UploadEndpointsMixin(object):
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
                 compat_http_client.HTTPException) as connection_error:
-                raise ClientConnectionError('{} {}'.format(
-                    connection_error.__class__.__name__, str(connection_error)))
+            raise ClientConnectionError('{} {}'.format(
+                connection_error.__class__.__name__, str(connection_error)))
 
         post_response = self._read_response(response)
         self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, post_response))
@@ -617,7 +617,7 @@ class UploadEndpointsMixin(object):
                                     self.logger.error(
                                         'Received unexpected chunk upload response: {0!s}'.format(post_response))
                                     raise ClientError(
-                                        'Upload has failed due to unexpected upload response: {0!s'.format(
+                                        'Upload has failed due to unexpected upload response: {0!s}'.format(
                                             post_response),
                                         code=500)
 
@@ -629,8 +629,8 @@ class UploadEndpointsMixin(object):
                     except (SSLError, timeout, SocketError,
                             compat_urllib_error.URLError,   # URLError is base of HTTPError
                             compat_http_client.HTTPException) as connection_error:
-                            raise ClientConnectionError('{} {}'.format(
-                                connection_error.__class__.__name__, str(connection_error)))
+                        raise ClientConnectionError('{} {}'.format(
+                            connection_error.__class__.__name__, str(connection_error)))
 
                 else:
                     # if not break due to completed chunks then continue with next chunk
@@ -663,7 +663,7 @@ class UploadEndpointsMixin(object):
             except ClientConnectionError as cce:
                 if i < configure_retry_max:
                     self.logger.warn(
-                        'Retry configure after {0:f} seconds: {}'.format(
+                        'Retry configure after {0:f} seconds: {1:s}'.format(
                             configure_delay, cce.msg))
                     time.sleep(configure_delay)
                 else:
