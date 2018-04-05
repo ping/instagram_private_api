@@ -30,7 +30,7 @@ from .errors import (
 )
 try:  # Python 3:
     # Not a no-op, we're adding this to the namespace so it can be imported.
-    ConnectionError = ConnectionError
+    ConnectionError = ConnectionError       # pylint: disable=redefined-builtin
 except NameError:  # Python 2:
     class ConnectionError(Exception):
         pass

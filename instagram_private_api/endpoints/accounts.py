@@ -12,7 +12,7 @@ from ..compatpatch import ClientCompatPatch
 from socket import timeout, error as SocketError
 from ssl import SSLError
 try:
-    ConnectionError = ConnectionError
+    ConnectionError = ConnectionError       # pylint: disable=redefined-builtin
 except NameError:  # Python 2:
     class ConnectionError(Exception):
         pass
