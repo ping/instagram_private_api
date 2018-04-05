@@ -81,6 +81,8 @@ class MediaEndpointsMixin(object):
         if self.auto_patch:
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
              for c in res.get('comments', [])]
+            [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
+             for c in res.get('preview_comments', [])]
         return res
 
     def media_n_comments(self, media_id, n=150, reverse=False, **kwargs):
