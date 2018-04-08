@@ -1,5 +1,5 @@
 
-from ..common import WebApiTestBase
+from ..common import WebApiTestBase, WebClient as Client
 
 
 class FeedTests(WebApiTestBase):
@@ -28,10 +28,23 @@ class FeedTests(WebApiTestBase):
                 'name': 'test_reels_feed',
                 'test': FeedTests('test_reels_feed', api),
             },
+            {
+                'name': 'test_unauthenticated_tag_feed',
+                'test': FeedTests('test_unauthenticated_tag_feed', api),
+            }
         ]
 
     def test_tag_feed(self):
         results = self.api.tag_feed('catsofinstagram').get('data', {})
+        self.assertIsNotNone(results.get('hashtag', {}).get('name'))
+        self.assertGreater(
+            len(results.get('hashtag', {}).get('edge_hashtag_to_media', {}).get('edges', [])), 0)
+        self.assertGreater(
+            len(results.get('hashtag', {}).get('edge_hashtag_to_top_posts', {}).get('edges', [])), 0)
+
+    def test_unauthenticated_tag_feed(self):
+        web_api = Client(auto_patch=True, drop_incompat_keys=False)
+        results = web_api.tag_feed('catsofinstagram').get('data', {})
         self.assertIsNotNone(results.get('hashtag', {}).get('name'))
         self.assertGreater(
             len(results.get('hashtag', {}).get('edge_hashtag_to_media', {}).get('edges', [])), 0)
