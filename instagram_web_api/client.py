@@ -20,7 +20,7 @@ from ssl import SSLError
 from .compat import (
     compat_urllib_request, compat_urllib_parse,
     compat_urllib_parse_urlparse, compat_urllib_error,
-    compat_http_client
+    compat_http_client, compat_cookiejar
 )
 from .compatpatch import ClientCompatPatch
 from .errors import (
@@ -262,6 +262,13 @@ class Client(object):
             'https://www.instagram.com/', return_response=True, get_method=lambda: 'HEAD')
         if not self.csrftoken:
             raise ClientError('Unable to get csrf from init request.')
+        # required to avoid 403 when doing unauthenticated requests
+        self.cookie_jar.set_cookie(
+            compat_cookiejar.Cookie(
+                0, 'ig_pr', '1', None, False,
+                'www.instagram.com', False, None, '/',
+                False, False, None, True, None, None, {})
+        )
 
     def login(self):
         """Login to the web site."""
