@@ -6,6 +6,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import hashlib
 import json
 import re
 import gzip
@@ -88,6 +89,7 @@ class Client(object):
         self.mobile_user_agent = (kwargs.pop('mobile_user_agent', None)
                                   or user_settings.get('mobile_user_agent')
                                   or self.MOBILE_USER_AGENT)
+        self.rhx_gis = kwargs.pop('rhx_gis', None) or user_settings.get('rhx_gis')
 
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
@@ -167,7 +169,8 @@ class Client(object):
         in addition to username and password."""
         return {
             'cookie': self.opener.cookie_jar.dump(),
-            'created_ts': int(time.time())
+            'created_ts': int(time.time()),
+            'rhx_gis': self.rhx_gis,
         }
 
     @staticmethod
@@ -218,6 +221,17 @@ class Client(object):
                 })
         if query:
             url += ('?' if '?' not in url else '&') + compat_urllib_parse.urlencode(query)
+            if self.rhx_gis and query.get('query_hash') and query.get('variables'):
+                graphql_variables = query.get('variables')
+                m = hashlib.md5()
+                m.update('{rhx_gis}:{csrf_token}:{ua}:{variables}'.format(
+                    rhx_gis=self.rhx_gis,
+                    ua=self.user_agent,
+                    csrf_token=self.csrftoken,
+                    variables=graphql_variables
+                ).encode('utf-8'))
+                headers['X-Instagram-GIS'] = m.hexdigest()
+
         req = compat_urllib_request.Request(url, headers=headers)
         if get_method:
             req.get_method = get_method
@@ -230,6 +244,7 @@ class Client(object):
                 data = compat_urllib_parse.urlencode(params).encode('ascii')
         try:
             self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
+            self.logger.debug('HEADERS: {0!s}'.format(json.dumps(headers)))
             self.logger.debug('DATA: {0!s}'.format(data))
             res = self.opener.open(req, data=data, timeout=self.timeout)
             if return_response:
@@ -256,12 +271,25 @@ class Client(object):
             media_id = media_id.split('_')[0]
         return media_id
 
+    @staticmethod
+    def _extract_rhx_gis(html):
+        mobj = re.search(
+            r'"rhx_gis":"(?P<rhx_gis>[a-f0-9]{32})"', html, re.MULTILINE)
+        if mobj:
+            return mobj.group('rhx_gis')
+        return None
+
     def init(self):
         """Make a HEAD request to get the first csrf token"""
-        self._make_request(
-            'https://www.instagram.com/', return_response=True, get_method=lambda: 'HEAD')
+        init_res = self._make_request(
+            'https://www.instagram.com/', return_response=True, get_method=lambda: 'GET')
+        init_res_content = self._read_response(init_res)
+        rhx_gis = self._extract_rhx_gis(init_res_content)
+        self.rhx_gis = rhx_gis
         if not self.csrftoken:
             raise ClientError('Unable to get csrf from init request.')
+        if not self.rhx_gis:
+            raise ClientError('Unable to get rhx_gis from init request.')
         # required to avoid 403 when doing unauthenticated requests
         self.cookie_jar.set_cookie(
             compat_cookiejar.Cookie(
@@ -340,17 +368,19 @@ class Client(object):
             - **extract**: bool. Return a simple list of media
         :return:
         """
+        count = kwargs.pop('count', 12)
+        end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
 
-        count = kwargs.pop('count', 16)
-        end_cursor = kwargs.pop('end_cursor', None)
-
-        query = {
-            'query_id': '17888483320059182',
+        variables = {
             'id': user_id,
-            'first': count}
-
+            'first': int(count),
+        }
         if end_cursor:
-            query['after'] = end_cursor
+            variables['after'] = end_cursor
+        query = {
+            'query_hash': '42323d64886122307be10013ad2dcc44',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
 
         if not info.get('data', {}).get('user'):
@@ -442,7 +472,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_id': '17852405266163336',
+            'query_hash': '33ba35852cb50da46f5b5e889df7d159',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -487,7 +517,7 @@ class Client(object):
             variables['after'] = end_cursor
 
         query = {
-            'query_id': '17874545323001329',
+            'query_hash': '58712303d941c6855d4e888c5f0cd22f',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -524,7 +554,7 @@ class Client(object):
             variables['after'] = end_cursor
 
         query = {
-            'query_id': '17851374694183129',
+            'query_hash': '37479f2b8209594dde7facb0d904896a',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -749,7 +779,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_id': '17875800862117404',
+            'query_hash': 'ded47faa9a1aaded10161a2ff32abb6b',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -776,7 +806,7 @@ class Client(object):
             variables['after'] = end_cursor
 
         query = {
-            'query_id': '17865274345132052',
+            'query_hash': 'ac38b90f0f3981c42092016a37c59bf7',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -805,7 +835,7 @@ class Client(object):
         if end_cursor:
             variables['fetch_media_item_cursor'] = end_cursor
         query = {
-            'query_id': '17842794232208280',
+            'query_hash': '485c25657308f08317c1e4b967356828',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)
@@ -816,13 +846,13 @@ class Client(object):
         Get a logged-in users reels tray.
         """
         query = {
-            'query_id': '17890626976041463',
-            'variables': json.dumps({}, separators=(',', ':'))
+            'query_hash': '60b755363b5c230111347a7a4e242001',
+            'variables': json.dumps({'only_stories': False}, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)
 
     @login_required
-    def reels_feed(self, reel_ids):
+    def reels_feed(self, reel_ids, **kwargs):
         """
         Get the stories feed for the specified user IDs
 
@@ -830,10 +860,12 @@ class Client(object):
         """
         variables = {
             'reel_ids': reel_ids,
+            'tag_names': kwargs.pop('tag_names', []),
+            'location_ids': kwargs.pop('location_ids', []),
             'precomposed_overlay': False,
         }
         query = {
-            'query_id': '17873473675158481',
+            'query_hash': '297c491471fff978fa2ab83c0673a618',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)

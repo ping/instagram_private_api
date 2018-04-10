@@ -1,6 +1,15 @@
 # Change Log
 
-## 1.5.0 (pending)
+## 1.5.2 (pending)
+- Web API:
+    * Fix for new ``query_hash`` param and ``X-Instagram-GIS`` signed header requirement
+    * You should now store the ``rhx_gis`` value returned by ``client.settings`` along with the cookie string
+
+## 1.5.1
+- Web API:
+    * Fix 403 Forbidden error when making unauthenticated requests
+
+## 1.5.0
 - App API:
     * __BREAKING CHANGE__: New arguments are needed for ``feed_tag()``, ``tag_search()``, ``user_following()``, ``user_followers()``, ``search_users()``, ``location_fb_search()``
     * New ``ClientReqHeadersTooLargeError`` error
