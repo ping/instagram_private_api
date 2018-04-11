@@ -189,6 +189,17 @@ class Client(object):
             res = response.read().decode('utf8')
         return res
 
+    def generate_request_signature(self, query):
+        if self.rhx_gis and query.get('query_hash') and query.get('variables'):
+            m = hashlib.md5()
+            m.update('{rhx_gis}:{csrf_token}:{ua}:{variables}'.format(
+                rhx_gis=self.rhx_gis,
+                ua=self.user_agent,
+                csrf_token=self.csrftoken,
+                variables=query.get('variables')
+            ).encode('utf-8'))
+        return m.hexdigest()
+
     def _make_request(self, url, params=None, headers=None, query=None,
                       return_response=False, get_method=None):
         """
@@ -222,16 +233,9 @@ class Client(object):
                 })
         if query:
             url += ('?' if '?' not in url else '&') + compat_urllib_parse.urlencode(query)
-            if self.rhx_gis and query.get('query_hash') and query.get('variables'):
-                graphql_variables = query.get('variables')
-                m = hashlib.md5()
-                m.update('{rhx_gis}:{csrf_token}:{ua}:{variables}'.format(
-                    rhx_gis=self.rhx_gis,
-                    ua=self.user_agent,
-                    csrf_token=self.csrftoken,
-                    variables=graphql_variables
-                ).encode('utf-8'))
-                headers['X-Instagram-GIS'] = m.hexdigest()
+            sig = self.generate_request_signature(query)
+            if sig:
+                headers['X-Instagram-GIS'] = sig
 
         req = compat_urllib_request.Request(url, headers=headers)
         if get_method:
