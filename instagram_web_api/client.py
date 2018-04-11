@@ -198,7 +198,8 @@ class Client(object):
                 csrf_token=self.csrftoken,
                 variables=query.get('variables')
             ).encode('utf-8'))
-        return m.hexdigest()
+            return m.hexdigest()
+        return None
 
     def _make_request(self, url, params=None, headers=None, query=None,
                       return_response=False, get_method=None):
