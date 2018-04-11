@@ -171,6 +171,7 @@ class Client(object):
             'cookie': self.opener.cookie_jar.dump(),
             'created_ts': int(time.time()),
             'rhx_gis': self.rhx_gis,
+            'user_agent': self.user_agent,
         }
 
     @staticmethod
