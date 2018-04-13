@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.5.4 (pending)
+- Web API:
+    * Fix for changes in the ``X-Instagram-GIS`` signed header requirement
+
 ## 1.5.3
 - Web API:
     * ``client.settings`` now includes ``user_agent`` which you should persist since ``rhx_gis`` is dependent on both the ``csrftoken`` (in cookie) and the client's ``user_agent``

@@ -192,9 +192,8 @@ class Client(object):
     def generate_request_signature(self, query):
         if self.rhx_gis and query.get('query_hash') and query.get('variables'):
             m = hashlib.md5()
-            m.update('{rhx_gis}:{csrf_token}:{ua}:{variables}'.format(
+            m.update('{rhx_gis}:{csrf_token}:{variables}'.format(
                 rhx_gis=self.rhx_gis,
-                ua=self.user_agent,
                 csrf_token=self.csrftoken,
                 variables=query.get('variables')
             ).encode('utf-8'))
@@ -251,14 +250,24 @@ class Client(object):
         try:
             self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
             self.logger.debug('HEADERS: {0!s}'.format(json.dumps(headers)))
+            self.logger.debug('COOKIES: {0!s}'.format(json.dumps([
+                ['{}: {}'.format(c.name, c.value) for c in self.cookie_jar]
+            ])))
             self.logger.debug('DATA: {0!s}'.format(data))
             res = self.opener.open(req, data=data, timeout=self.timeout)
+
+            self.logger.debug('RESPONSE: {0:d} {1!s}'.format(
+                res.code, res.geturl()
+            ))
+            self.logger.debug('HEADERS: {0!s}'.format(
+                [u'{}: {}'.format(k, v) for k, v in res.info().items()]
+            ))
             if return_response:
                 return res
 
             response_content = self._read_response(res)
 
-            self.logger.debug('RESPONSE: {0!s}'.format(response_content))
+            self.logger.debug('BODY: {0!s}'.format(response_content))
             return json.loads(response_content)
 
         except compat_urllib_error.HTTPError as e:
