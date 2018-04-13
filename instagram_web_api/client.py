@@ -189,14 +189,20 @@ class Client(object):
             res = response.read().decode('utf8')
         return res
 
-    def generate_request_signature(self, query):
+    def generate_request_signature(self, query, url=None):
         if self.rhx_gis and query.get('query_hash') and query.get('variables'):
+            variables = query.get('variables')
+        elif url:
+            variables = compat_urllib_parse_urlparse(url).path
+        else:
+            variables = None
+
+        if variables:
             m = hashlib.md5()
-            m.update('{rhx_gis}:{csrf_token}:{ua}:{variables}'.format(
+            m.update('{rhx_gis}:{csrf_token}:{variables}'.format(
                 rhx_gis=self.rhx_gis,
-                ua=self.user_agent,
                 csrf_token=self.csrftoken,
-                variables=query.get('variables')
+                variables=variables
             ).encode('utf-8'))
             return m.hexdigest()
         return None
@@ -234,7 +240,7 @@ class Client(object):
                 })
         if query:
             url += ('?' if '?' not in url else '&') + compat_urllib_parse.urlencode(query)
-            sig = self.generate_request_signature(query)
+            sig = self.generate_request_signature(query, url)
             if sig:
                 headers['X-Instagram-GIS'] = sig
 
