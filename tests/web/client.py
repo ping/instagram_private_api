@@ -52,7 +52,10 @@ class ClientTests(WebApiTestBase):
 
         make_request.assert_called_with(
             'https://www.instagram.com/accounts/login/ajax/',
-            params={'username': self.api.username, 'password': self.api.password})
+            params={
+                'username': self.api.username,
+                'password': self.api.password,
+                'queryParams': '{}'})
         with self.assertRaises(ClientLoginError):
             self.api.login()
 

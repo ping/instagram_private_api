@@ -28,6 +28,10 @@ class UnauthenticatedTests(WebApiTestBase):
                 'name': 'test_unauthenticated_media_comments_noextract',
                 'test': UnauthenticatedTests('test_unauthenticated_media_comments_noextract', api),
             },
+            {
+                'name': 'test_unauthenticated_user_info2',
+                'test': UnauthenticatedTests('test_unauthenticated_user_info2', api),
+            }
         ]
 
     def test_unauthenticated_tag_feed(self):
@@ -61,3 +65,7 @@ class UnauthenticatedTests(WebApiTestBase):
     def test_unauthenticated_media_comments_noextract(self):
         results = self.api.media_comments(self.test_media_shortcode, count=20, extract=False)
         self.assertIsInstance(results, dict)
+
+    def test_unauthenticated_user_info2(self):
+        results = self.api.user_info2('instagram')
+        self.assertIsNotNone(results.get('id'))

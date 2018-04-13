@@ -15,6 +15,10 @@ class UserTests(WebApiTestBase):
                 'test': UserTests('test_user_info', api),
             },
             {
+                'name': 'test_user_info2',
+                'test': UserTests('test_user_info2', api),
+            },
+            {
                 'name': 'test_user_feed',
                 'test': UserTests('test_user_feed', api),
             },
@@ -66,6 +70,10 @@ class UserTests(WebApiTestBase):
         results = self.api.user_info(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('profile_picture'))
+
+    def test_user_info2(self):
+        results = self.api.user_info2('instagram')
+        self.assertIsNotNone(results.get('id'))
 
     def test_user_feed(self):
         results = self.api.user_feed(self.test_user_id)

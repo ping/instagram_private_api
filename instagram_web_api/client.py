@@ -189,16 +189,21 @@ class Client(object):
             res = response.read().decode('utf8')
         return res
 
-    def generate_request_signature(self, query):
+    def generate_request_signature(self, query, endpoint=None):
         if self.rhx_gis and query.get('query_hash') and query.get('variables'):
-            m = hashlib.md5()
-            m.update('{rhx_gis}:{csrf_token}:{variables}'.format(
-                rhx_gis=self.rhx_gis,
-                csrf_token=self.csrftoken,
-                variables=query.get('variables')
-            ).encode('utf-8'))
-            return m.hexdigest()
-        return None
+            variables = query.get('variables')
+        elif self.rhx_gis and '__a' in query and endpoint:
+            variables = compat_urllib_parse_urlparse(endpoint).path
+        else:
+            return None
+
+        m = hashlib.md5()
+        m.update('{rhx_gis}:{csrf_token}:{variables}'.format(
+            rhx_gis=self.rhx_gis,
+            csrf_token=self.csrftoken,
+            variables=variables
+        ).encode('utf-8'))
+        return m.hexdigest()
 
     def _make_request(self, url, params=None, headers=None, query=None,
                       return_response=False, get_method=None):
@@ -233,7 +238,7 @@ class Client(object):
                 })
         if query:
             url += ('?' if '?' not in url else '&') + compat_urllib_parse.urlencode(query)
-            sig = self.generate_request_signature(query)
+            sig = self.generate_request_signature(query, url)
             if sig:
                 headers['X-Instagram-GIS'] = sig
 
@@ -249,17 +254,19 @@ class Client(object):
                 data = compat_urllib_parse.urlencode(params).encode('ascii')
         try:
             self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
-            self.logger.debug('HEADERS: {0!s}'.format(json.dumps(headers)))
-            self.logger.debug('COOKIES: {0!s}'.format(json.dumps([
+            self.logger.debug('REQ HEADERS: {0!s}'.format(
+                ['{}: {}'.format(k, v) for k, v in headers.items()]
+            ))
+            self.logger.debug('REQ COOKIES: {0!s}'.format(
                 ['{}: {}'.format(c.name, c.value) for c in self.cookie_jar]
-            ])))
-            self.logger.debug('DATA: {0!s}'.format(data))
+            ))
+            self.logger.debug('REQ DATA: {0!s}'.format(data))
             res = self.opener.open(req, data=data, timeout=self.timeout)
 
             self.logger.debug('RESPONSE: {0:d} {1!s}'.format(
                 res.code, res.geturl()
             ))
-            self.logger.debug('HEADERS: {0!s}'.format(
+            self.logger.debug('RES HEADERS: {0!s}'.format(
                 [u'{}: {}'.format(k, v) for k, v in res.info().items()]
             ))
             if return_response:
@@ -267,7 +274,7 @@ class Client(object):
 
             response_content = self._read_response(res)
 
-            self.logger.debug('BODY: {0!s}'.format(response_content))
+            self.logger.debug('RES BODY: {0!s}'.format(response_content))
             return json.loads(response_content)
 
         except compat_urllib_error.HTTPError as e:
@@ -295,7 +302,7 @@ class Client(object):
         return None
 
     def init(self):
-        """Make a HEAD request to get the first csrf token"""
+        """Make a GET request to get the first csrf token and rhx_gis"""
         init_res = self._make_request(
             'https://www.instagram.com/', return_response=True, get_method=lambda: 'GET')
         init_res_content = self._read_response(init_res)
@@ -317,7 +324,7 @@ class Client(object):
         """Login to the web site."""
         if not self.username or not self.password:
             raise ClientError('username/password is blank')
-        params = {'username': self.username, 'password': self.password}
+        params = {'username': self.username, 'password': self.password, 'queryParams': '{}'}
         login_res = self._make_request('https://www.instagram.com/accounts/login/ajax/', params=params)
         if not login_res.get('status', '') == 'ok' or not login_res.get('authenticated'):
             raise ClientLoginError('Unable to login')
@@ -360,6 +367,9 @@ class Client(object):
         :param kwargs:
         :return:
         """
+        # For authenticated clients, a fresh rhx_gis must be used
+        if self.is_authenticated:
+            self.init()
         endpoint = 'https://www.instagram.com/{username!s}/'.format(**{'username': user_name})
         info = self._make_request(endpoint, query={'__a': '1'})
         if self.auto_patch:
@@ -459,7 +469,8 @@ class Client(object):
             'x-requested-with': 'XMLHttpRequest',
         }
         info = self._make_request(
-            'https://www.instagram.com/p/{0!s}/?__a=1&__b=1'.format(short_code),
+            'https://www.instagram.com/p/{0!s}/'.format(short_code),
+            query={'__a': '1', '__b': '1'},
             headers=headers)
         media = info.get('graphql', {}).get('shortcode_media', {})
         if self.auto_patch:
