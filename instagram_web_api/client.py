@@ -198,9 +198,8 @@ class Client(object):
             return None
 
         m = hashlib.md5()
-        m.update('{rhx_gis}:{csrf_token}:{variables}'.format(
+        m.update('{rhx_gis}:{variables}'.format(
             rhx_gis=self.rhx_gis,
-            csrf_token=self.csrftoken,
             variables=variables
         ).encode('utf-8'))
         return m.hexdigest()
@@ -502,8 +501,6 @@ class Client(object):
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
-        if end_cursor:
-            query['after'] = end_cursor
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
 
         if not info.get('data', {}).get('shortcode_media'):
