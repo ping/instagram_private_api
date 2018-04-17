@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.5.5
+- Web API:
+    * Fix for changes in the ``X-Instagram-GIS`` signed header requirement
+
 ## 1.5.4
 - Web API:
     * Fix for changes in the ``X-Instagram-GIS`` signed header requirement
