@@ -366,11 +366,17 @@ class Client(object):
         :param kwargs:
         :return:
         """
-        # For authenticated clients, a fresh rhx_gis must be used
-        if self.is_authenticated:
-            self.init()
+        # For authed and unauthed clients, a "fresh" rhx_gis must be used
         endpoint = 'https://www.instagram.com/{username!s}/'.format(**{'username': user_name})
-        info = self._make_request(endpoint, query={'__a': '1'})
+        try:
+            info = self._make_request(endpoint, query={'__a': '1'})
+        except ClientError as ce:
+            if ce.code != 403:
+                raise ce
+            # reinit to get a fresh rhx_gis
+            self.init()
+            info = self._make_request(endpoint, query={'__a': '1'})
+
         if self.auto_patch:
             ClientCompatPatch.user(info['graphql']['user'], drop_incompat_keys=self.drop_incompat_keys)
         return info['graphql']['user']
@@ -381,7 +387,7 @@ class Client(object):
 
         :param user_id:
         :param kwargs:
-            - **count**: Number of items to return. Default: 16
+            - **count**: Number of items to return. Default: 12
             - **end_cursor**: For pagination. Taken from:
 
                 .. code-block:: python
@@ -393,6 +399,9 @@ class Client(object):
         :return:
         """
         count = kwargs.pop('count', 12)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
+
         end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
 
         variables = {
@@ -482,12 +491,14 @@ class Client(object):
 
         :param short_code:
         :param kwargs:
-            - **count**: Number of comments to return. Default: 16. Maximum: 1000
+            - **count**: Number of comments to return. Default: 16. Maximum: 50
             - **end_cursor**: For pagination
             - **extract**: bool. Return a simple list of comments
         :return:
         """
         count = kwargs.pop('count', 16)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
         end_cursor = kwargs.pop('end_cursor', None)
 
         variables = {
@@ -531,6 +542,9 @@ class Client(object):
         :return:
         """
         count = kwargs.pop('count', 10)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
+
         end_cursor = kwargs.pop('end_cursor', None)
         variables = {
             'id': user_id,
@@ -568,6 +582,9 @@ class Client(object):
         :return:
         """
         count = kwargs.pop('count', 10)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
+
         end_cursor = kwargs.pop('end_cursor', None)
         variables = {
             'id': user_id,
@@ -793,6 +810,9 @@ class Client(object):
         :return:
         """
         count = kwargs.pop('count', 16)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
+
         end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
 
         variables = {
@@ -819,6 +839,9 @@ class Client(object):
         :return:
         """
         count = kwargs.pop('count', 16)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
+
         end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
 
         variables = {
@@ -846,6 +869,9 @@ class Client(object):
         """
         end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
         fetch_media_item_count = int(kwargs.pop('count', 12))
+        if fetch_media_item_count > 50:
+            raise ValueError('count cannot be greater than 50')
+
         fetch_comment_count = int(kwargs.pop('fetch_comment_count', 4))
         fetch_like = int(kwargs.pop('fetch_like', 10))
         has_stories = bool(kwargs.pop('has_stories', False))
