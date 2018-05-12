@@ -61,5 +61,4 @@ class FeedTests(WebApiTestBase):
 
     def test_reels_feed(self):
         results = self.api.reels_feed(['25025320']).get('data', {})
-        self.assertGreater(
-            len(results.get('reels_media')), 0)
+        self.assertTrue('reels_media' in results)

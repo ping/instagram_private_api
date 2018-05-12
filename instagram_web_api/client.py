@@ -530,6 +530,50 @@ class Client(object):
         return info
 
     @login_required
+    def media_likers(self, short_code, **kwargs):
+        """
+        Get media likers
+
+        :param short_code:
+        :param kwargs:
+            - **count**: Number of comments to return. Default: 24. Maximum: 50
+            - **end_cursor**: For pagination
+            - **extract**: bool. Return a simple list of comments
+        :return:
+        """
+        end_cursor = kwargs.pop('end_cursor', None)
+        # request 24 by default for the first page
+        if end_cursor:
+            count = kwargs.pop('count', 12)
+        else:
+            count = kwargs.pop('count', 24)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
+
+        variables = {
+            'shortcode': short_code,
+            'first': int(count)
+        }
+        if end_cursor:
+            variables['after'] = end_cursor
+        query = {
+            'query_hash': '1cb6ec562846122743b61e492c85999f',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+
+        info = self._make_request(self.GRAPHQL_API_URL, query=query)
+
+        if not info.get('data', {}).get('shortcode_media'):
+            # deleted media does not return 'comments' at all
+            # media without comments will return comments, with counts = 0, nodes = [], etc
+            raise ClientError('Not Found', 404)
+
+        if kwargs.pop('extract', True):
+            return [c['node'] for c in info.get('data', {}).get('shortcode_media', {}).get(
+                'edge_liked_by', {}).get('edges', [])]
+        return info
+
+    @login_required
     def user_following(self, user_id, **kwargs):
         """
         Get user's followings. Login required.
@@ -914,7 +958,7 @@ class Client(object):
             'precomposed_overlay': False,
         }
         query = {
-            'query_hash': '297c491471fff978fa2ab83c0673a618',
+            'query_hash': '45246d3fe16ccc6577e0bd297a5db1ab',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)

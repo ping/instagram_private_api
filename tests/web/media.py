@@ -74,7 +74,19 @@ class MediaTests(WebApiTestBase):
             {
                 'name': 'test_post_comment_validation_mock',
                 'test': MediaTests('test_post_comment_validation_mock', api),
-            }
+            },
+            {
+                'name': 'test_media_likers',
+                'test': MediaTests('test_media_likers', api),
+            },
+            {
+                'name': 'test_notfound_media_likers',
+                'test': MediaTests('test_notfound_media_likers', api),
+            },
+            {
+                'name': 'test_media_likers_noextract',
+                'test': MediaTests('test_media_likers_noextract', api),
+            },
         ]
 
     @unittest.skip('Deprecated.')
@@ -108,6 +120,19 @@ class MediaTests(WebApiTestBase):
 
     def test_media_comments_noextract(self):
         results = self.api.media_comments(self.test_media_shortcode, count=20, extract=False)
+        self.assertIsInstance(results, dict)
+
+    def test_media_likers(self):
+        results = self.api.media_likers(self.test_media_shortcode, count=20)
+        self.assertGreaterEqual(len(results), 0)
+        self.assertIsInstance(results, list)
+        self.assertIsInstance(results[0], dict)
+
+    def test_notfound_media_likers(self):
+        self.assertRaises(ClientError, lambda: self.api.media_likers('BSgmaRDg-xX'))
+
+    def test_media_likers_noextract(self):
+        results = self.api.media_likers(self.test_media_shortcode, count=20, extract=False)
         self.assertIsInstance(results, dict)
 
     @unittest.skip('Modifies data.')
