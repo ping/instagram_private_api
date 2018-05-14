@@ -536,9 +536,9 @@ class Client(object):
 
         :param short_code:
         :param kwargs:
-            - **count**: Number of comments to return. Default: 24. Maximum: 50
+            - **count**: Number of likers to return. Default: 24. Maximum: 50
             - **end_cursor**: For pagination
-            - **extract**: bool. Return a simple list of comments
+            - **extract**: bool. Return a simple list of likers
         :return:
         """
         end_cursor = kwargs.pop('end_cursor', None)
@@ -564,8 +564,8 @@ class Client(object):
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
 
         if not info.get('data', {}).get('shortcode_media'):
-            # deleted media does not return 'comments' at all
-            # media without comments will return comments, with counts = 0, nodes = [], etc
+            # deleted media does not return 'likers' at all
+            # media without likes will return likes, with counts = 0, nodes = [], etc
             raise ClientError('Not Found', 404)
 
         if kwargs.pop('extract', True):
