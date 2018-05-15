@@ -298,10 +298,28 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'parsed_params': parse_params
         }
 
-    def get_cookie_value(self, key):
-        for cookie in self.cookie_jar:
+    def get_cookie_value(self, key, domain=''):
+        now = int(time.time())
+        eternity = now + 100 * 365 * 24 * 60 * 60   # future date for non-expiring cookies
+        if not domain:
+            domain = compat_urllib_parse_urlparse(self.API_URL).netloc
+
+        for cookie in sorted(
+                self.cookie_jar, key=lambda c: c.expires or eternity, reverse=True):
+            # don't return expired cookie
+            if cookie.expires and cookie.expires < now:
+                continue
+            # cookie domain may be i.instagram.com or .instagram.com
+            cookie_domain = cookie.domain
+            # simple domain matching
+            if cookie_domain.startswith('.'):
+                cookie_domain = cookie_domain[1:]
+            if not domain.endswith(cookie_domain):
+                continue
+
             if cookie.name.lower() == key.lower():
                 return cookie.value
+
         return None
 
     @property
