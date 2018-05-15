@@ -19,10 +19,10 @@ class ClientCookieJar(compat_cookiejar.CookieJar):
                 self._cookies = compat_pickle.loads(cookie_string.encode('utf-8'))
 
     @property
-    def expires_earliest(self):
-        if len(self) > 0:
-            # sometimes a cookie has no expiration?
-            return min([cookie.expires for cookie in self if cookie.expires])
+    def auth_expires(self):
+        for cookie in self:
+            if cookie.name in ('ds_user_id', 'ds_user'):
+                return cookie.expires
         return None
 
     def dump(self):
