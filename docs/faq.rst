@@ -7,6 +7,11 @@ FAQ
    :local:
    :backlinks: top
 
+Can I do "XYZ" with this library?
+---------------------------------
+
+This library is limited to what the mobile app/web interface can do. If you can't do it on those platforms, you can't do it through the library.
+
 What does error code XXX mean?
 ------------------------------
 
