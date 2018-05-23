@@ -69,14 +69,14 @@ class MiscEndpointsMixin(object):
 
     def news(self):
         """
-        Get news feed of accounts the logged in account in following.
+        Get news feed of accounts the logged in account is following.
         This returns the items in the 'Following' tab.
         """
         return self._call_api('news/')
 
     def news_inbox(self):
         """
-        Get inbox feed of activity related to you.
+        Get inbox feed of activity related to the logged in account.
         This returns the items in the 'You' tab.
         """
         return self._call_api(
