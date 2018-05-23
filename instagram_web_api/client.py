@@ -89,6 +89,8 @@ class Client(object):
         self.mobile_user_agent = (kwargs.pop('mobile_user_agent', None)
                                   or user_settings.get('mobile_user_agent')
                                   or self.MOBILE_USER_AGENT)
+
+        self.init_csrftoken = None
         self.rhx_gis = kwargs.pop('rhx_gis', None) or user_settings.get('rhx_gis')
 
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
@@ -144,7 +146,7 @@ class Client(object):
     @property
     def csrftoken(self):
         """The client's current csrf token"""
-        return self.get_cookie_value('csrftoken')
+        return self.get_cookie_value('csrftoken') or self.init_csrftoken
 
     @property
     def authenticated_user_id(self):
@@ -300,13 +302,28 @@ class Client(object):
             return mobj.group('rhx_gis')
         return None
 
+    @staticmethod
+    def _extract_csrftoken(html):
+        mobj = re.search(
+            r'"csrf_token":"(?P<csrf_token>[A-Za-z0-9]+)"', html, re.MULTILINE)
+
+        if mobj:
+            return mobj.group('csrf_token')
+        return None
+
     def init(self):
         """Make a GET request to get the first csrf token and rhx_gis"""
         init_res = self._make_request(
             'https://www.instagram.com/', return_response=True, get_method=lambda: 'GET')
         init_res_content = self._read_response(init_res)
+
         rhx_gis = self._extract_rhx_gis(init_res_content)
         self.rhx_gis = rhx_gis
+
+        if not self.csrftoken:
+            csrftoken = self._extract_csrftoken(init_res_content)
+            self.init_csrftoken = csrftoken
+
         if not self.csrftoken:
             raise ClientError('Unable to get csrf from init request.')
         if not self.rhx_gis:
