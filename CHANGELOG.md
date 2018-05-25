@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.5.6
+- Web API:
+    * Add ``media_likers()``
+    * Few fixes
+- App API:
+    * Few improvements
+
 ## 1.5.5
 - Web API:
     * Fix for changes in the ``X-Instagram-GIS`` signed header requirement
