@@ -3,9 +3,11 @@
 ## 1.5.6
 - Web API:
     * Add ``media_likers()``
-    * Few fixes
+    * Fix ``user_info2()``
+    * Fix csrf token extraction
 - App API:
-    * Few improvements
+    * Fix client authentication expiry
+    * Improve get cookie value
 
 ## 1.5.5
 - Web API:
