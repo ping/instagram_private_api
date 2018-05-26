@@ -102,7 +102,7 @@ if __name__ == '__main__':
         exit(99)
 
     # Show when login expires
-    cookie_expiry = api.cookie_jar.expires_earliest
+    cookie_expiry = api.cookie_jar.auth_expires
     print('Cookie Expiry: {0!s}'.format(datetime.datetime.fromtimestamp(cookie_expiry).strftime('%Y-%m-%dT%H:%M:%SZ')))
 
     # Call the api

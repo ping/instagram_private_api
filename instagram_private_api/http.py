@@ -25,6 +25,11 @@ class ClientCookieJar(compat_cookiejar.CookieJar):
                 return cookie.expires
         return None
 
+    @property
+    def expires_earliest(self):
+        """For backward compatibility"""
+        return self.auth_expires
+
     def dump(self):
         return compat_pickle.dumps(self._cookies)
 
