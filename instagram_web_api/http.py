@@ -20,10 +20,21 @@ class ClientCookieJar(compat_cookiejar.CookieJar):
                 self._cookies = compat_pickle.loads(cookie_string.encode('utf-8'))
 
     @property
-    def expires_earliest(self):
-        if len(self) > 0:
-            return min([cookie.expires for cookie in self if cookie.expires])
+    def auth_expires(self):
+        try:
+            return min([
+                cookie.expires for cookie in self
+                if cookie.name in ('sessionid', 'ds_user_id', 'ds_user')
+                and cookie.expires])
+        except ValueError:
+            # empty sequence
+            pass
         return None
+
+    @property
+    def expires_earliest(self):
+        """For backward compatibility"""
+        return self.auth_expires
 
     def dump(self):
         return compat_pickle.dumps(self._cookies)

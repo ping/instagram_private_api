@@ -95,8 +95,8 @@ class Client(object):
 
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
-        if cookie_string and cookie_jar.expires_earliest and int(time.time()) >= cookie_jar.expires_earliest:
-            raise ClientCookieExpiredError('Oldest cookie expired at {0!s}'.format(cookie_jar.expires_earliest))
+        if cookie_string and cookie_jar.auth_expires and int(time.time()) >= cookie_jar.auth_expires:
+            raise ClientCookieExpiredError('Cookie expired at {0!s}'.format(cookie_jar.auth_expires))
 
         custom_ssl_context = kwargs.pop('custom_ssl_context', None)
         proxy_handler = None
