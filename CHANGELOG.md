@@ -4,7 +4,7 @@
 - Web API:
     * Improve cookie expiry detection
 - App API:
-    * Make change to cookiejar (in 1.5.6) backward compatibility
+    * Make change to cookiejar (in 1.5.6) backward compatible
 
 ## 1.5.6
 - Web API:
