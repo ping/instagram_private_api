@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.5.7
+- Web API:
+    * Improve cookie expiry detection
+- App API:
+    * Make change to cookiejar (in 1.5.6) backward compatibility
+
 ## 1.5.6
 - Web API:
     * Add ``media_likers()``

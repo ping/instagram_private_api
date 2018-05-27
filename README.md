@@ -44,11 +44,11 @@ Documentation is available at https://instagram-private-api.readthedocs.io/en/la
 
 Install with pip:
 
-``pip install git+https://git@github.com/ping/instagram_private_api.git@1.5.6``
+``pip install git+https://git@github.com/ping/instagram_private_api.git@1.5.7``
 
 To update:
 
-``pip install git+https://git@github.com/ping/instagram_private_api.git@1.5.6 --upgrade``
+``pip install git+https://git@github.com/ping/instagram_private_api.git@1.5.7 --upgrade``
 
 To update with latest repo code:
 
