@@ -19,8 +19,8 @@ Problems? Please check the [docs](https://instagram-private-api.readthedocs.io/e
 
 - Supports many functions that are only available through the official app, such as:
     * Multiple feeds, such as [user feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.user_feed), [location feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.feed_location), [tag feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.feed_tag), [popular feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.feed_popular)
-    * Post a [photo](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.friendships_destroy) or [video](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.post_video) to your feed or stories
-    * [Like](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_like)/[unlike](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_unlike) posts
+    * Post a [photo](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.post_photo) or [video](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.post_video) to your feed or stories
+    * [Like](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.post_like)/[unlike](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.delete_like) posts
     * Get [post comments](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.media_comments)
     * [Post](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.post_comment)/[delete](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.delete_comment) comments
     * [Like](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_like)/[unlike](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.Client.comment_unlike) comments
@@ -95,18 +95,18 @@ web_api = Client(auto_patch=True, drop_incompat_keys=False)
 user_feed_info = web_api.user_feed('329452045', count=10)
 for post in user_feed_info:
     print('%s from %s' % (post['link'], post['user']['username']))
-    
+
 # Some endpoints, e.g. user_following are available only after authentication
 authed_web_api = Client(
     auto_patch=True, authenticate=True,
     username='YOUR_USERNAME', password='YOUR_PASSWORD')
-    
+
 following = authed_web_api.user_following('123456')
 for user in following:
     print(user['username'])
-    
+
 # Note: You can and should cache the cookie even for non-authenticated sessions.
-# This saves the overhead of a single http request when the Client is initialised.    
+# This saves the overhead of a single http request when the Client is initialised.
 ```
 
 ### Avoiding Re-login
