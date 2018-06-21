@@ -67,21 +67,38 @@ class AccountsEndpointsMixin(object):
     def signup(self, phone):
         """Signup."""
 
-        self._fetch_prelogin_params()
+        assert (self.username is None) and (self.password is None)
 
-        signup_params = {
-            'device_id': self.device_id,
-            'guid': self.uuid,
-            'adid': self.ad_id,
-            'phone_id': self.phone_id,
-            '_csrftoken': self.csrftoken,
+        self._fetch_prelogin_params()
+        self._phone = phone
+
+        params = {
+            **self.prelogin_params,
             'phone_number': phone,
         }
+        response = self._call_api(
+            'accounts/send_signup_sms_code/', params=params, return_response=True)
+        response_json = json.loads(self._read_response(response))
 
-        signup_response = self._call_api(
-            'accounts/send_signup_sms_code/', params=signup_params, return_response=True)
-        signup_json = json.loads(self._read_response(signup_response))
-        print(signup_json)
+        return response_json
+
+    def signup_confirm(self, code, phone=None):
+        """"Signup confirmation."""
+
+        if phone is not None:
+            self._phone = phone
+        assert self._phone is not None
+
+        params = {
+            **self.prelogin_params,
+            'phone_number': self._phone,
+            'verification_code': code,
+        }
+        response = self._call_api(
+            'accounts/validate_signup_sms_code/', params=params, return_response=True)
+        response_json = json.loads(self._read_response(response))
+
+        return response_json
 
     def current_user(self):
         """Get current user info"""
@@ -244,3 +261,13 @@ class AccountsEndpointsMixin(object):
             raise ClientError(
                 'Unable to get csrf from prelogin.',
                 error_response=self._read_response(prelogin_params))
+
+    @property
+    def prelogin_params(self):
+        return {
+            'device_id': self.device_id,
+            'guid': self.uuid,
+            'adid': self.ad_id,
+            'phone_id': self.phone_id,
+            '_csrftoken': self.csrftoken,
+        }
