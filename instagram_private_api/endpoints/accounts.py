@@ -24,16 +24,7 @@ class AccountsEndpointsMixin(object):
     def login(self):
         """Login."""
 
-        prelogin_params = self._call_api(
-            'si/fetch_headers/',
-            params='',
-            query={'challenge_type': 'signup', 'guid': self.generate_uuid(True)},
-            return_response=True)
-
-        if not self.csrftoken:
-            raise ClientError(
-                'Unable to get csrf from prelogin.',
-                error_response=self._read_response(prelogin_params))
+        self._fetch_prelogin_params()
 
         login_params = {
             'device_id': self.device_id,
@@ -72,6 +63,25 @@ class AccountsEndpointsMixin(object):
         # self.direct_v2_inbox()
         # self.news_inbox()
         # self.explore()
+
+    def signup(self, phone):
+        """Signup."""
+
+        self._fetch_prelogin_params()
+
+        signup_params = {
+            'device_id': self.device_id,
+            'guid': self.uuid,
+            'adid': self.ad_id,
+            'phone_id': self.phone_id,
+            '_csrftoken': self.csrftoken,
+            'phone_number': phone,
+        }
+
+        signup_response = self._call_api(
+            'accounts/send_signup_sms_code/', params=signup_params, return_response=True)
+        signup_json = json.loads(self._read_response(signup_response))
+        print(signup_json)
 
     def current_user(self):
         """Get current user info"""
@@ -222,3 +232,15 @@ class AccountsEndpointsMixin(object):
     def disable_presence_status(self):
         """Disable presence status setting"""
         return self.set_presence_status(True)
+
+    def _fetch_prelogin_params(self):
+        prelogin_params = self._call_api(
+            'si/fetch_headers/',
+            params='',
+            query={'challenge_type': 'signup', 'guid': self.generate_uuid(True)},
+            return_response=True)
+
+        if not self.csrftoken:
+            raise ClientError(
+                'Unable to get csrf from prelogin.',
+                error_response=self._read_response(prelogin_params))
