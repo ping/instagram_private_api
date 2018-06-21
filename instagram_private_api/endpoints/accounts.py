@@ -27,11 +27,7 @@ class AccountsEndpointsMixin(object):
         self._fetch_prelogin_params()
 
         login_params = {
-            'device_id': self.device_id,
-            'guid': self.uuid,
-            'adid': self.ad_id,
-            'phone_id': self.phone_id,
-            '_csrftoken': self.csrftoken,
+            **self.prelogin_params,
             'username': self.username,
             'password': self.password,
             'login_attempt_count': '0',
@@ -64,8 +60,8 @@ class AccountsEndpointsMixin(object):
         # self.news_inbox()
         # self.explore()
 
-    def signup(self, phone):
-        """Signup."""
+    def signup_start(self, phone):
+        """Signup start."""
 
         assert (self.username is None) and (self.password is None)
 
@@ -82,12 +78,12 @@ class AccountsEndpointsMixin(object):
 
         return response_json
 
-    def signup_confirm(self, code, phone=None):
+    def signup_confirmation(self, code):
         """"Signup confirmation."""
 
-        if phone is not None:
-            self._phone = phone
         assert self._phone is not None
+
+        self._code = code
 
         params = {
             **self.prelogin_params,
@@ -96,6 +92,31 @@ class AccountsEndpointsMixin(object):
         }
         response = self._call_api(
             'accounts/validate_signup_sms_code/', params=params, return_response=True)
+        response_json = json.loads(self._read_response(response))
+
+        return response_json
+
+    def signup_create_validated(self, username, password, name):
+        """Signup user creation after code verification."""
+
+        assert (self._phone is not None) and (self._code is not None)
+
+        self.username = username
+        self.password = password
+
+        params = {
+            **self.prelogin_params,
+            'username': username,
+            'password': password,
+            'first_name': name,
+            'phone_number': self._phone,
+            'verification_code': self._code,
+            'force_sign_up_code': '',
+            'qs_stamp': '',
+            'waterfall_id': TODO,
+        }
+        response = self._call_api(
+            'accounts/create_validated/', params=params, return_response=True)
         response_json = json.loads(self._read_response(response))
 
         return response_json
