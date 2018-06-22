@@ -191,10 +191,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             kwargs.pop('ad_id', None) or user_settings.get('ad_id') or
             self.generate_adid())
 
-        if self.username and self.password:
-            if not cookie_string:   # [TODO] There's probably a better way than to depend on cookie_string
-                if not self.username or not self.password:
-                    raise ClientLoginRequiredError('login_required', code=400)
+        if not cookie_string:   # [TODO] There's probably a better way than to depend on cookie_string
+            if self.username and self.password:
                 self.login()
 
         self.logger.debug('USERAGENT: {0!s}'.format(self.user_agent))

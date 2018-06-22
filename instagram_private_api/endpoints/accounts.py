@@ -113,7 +113,7 @@ class AccountsEndpointsMixin(object):
             'verification_code': self._code,
             'force_sign_up_code': '',
             'qs_stamp': '',
-            'waterfall_id': TODO,
+            'waterfall_id': self.generate_uuid(),
         }
         response = self._call_api(
             'accounts/create_validated/', params=params, return_response=True)
