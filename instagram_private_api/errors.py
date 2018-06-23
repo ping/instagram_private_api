@@ -39,6 +39,11 @@ class ClientLoginRequiredError(ClientError):
     pass
 
 
+class ClientSignupError(ClientError):
+    """Raised when signup fails."""
+    pass
+
+
 class ClientCookieExpiredError(ClientError):
     """Raised when cookies have expired."""
     pass

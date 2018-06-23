@@ -1,11 +1,13 @@
 import json
+import time
 
 from ..compat import (
     compat_urllib_request, compat_urllib_error,
     compat_http_client
 )
 from ..errors import (
-    ErrorHandler, ClientError, ClientLoginError, ClientConnectionError
+    ErrorHandler, ClientError, ClientLoginError,
+    ClientSignupError, ClientConnectionError
 )
 from ..http import MultipartFormDataEncoder
 from ..compatpatch import ClientCompatPatch
@@ -27,7 +29,7 @@ class AccountsEndpointsMixin(object):
         self._fetch_prelogin_params()
 
         login_params = {
-            **self.prelogin_params,
+            **self._common_params,
             'username': self.username,
             'password': self.password,
             'login_attempt_count': '0',
@@ -60,7 +62,16 @@ class AccountsEndpointsMixin(object):
         # self.news_inbox()
         # self.explore()
 
-    def signup_start(self, phone):
+    def signup(self, phone, username, password, name, smsCallback):
+        self._signup_start(phone)
+        time.sleep(3)
+
+        self._signup_confirmation(smsCallback())
+        time.sleep(7)
+
+        return self._signup_create_validated(username, password, name)
+
+    def _signup_start(self, phone):
         """Signup start."""
 
         assert (self.username is None) and (self.password is None)
@@ -69,7 +80,7 @@ class AccountsEndpointsMixin(object):
         self._phone = phone
 
         params = {
-            **self.prelogin_params,
+            **self._common_params,
             'phone_number': phone,
         }
         response = self._call_api(
@@ -78,7 +89,7 @@ class AccountsEndpointsMixin(object):
 
         return response_json
 
-    def signup_confirmation(self, code):
+    def _signup_confirmation(self, code):
         """"Signup confirmation."""
 
         assert self._phone is not None
@@ -86,7 +97,7 @@ class AccountsEndpointsMixin(object):
         self._code = code
 
         params = {
-            **self.prelogin_params,
+            **self._common_params,
             'phone_number': self._phone,
             'verification_code': code,
         }
@@ -94,9 +105,12 @@ class AccountsEndpointsMixin(object):
             'accounts/validate_signup_sms_code/', params=params, return_response=True)
         response_json = json.loads(self._read_response(response))
 
+        if not response_json.get('verified'):
+            raise ClientSignupError('Code is invalid.')
+
         return response_json
 
-    def signup_create_validated(self, username, password, name):
+    def _signup_create_validated(self, username, password, name):
         """Signup user creation after code verification."""
 
         assert (self._phone is not None) and (self._code is not None)
@@ -105,7 +119,7 @@ class AccountsEndpointsMixin(object):
         self.password = password
 
         params = {
-            **self.prelogin_params,
+            **self._common_params,
             'username': username,
             'password': password,
             'first_name': name,
@@ -118,6 +132,9 @@ class AccountsEndpointsMixin(object):
         response = self._call_api(
             'accounts/create_validated/', params=params, return_response=True)
         response_json = json.loads(self._read_response(response))
+
+        if not response_json.get('account_created'):
+            raise ClientSignupError('Signup failed.')
 
         return response_json
 
@@ -284,7 +301,7 @@ class AccountsEndpointsMixin(object):
                 error_response=self._read_response(prelogin_params))
 
     @property
-    def prelogin_params(self):
+    def _common_params(self):
         return {
             'device_id': self.device_id,
             'guid': self.uuid,
