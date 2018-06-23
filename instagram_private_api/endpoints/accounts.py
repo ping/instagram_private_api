@@ -62,7 +62,10 @@ class AccountsEndpointsMixin(object):
         # self.news_inbox()
         # self.explore()
 
-    def signup(self, phone, username, password, name, smsCallback):
+    def signup(self, phone, username, password, name, smsCallback=None):
+        if smsCallback is None:
+            smsCallback = lambda: input('Verification code: ')
+
         self._signup_start(phone)
         time.sleep(3)
 
@@ -127,7 +130,7 @@ class AccountsEndpointsMixin(object):
             'verification_code': self._code,
             'force_sign_up_code': '',
             'qs_stamp': '',
-            'waterfall_id': self.generate_uuid(),
+            'waterfall_id': self.generate_uuid(True),
         }
         response = self._call_api(
             'accounts/create_validated/', params=params, return_response=True)
