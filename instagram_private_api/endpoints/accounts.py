@@ -1,11 +1,13 @@
 import json
+import time
 
 from ..compat import (
     compat_urllib_request, compat_urllib_error,
     compat_http_client
 )
 from ..errors import (
-    ErrorHandler, ClientError, ClientLoginError, ClientConnectionError
+    ErrorHandler, ClientError, ClientLoginError,
+    ClientSignupError, ClientConnectionError
 )
 from ..http import MultipartFormDataEncoder
 from ..compatpatch import ClientCompatPatch
@@ -24,23 +26,10 @@ class AccountsEndpointsMixin(object):
     def login(self):
         """Login."""
 
-        prelogin_params = self._call_api(
-            'si/fetch_headers/',
-            params='',
-            query={'challenge_type': 'signup', 'guid': self.generate_uuid(True)},
-            return_response=True)
-
-        if not self.csrftoken:
-            raise ClientError(
-                'Unable to get csrf from prelogin.',
-                error_response=self._read_response(prelogin_params))
+        self._fetch_prelogin_params()
 
         login_params = {
-            'device_id': self.device_id,
-            'guid': self.uuid,
-            'adid': self.ad_id,
-            'phone_id': self.phone_id,
-            '_csrftoken': self.csrftoken,
+            **self._common_params,
             'username': self.username,
             'password': self.password,
             'login_attempt_count': '0',
@@ -72,6 +61,115 @@ class AccountsEndpointsMixin(object):
         # self.direct_v2_inbox()
         # self.news_inbox()
         # self.explore()
+
+    def signup(self, username, password, name,
+               phone=None, smsCallback=None,
+               email=None, emailCallback=None
+               ):
+
+        if phone:
+            if smsCallback is None:
+                smsCallback = lambda: input('Verification code: ')
+
+            self._signup_start(phone)
+            time.sleep(3)
+
+            self._signup_confirmation(smsCallback())
+            time.sleep(7)
+
+            return self._signup_create_validated(username, password, name)
+
+        elif email:
+            self._signup_email(username, password, name, email)
+
+    def _signup_email(self, username, password, name, email):
+        """Signup by confirming email"""
+
+        params = {
+            **self._common_params,
+            'username': username,
+            'first_name': name,
+            'email': email,
+            'force_sign_up_code': '',
+            'qs_stamp': '',
+            'password': password,
+        }
+        response = self._call_api(
+            'accounts/create/', params=params, return_response=True)
+        response_json = json.loads(self._read_response(response))
+        print(response_json)
+
+        if not response_json.get('account_created'):
+            raise ClientSignupError('Signup failed.')
+
+        return response_json
+
+    def _signup_start(self, phone):
+        """Signup start."""
+
+        assert (self.username is None) and (self.password is None)
+
+        self._fetch_prelogin_params()
+        self._phone = phone
+
+        params = {
+            **self._common_params,
+            'phone_number': phone,
+        }
+        response = self._call_api(
+            'accounts/send_signup_sms_code/', params=params, return_response=True)
+        response_json = json.loads(self._read_response(response))
+
+        return response_json
+
+    def _signup_confirmation(self, code):
+        """"Signup confirmation."""
+
+        assert self._phone is not None
+
+        self._code = code
+
+        params = {
+            **self._common_params,
+            'phone_number': self._phone,
+            'verification_code': code,
+        }
+        response = self._call_api(
+            'accounts/validate_signup_sms_code/', params=params, return_response=True)
+        response_json = json.loads(self._read_response(response))
+
+        if not response_json.get('verified'):
+            raise ClientSignupError('Code is invalid.')
+
+        return response_json
+
+    def _signup_create_validated(self, username, password, name):
+        """Signup user creation after code verification."""
+
+        assert (self._phone is not None) and (self._code is not None)
+
+        self.username = username
+        self.password = password
+
+        params = {
+            **self._common_params,
+            'username': username,
+            'password': password,
+            'first_name': name,
+            'phone_number': self._phone,
+            'verification_code': self._code,
+            'force_sign_up_code': '',
+            'qs_stamp': '',
+            'waterfall_id': self.generate_uuid(True),
+        }
+        response = self._call_api(
+            'accounts/create_validated/', params=params, return_response=True)
+        response_json = json.loads(self._read_response(response))
+
+        if not response_json.get('account_created'):
+            raise ClientSignupError('Signup failed.')
+
+        return response_json
 
     def current_user(self):
         """Get current user info"""
@@ -222,3 +320,25 @@ class AccountsEndpointsMixin(object):
     def disable_presence_status(self):
         """Disable presence status setting"""
         return self.set_presence_status(True)
+
+    def _fetch_prelogin_params(self):
+        prelogin_params = self._call_api(
+            'si/fetch_headers/',
+            params='',
+            query={'challenge_type': 'signup', 'guid': self.generate_uuid(True)},
+            return_response=True)
+
+        if not self.csrftoken:
+            raise ClientError(
+                'Unable to get csrf from prelogin.',
+                error_response=self._read_response(prelogin_params))
+
+    @property
+    def _common_params(self):
+        return {
+            'device_id': self.device_id,
+            'guid': self.uuid,
+            'adid': self.ad_id,
+            'phone_id': self.phone_id,
+            '_csrftoken': self.csrftoken,
+        }
