@@ -62,17 +62,47 @@ class AccountsEndpointsMixin(object):
         # self.news_inbox()
         # self.explore()
 
-    def signup(self, phone, username, password, name, smsCallback=None):
-        if smsCallback is None:
-            smsCallback = lambda: input('Verification code: ')
+    def signup(self, username, password, name,
+               phone=None, smsCallback=None,
+               email=None, emailCallback=None
+               ):
 
-        self._signup_start(phone)
-        time.sleep(3)
+        if phone:
+            if smsCallback is None:
+                smsCallback = lambda: input('Verification code: ')
 
-        self._signup_confirmation(smsCallback())
-        time.sleep(7)
+            self._signup_start(phone)
+            time.sleep(3)
 
-        return self._signup_create_validated(username, password, name)
+            self._signup_confirmation(smsCallback())
+            time.sleep(7)
+
+            return self._signup_create_validated(username, password, name)
+
+        elif email:
+            self._signup_email(username, password, name, email)
+
+    def _signup_email(self, username, password, name, email):
+        """Signup by confirming email"""
+
+        params = {
+            **self._common_params,
+            'username': username,
+            'first_name': name,
+            'email': email,
+            'force_sign_up_code': '',
+            'qs_stamp': '',
+            'password': password,
+        }
+        response = self._call_api(
+            'accounts/create/', params=params, return_response=True)
+        response_json = json.loads(self._read_response(response))
+        print(response_json)
+
+        if not response_json.get('account_created'):
+            raise ClientSignupError('Signup failed.')
+
+        return response_json
 
     def _signup_start(self, phone):
         """Signup start."""
