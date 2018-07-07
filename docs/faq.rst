@@ -7,6 +7,10 @@ FAQ
    :local:
    :backlinks: top
 
+Can I create accounts with this library?
+----------------------------------------
+No. This library will not support account creation because of abuse by spammers. If you need an account, use the official app or website.
+
 Can I _____ with this library?
 ---------------------------------
 
