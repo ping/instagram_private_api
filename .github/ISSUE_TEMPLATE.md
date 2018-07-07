@@ -25,3 +25,27 @@
 ### Describe your issue
 
 Please make sure the description is worded well enough to be understood with as much context and examples as possible.
+
+If describing a problem or a bug, code to replicate the issue *must* be provided below.
+
+---
+
+Paste the output of ``python -V`` here:
+
+Code:
+
+```python
+# Example code that will produce the error reported
+from instagram_web_api import Client
+
+web_api = Client()
+user_feed_info = web_api.user_feed('1234567890', count=10)
+```
+
+Error/Debug Log:
+
+```python
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ZeroDivisionError: integer division or modulo by zero
+```
