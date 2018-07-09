@@ -28,6 +28,10 @@ class FeedTests(WebApiTestBase):
                 'name': 'test_reels_feed',
                 'test': FeedTests('test_reels_feed', api),
             },
+            {
+                'name': 'test_highlight_reels',
+                'test': FeedTests('test_highlight_reels', api),
+            },
         ]
 
     def test_tag_feed(self):
@@ -62,3 +66,7 @@ class FeedTests(WebApiTestBase):
     def test_reels_feed(self):
         results = self.api.reels_feed(['25025320']).get('data', {})
         self.assertTrue('reels_media' in results)
+
+    def test_highlight_reels(self):
+        results = self.api.highlight_reels('25025320').get('data', {}).get('user', {})
+        self.assertTrue('edge_highlight_reels' in results)

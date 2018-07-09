@@ -26,7 +26,8 @@ from .compat import (
 from .compatpatch import ClientCompatPatch
 from .errors import (
     ClientError, ClientLoginError, ClientCookieExpiredError,
-    ClientConnectionError
+    ClientConnectionError, ClientBadRequestError,
+    ClientForbiddenError, ClientThrottledError,
 )
 try:  # Python 3:
     # Not a no-op, we're adding this to the namespace so it can be imported.
@@ -279,7 +280,15 @@ class Client(object):
             return json.loads(response_content)
 
         except compat_urllib_error.HTTPError as e:
-            raise ClientError('HTTPError "{0!s}" while opening {1!s}'.format(e.reason, url), e.code)
+            msg = 'HTTPError "{0!s}" while opening {1!s}'.format(e.reason, url)
+            if e.code == 400:
+                raise ClientBadRequestError(msg, e.code)
+            elif e.code == 403:
+                raise ClientForbiddenError(msg, e.code)
+            elif e.code == 429:
+                raise ClientThrottledError(msg, e.code)
+            raise ClientError(msg, e.code)
+
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
                 compat_http_client.HTTPException,
@@ -362,9 +371,10 @@ class Client(object):
             'This endpoint is obsolete. Do not use.', ClientDeprecationWarning)
 
         params = {
-            'q': 'ig_user(%(user_id)s) {id, username, full_name, profile_pic_url, '
+            'q': 'ig_user({user_id}) {{id, username, full_name, profile_pic_url, '
                  'biography, external_url, is_private, is_verified, '
-                 'media {count}, followed_by {count}, follows {count} }' % {'user_id': user_id},
+                 'media {{count}}, followed_by {{count}}, '
+                 'follows {{count}} }}'.format(**{'user_id': user_id}),
         }
         user = self._make_request(self.API_URL, params=params)
 
@@ -428,7 +438,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': '42323d64886122307be10013ad2dcc44',
+            'query_hash': 'df16f80848b2de5a3ca9495d781f98df',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
@@ -460,13 +470,14 @@ class Client(object):
             'This endpoint is obsolete. Do not use.', ClientDeprecationWarning)
 
         params = {
-            'q': 'ig_shortcode(%(media_code)s) { caption, code, comments {count}, date, '
-                 'dimensions {height, width}, comments_disabled, '
-                 'usertags {nodes {x, y, user {id, username, full_name, profile_pic_url} }}, '
-                 'location {id, name, lat, lng}, display_src, id, is_video, is_ad, '
-                 'likes {count}, owner {id, username, full_name, profile_pic_url, '
-                 'is_private, is_verified}, __typename, '
-                 'thumbnail_src, video_views, video_url }' % {'media_code': short_code}
+            'q': 'ig_shortcode({media_code}) {{ caption, code, comments {{count}}, date, '
+                 'dimensions {{height, width}}, comments_disabled, '
+                 'usertags {{nodes {{x, y, user {{id, username, full_name, profile_pic_url}} }} }}, '
+                 'location {{id, name, lat, lng}}, display_src, id, is_video, is_ad, '
+                 'likes {{count}}, owner {{id, username, full_name, profile_pic_url, '
+                 'is_private, is_verified}}, __typename, '
+                 'thumbnail_src, video_views, video_url }}'.format(
+                     **{'media_code': short_code})
         }
         media = self._make_request(self.API_URL, params=params)
         if not media.get('code'):
@@ -945,7 +956,7 @@ class Client(object):
         if end_cursor:
             variables['fetch_media_item_cursor'] = end_cursor
         query = {
-            'query_hash': '485c25657308f08317c1e4b967356828',
+            'query_hash': '13ab8e6f3d19ee05e336ea3bd37ef12b',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)
@@ -972,6 +983,45 @@ class Client(object):
             'reel_ids': reel_ids,
             'tag_names': kwargs.pop('tag_names', []),
             'location_ids': kwargs.pop('location_ids', []),
+            'precomposed_overlay': False,
+        }
+        query = {
+            'query_hash': '45246d3fe16ccc6577e0bd297a5db1ab',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+        return self._make_request(self.GRAPHQL_API_URL, query=query)
+
+    @login_required
+    def highlight_reels(self, user_id):
+        """
+        Get the highlights for the specified user ID
+
+        :param user_id:
+        """
+        variables = {
+            'user_id': user_id,
+            'include_chaining': True,
+            'include_reel': True,
+            'include_suggested_users': False,
+            'include_logged_out_extras': False,
+            'include_highlight_reels': True,
+        }
+        query = {
+            'query_hash': '9ca88e465c3f866a76f7adee3871bdd8',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+        return self._make_request(self.GRAPHQL_API_URL, query=query)
+
+    def highlight_reel_media(self, highlight_reel_ids):
+        """
+        Get medias for the specified highlight IDs
+
+        :param highlight_reel_ids: List of highlight reel IDs
+        """
+        variables = {
+            'highlight_reel_ids': highlight_reel_ids,
+            'reel_ids': [],
+            'location_ids': [],
             'precomposed_overlay': False,
         }
         query = {

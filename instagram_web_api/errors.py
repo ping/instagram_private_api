@@ -26,3 +26,18 @@ class ClientCookieExpiredError(ClientError):
 class ClientConnectionError(ClientError):
     """Raised due to network connectivity-related issues"""
     pass
+
+
+class ClientBadRequestError(ClientError):
+    """Raised due to a HTTP 400 response"""
+    pass
+
+
+class ClientForbiddenError(ClientError):
+    """Raised due to a HTTP 403 response"""
+    pass
+
+
+class ClientThrottledError(ClientError):
+    """Raised due to a HTTP 429 response"""
+    pass

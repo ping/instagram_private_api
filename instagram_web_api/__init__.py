@@ -4,7 +4,8 @@ from .client import Client
 from .compatpatch import ClientCompatPatch
 from .errors import (
     ClientError, ClientLoginError, ClientCookieExpiredError,
-    ClientConnectionError
+    ClientConnectionError, ClientForbiddenError,
+    ClientThrottledError,ClientBadRequestError,
 )
 from .common import ClientDeprecationWarning
 
