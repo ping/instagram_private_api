@@ -1,3 +1,4 @@
+import unittest
 
 from ..common import ApiTestBase
 
@@ -35,6 +36,7 @@ class DiscoverTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
 
+    @unittest.skip('Deprecated.')
     def test_discover_channels_home(self):
         results = self.api.discover_channels_home()
         self.assertEqual(results.get('status'), 'ok')

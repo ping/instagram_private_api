@@ -2,10 +2,10 @@
 class Constants(object):
     """Constants holder class that stores the bulk of the fixed strings used in the library."""
 
-    IG_SIG_KEY = '99e16edcca71d7c1f3fd74d447f6281bd5253a623000a55ed0b60014467a53b1'
-    IG_CAPABILITIES = '3brTBw=='    # = base64.b64encode(struct.pack('<i', 131316445)).decode('ascii')
+    IG_SIG_KEY = '673581b0ddb792bf47da5f9ca816b613d7996f342723aa06993a3f0552311c7d'
+    IG_CAPABILITIES = '3brTPw=='
     SIG_KEY_VERSION = '4'
-    APP_VERSION = '26.0.0.10.86'
+    APP_VERSION = '42.0.0.19.95'
     APPLICATION_ID = '567067343352427'
     FB_HTTP_ENGINE = 'Liger'
 
@@ -17,17 +17,18 @@ class Constants(object):
     PHONE_DPI = '640dpi'
     PHONE_RESOLUTION = '1440x2560'
     PHONE_CHIPSET = 'samsungexynos8890'
+    VERSION_CODE = '104766893'
 
     USER_AGENT_FORMAT = \
-        'Instagram %(app_version)s Android (%(android_version)d/%(android_release)s; ' \
-        '%(dpi)s; %(resolution)s; %(brand)s; %(device)s; %(model)s; %(chipset)s; en_US)'
+        'Instagram {app_version} Android ({android_version:d}/{android_release}; ' \
+        '{dpi}; {resolution}; {brand}; {device}; {model}; {chipset}; en_US; {version_code})'
 
     USER_AGENT_EXPRESSION = \
         r'Instagram\s(?P<app_version>[^\s]+)\sAndroid\s\((?P<android_version>[0-9]+)/(?P<android_release>[0-9\.]+);\s' \
         r'(?P<dpi>\d+dpi);\s(?P<resolution>\d+x\d+);\s(?P<manufacturer>[^;]+);\s(?P<device>[^;]+);\s' \
-        r'(?P<model>[^;]+);\s(?P<chipset>[^;]+);'
+        r'(?P<model>[^;]+);\s(?P<chipset>[^;]+);\s[a-z]+_[A-Z]+;\s(?P<version_code>\d+)'
 
-    USER_AGENT = USER_AGENT_FORMAT % {
+    USER_AGENT = USER_AGENT_FORMAT.format(**{
         'app_version': APP_VERSION,
         'android_version': ANDROID_VERSION,
         'android_release': ANDROID_RELEASE,
@@ -36,7 +37,8 @@ class Constants(object):
         'model': PHONE_MODEL,
         'dpi': PHONE_DPI,
         'resolution': PHONE_RESOLUTION,
-        'chipset': PHONE_CHIPSET}
+        'chipset': PHONE_CHIPSET,
+        'version_code': VERSION_CODE})
 
     LOGIN_EXPERIMENTS = 'ig_android_sms_consent_in_reg,ig_android_flexible_sampling_universe,ig_android_background_conf_resend_fix,ig_restore_focus_on_reg_textbox_universe,ig_android_analytics_data_loss,ig_android_gmail_oauth_in_reg,ig_android_phoneid_sync_interval,ig_android_stay_at_one_tap_on_error,ig_android_link_to_access_if_email_taken_in_reg,ig_android_non_fb_sso,ig_android_family_apps_user_values_provider_universe,ig_android_reg_inline_errors,ig_android_run_fb_reauth_on_background,ig_fbns_push,ig_android_reg_omnibox,ig_android_show_password_in_reg_universe,ig_android_background_phone_confirmation_v2,ig_fbns_blocked,ig_android_access_redesign,ig_android_please_create_username_universe,ig_android_gmail_oauth_in_access,ig_android_reg_whiteout_redesign_v3'   # noqa
 

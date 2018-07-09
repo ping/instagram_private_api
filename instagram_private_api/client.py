@@ -148,6 +148,9 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             self.phone_chipset = (
                 kwargs.pop('phone_chipset', None) or user_settings.get('phone_chipset') or
                 Constants.PHONE_CHIPSET)
+            self.version_code = (
+                kwargs.pop('version_code', None) or user_settings.get('version_code') or
+                Constants.VERSION_CODE)
 
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
@@ -214,7 +217,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     @property
     def user_agent(self):
         """Returns the useragent string that the client is currently using."""
-        return Constants.USER_AGENT_FORMAT % {
+        return Constants.USER_AGENT_FORMAT.format(**{
             'app_version': self.app_version,
             'android_version': self.android_version,
             'android_release': self.android_release,
@@ -223,7 +226,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'model': self.phone_model,
             'dpi': self.phone_dpi,
             'resolution': self.phone_resolution,
-            'chipset': self.phone_chipset}
+            'chipset': self.phone_chipset,
+            'version_code': self.version_code})
 
     @user_agent.setter
     def user_agent(self, value):
@@ -241,6 +245,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         self.phone_dpi = mobj.group('dpi')
         self.phone_resolution = mobj.group('resolution')
         self.phone_chipset = mobj.group('chipset')
+        self.version_code = mobj.group('version_code')
 
     @staticmethod
     def generate_useragent(**kwargs):
@@ -259,7 +264,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             - **chipset**
         :return: A compatible user agent string
         """
-        return Constants.USER_AGENT_FORMAT % {
+        return Constants.USER_AGENT_FORMAT.format(**{
             'app_version': kwargs.pop('app_version', None) or Constants.APP_VERSION,
             'android_version': int(kwargs.pop('android_version', None) or Constants.ANDROID_VERSION),
             'android_release': kwargs.pop('android_release', None) or Constants.ANDROID_RELEASE,
@@ -268,7 +273,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'model': kwargs.pop('phone_model', None) or Constants.PHONE_MODEL,
             'dpi': kwargs.pop('phone_dpi', None) or Constants.PHONE_DPI,
             'resolution': kwargs.pop('phone_resolution', None) or Constants.PHONE_RESOLUTION,
-            'chipset': kwargs.pop('phone_chipset', None) or Constants.PHONE_CHIPSET}
+            'chipset': kwargs.pop('phone_chipset', None) or Constants.PHONE_CHIPSET,
+            'version_code': kwargs.pop('version_code', None) or Constants.VERSION_CODE})
 
     @staticmethod
     def validate_useragent(value):
@@ -280,8 +286,9 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         """
         mobj = re.search(Constants.USER_AGENT_EXPRESSION, value)
         if not mobj:
-            raise ValueError('User-agent specified does not fit format required: {0!s}'.format(
-                Constants.USER_AGENT_EXPRESSION))
+            raise ValueError(
+                'User-agent specified does not fit format required: {0!s}'.format(
+                    Constants.USER_AGENT_EXPRESSION))
         parse_params = {
             'app_version': mobj.group('app_version'),
             'android_version': int(mobj.group('android_version')),
@@ -291,10 +298,11 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'model': mobj.group('model'),
             'dpi': mobj.group('dpi'),
             'resolution': mobj.group('resolution'),
-            'chipset': mobj.group('chipset')
+            'chipset': mobj.group('chipset'),
+            'version_code': mobj.group('version_code'),
         }
         return {
-            'user_agent': Constants.USER_AGENT_FORMAT % parse_params,
+            'user_agent': Constants.USER_AGENT_FORMAT.format(**parse_params),
             'parsed_params': parse_params
         }
 

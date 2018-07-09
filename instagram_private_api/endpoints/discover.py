@@ -1,3 +1,6 @@
+import warnings
+
+from .common import ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
 
 
@@ -20,8 +23,12 @@ class DiscoverEndpointsMixin(object):
              if item.get('media') else item for item in res['items']]
         return res
 
-    def discover_channels_home(self):
+    def discover_channels_home(self):       # pragma: no cover
         """Discover channels home"""
+        warnings.warn(
+            'This endpoint is believed to be obsolete. Do not use.',
+            ClientDeprecationWarning)
+
         res = self._call_api('discover/channels_home/')
         if self.auto_patch:
             for item in res.get('items', []):

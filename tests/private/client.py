@@ -70,7 +70,7 @@ class ClientTests(ApiTestBase):
 
     def test_validate_useragent(self):
         self.sleep_interval = 0
-        ua = 'Instagram 9.2.0 Android (22/5.1.1; 480dpi; 1080x1920; Xiaomi; Redmi Note 3; kenzo; qcom; en_GB)'
+        ua = 'Instagram 9.2.0 Android (22/5.1.1; 480dpi; 1080x1920; Xiaomi; Redmi Note 3; kenzo; qcom; en_GB; 123456)'
         results = Client.validate_useragent(ua)
         self.assertEqual(results['parsed_params']['brand'], 'Xiaomi')
         self.assertEqual(results['parsed_params']['device'], 'Redmi Note 3')
@@ -81,6 +81,7 @@ class ClientTests(ApiTestBase):
         self.assertEqual(results['parsed_params']['android_version'], 22)
         self.assertEqual(results['parsed_params']['android_release'], '5.1.1')
         self.assertEqual(results['parsed_params']['app_version'], '9.2.0')
+        self.assertEqual(results['parsed_params']['version_code'], '123456')
 
     def test_validate_useragent2(self):
         self.sleep_interval = 0
@@ -113,7 +114,7 @@ class ClientTests(ApiTestBase):
         self.assertEqual(
             custom_ua,
             'Instagram %s Android (%s/%s; %s; %s; '
-            '%s; %s; %s; %s; en_US)'
+            '%s; %s; %s; %s; en_US; %s)'
             % (
                 Constants.APP_VERSION,
                 custom_device['android_version'],
@@ -124,6 +125,7 @@ class ClientTests(ApiTestBase):
                 custom_device['device'],
                 custom_device['model'],
                 custom_device['chipset'],
+                Constants.VERSION_CODE,
             )
         )
 

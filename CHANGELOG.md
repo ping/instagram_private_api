@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.0 (pending)
+- Web API:
+    * Add ``highlight_reels()`` and ``highlight_reel_media()``
+- App API:
+    * __BREAKING CHANGE__: Change in user agent format for the app version
+
 ## 1.5.7
 - Web API:
     * Improve cookie expiry detection
