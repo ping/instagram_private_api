@@ -1029,3 +1029,39 @@ class Client(object):
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)
+
+    def tagged_user_feed(self, user_id, **kwargs):
+        """
+        Get the tagged feed for the specified user ID
+
+        :param user_id:
+        """
+        count = kwargs.pop('count', 12)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
+
+        end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
+
+        variables = {
+            'id': user_id,
+            'first': int(count),
+        }
+        if end_cursor:
+            variables['after'] = end_cursor
+        query = {
+            'query_hash': 'e31a871f7301132ceaab56507a66bbb7',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+        info = self._make_request(self.GRAPHQL_API_URL, query=query)
+
+        if not info.get('data', {}).get('user'):
+            # non-existent accounts do not return media at all
+            # private accounts return media with just a count, no nodes
+            raise ClientError('Not Found', 404)
+
+        if self.auto_patch:
+            [ClientCompatPatch.media(media['node'], drop_incompat_keys=self.drop_incompat_keys)
+             for media in info.get('data', {}).get('user', {}).get(
+                 'edge_user_to_photos_of_you', {}).get('edges', [])]
+
+        return info
