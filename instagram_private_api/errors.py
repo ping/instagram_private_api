@@ -131,7 +131,5 @@ class ErrorHandler(object):
         except ValueError as ve:
             # do nothing else, prob can't parse json
             logger.warning('Error parsing error response: {}'.format(str(ve)))
-        except ClientError:
-            raise
 
         raise ClientError(error_msg, http_error.code, error_response)
