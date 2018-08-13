@@ -666,7 +666,7 @@ class Client(object):
             variables['after'] = end_cursor
 
         query = {
-            'query_hash': '37479f2b8209594dde7facb0d904896a',
+            'query_hash': '7dd9a7e2160524fd85f50317462cff9f',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
