@@ -13,6 +13,7 @@ from .upload import UploadTests
 from .users import UsersTests
 from .usertags import UsertagsTests
 from .highlights import HighlightsTests
+from .igtv import IGTVTests
 
 from .apiutils import ApiUtilsTests
 from .client import ClientTests

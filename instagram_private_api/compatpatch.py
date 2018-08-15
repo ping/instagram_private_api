@@ -381,9 +381,9 @@ class ClientCompatPatch(object):
     def user(cls, user, drop_incompat_keys=False):
         """Patch a user object """
         user['id'] = str(user['pk'])
-        user['bio'] = user['biography']
+        user['bio'] = user.get('biography', '')
         user['profile_picture'] = user['profile_pic_url']
-        user['website'] = user['external_url']
+        user['website'] = user.get('external_url', '')
         if 'media_count' in user and 'follower_count' in user and 'following_count' in user:
             counts = {
                 'media': user['media_count'],

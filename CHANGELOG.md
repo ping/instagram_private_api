@@ -7,6 +7,7 @@
     * Update query hashes
 - App API:
     * __BREAKING CHANGE__: Change in user agent format for the app version
+    * Add IGTV endpoints
 
 ## 1.5.7
 - Web API:

@@ -13,6 +13,7 @@ from .users import UsersEndpointsMixin
 from .usertags import UsertagsEndpointsMixin
 from .collections import CollectionsEndpointsMixin
 from .highlights import HighlightsEndpointsMixin
+from .igtv import IGTVEndpointsMixin
 
 from .common import (
     ClientDeprecationWarning,

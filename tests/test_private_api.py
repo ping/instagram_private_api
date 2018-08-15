@@ -13,7 +13,8 @@ from .private import (
     LocationTests, MediaTests, MiscTests,
     TagsTests, UploadTests, UsersTests,
     UsertagsTests, HighlightsTests,
-    ClientTests, ApiUtilsTests, CompatPatchTests
+    ClientTests, ApiUtilsTests, CompatPatchTests,
+    IGTVTests,
 )
 from .common import (
     Client, ClientError, ClientLoginError, ClientCookieExpiredError,
@@ -135,6 +136,7 @@ if __name__ == '__main__':
     tests.extend(UsersTests.init_all(api))
     tests.extend(UsertagsTests.init_all(api))
     tests.extend(HighlightsTests.init_all(api))
+    tests.extend(IGTVTests.init_all(api))
 
     tests.extend(ClientTests.init_all(api))
     tests.extend(CompatPatchTests.init_all(api))
