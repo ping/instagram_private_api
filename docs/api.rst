@@ -14,6 +14,12 @@ The api currently has two main interfaces:
     - :class:`instagram_private_api.ClientLoginError`
     - :class:`instagram_private_api.ClientLoginRequiredError`
     - :class:`instagram_private_api.ClientCookieExpiredError`
+    - :class:`instagram_private_api.ClientThrottledError`
+    - :class:`instagram_private_api.ClientReqHeadersTooLargeError`
+    - :class:`instagram_private_api.ClientConnectionError`
+    - :class:`instagram_private_api.ClientCheckpointRequiredError`
+    - :class:`instagram_private_api.ClientChallengeRequiredError`
+    - :class:`instagram_private_api.ClientSentryBlockError`
     - :class:`instagram_private_api.MediaRatios`
     - :class:`instagram_private_api.MediaTypes`
 
@@ -22,6 +28,10 @@ The api currently has two main interfaces:
     - :class:`instagram_web_api.ClientCompatPatch`
     - :class:`instagram_web_api.ClientError`
     - :class:`instagram_web_api.ClientCookieExpiredError`
+    - :class:`instagram_web_api.ClientConnectionError`
+    - :class:`instagram_web_api.ClientBadRequestError`
+    - :class:`instagram_web_api.ClientForbiddenError`
+    - :class:`instagram_web_api.ClientThrottledError`
 
 
 App API
