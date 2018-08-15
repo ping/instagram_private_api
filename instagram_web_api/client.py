@@ -56,8 +56,8 @@ class Client(object):
 
     API_URL = 'https://www.instagram.com/query/'
     GRAPHQL_API_URL = 'https://www.instagram.com/graphql/query/'
-    USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0.1 Safari/604.3.5'    # noqa
-    MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0 Mobile/15B93 Safari/604.1'     # noqa
+    USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.2 Safari/605.1.15'      # noqa
+    MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.0 Mobile/15E148 Safari/604.1'  # noqa
 
     def __init__(self, user_agent=None, **kwargs):
         """
@@ -438,7 +438,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': 'df16f80848b2de5a3ca9495d781f98df',
+            'query_hash': 'e7e2f4da4b02303f74f0841279e52d76',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
@@ -536,7 +536,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': '33ba35852cb50da46f5b5e889df7d159',
+            'query_hash': 'f0986789a5c5d17c2400faebf16efd0d',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -585,7 +585,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': '1cb6ec562846122743b61e492c85999f',
+            'query_hash': 'e0f59e4a1c8d78d0161873bc2ee7ec44',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -626,7 +626,7 @@ class Client(object):
             variables['after'] = end_cursor
 
         query = {
-            'query_hash': '58712303d941c6855d4e888c5f0cd22f',
+            'query_hash': 'c56ee0ae1f89cdbd1c89e2bc6b8f3d18',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -894,7 +894,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': 'ded47faa9a1aaded10161a2ff32abb6b',
+            'query_hash': 'faa8d9917120f16cec7debbd3f16929d',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -1007,7 +1007,7 @@ class Client(object):
             'include_highlight_reels': True,
         }
         query = {
-            'query_hash': '9ca88e465c3f866a76f7adee3871bdd8',
+            'query_hash': '7c16654f22c819fb63d1183034a5162f',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)

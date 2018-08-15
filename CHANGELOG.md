@@ -4,6 +4,7 @@
 - Web API:
     * Add ``highlight_reels()`` and ``highlight_reel_media()``
     * Add ``tagged_user_feed()``
+    * Update query hashes
 - App API:
     * __BREAKING CHANGE__: Change in user agent format for the app version
 
