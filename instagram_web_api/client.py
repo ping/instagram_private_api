@@ -322,6 +322,15 @@ class Client(object):
 
     def init(self):
         """Make a GET request to get the first csrf token and rhx_gis"""
+
+        # try to emulate cookies consent
+        self.cookie_jar.set_cookie(
+            compat_cookiejar.Cookie(
+                0, 'ig_cb', '1', None, False,
+                'www.instagram.com', False, None, '/',
+                False, False, None, True, None, None, {})
+        )
+
         init_res = self._make_request(
             'https://www.instagram.com/', return_response=True, get_method=lambda: 'GET')
         init_res_content = self._read_response(init_res)
