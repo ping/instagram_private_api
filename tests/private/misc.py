@@ -34,6 +34,10 @@ class MiscTests(ApiTestBase):
                 'test': MiscTests('test_direct_v2_inbox', api)
             },
             {
+                'name': 'test_direct_v2_thread',
+                'test': MiscTests('test_direct_v2_thread', api)
+            },
+            {
                 'name': 'test_oembed',
                 'test': MiscTests('test_oembed', api)
             },
