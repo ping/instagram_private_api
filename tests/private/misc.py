@@ -100,6 +100,11 @@ class MiscTests(ApiTestBase):
         results = self.api.direct_v2_inbox()
         self.assertEqual(results.get('status'), 'ok')
 
+    def test_direct_v2_thread(self):
+        results = self.api.direct_v2_thread()
+        self.assertIsNotNone(results.get('thread'))
+        self.assertEqual(results.get('status'), 'ok')
+
     def test_oembed(self):
         results = self.api.oembed('https://www.instagram.com/p/BJL-gjsDyo1/')
         self.assertIsNotNone(results.get('html'))
