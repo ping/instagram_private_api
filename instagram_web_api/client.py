@@ -897,7 +897,7 @@ class Client(object):
         end_cursor = kwargs.pop('end_cursor', None) or kwargs.pop('max_id', None)
 
         variables = {
-            'tag_name': tag,
+            'tag_name': tag.lower(),
             'first': int(count)
         }
         if end_cursor:
