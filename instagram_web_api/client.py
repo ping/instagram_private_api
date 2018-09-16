@@ -876,10 +876,14 @@ class Client(object):
             if user_tags:
                 user_tags_ = {"in": []}
                 if isinstance(user_tags, list):
+                    if len(user_tags) > 60:
+                        warnings.warn('Adding more than 60 users will put your account at banned risk', UserWarning)
                     for user_id in user_tags:
                         user_tags_["in"].append({"user_id": user_id, "position": [random.uniform(0.1, 0.9), random.uniform(0.1, 0.9)]})
                 elif isinstance(user_tags, str):
                     user_tags_["in"].append({"user_id": user_tags, "position": [random.uniform(0.1, 0.9), random.uniform(0.1, 0.9)]})
+                else:
+                    raise ValueError('user_tags must be list of users id or string with one user id')
 
             res = self._make_request(
                 endpoint, headers=headers,
