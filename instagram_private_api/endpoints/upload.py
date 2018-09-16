@@ -600,7 +600,7 @@ class UploadEndpointsMixin(object):
                         res = self.opener.open(req, timeout=self.timeout)
                         post_response = self._read_response(res)
                         self.logger.debug('RESPONSE: {0:d} {1!s}'.format(res.code, post_response))
-                        if res.info().get('Content-Type') == 'application/json':
+                        if res.info().get('Content-Type', '').startswith('application/json'):
                             # last chunk
                             upload_res = json.loads(post_response)
                             configure_delay = int(upload_res.get('configure_delay_ms', 0)) / 1000.0
