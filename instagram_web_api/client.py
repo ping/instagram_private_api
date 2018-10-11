@@ -17,6 +17,8 @@ from functools import wraps
 import string
 import random
 from socket import timeout, error as SocketError
+import socks
+from sockshandler import SocksiPyHandler
 from ssl import SSLError
 from .compat import (
     compat_urllib_request, compat_urllib_parse,
@@ -106,8 +108,15 @@ class Client(object):
             warnings.warn('Proxy support is alpha.', UserWarning)
             parsed_url = compat_urllib_parse_urlparse(proxy)
             if parsed_url.netloc and parsed_url.scheme:
-                proxy_address = '{0!s}://{1!s}'.format(parsed_url.scheme, parsed_url.netloc)
-                proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
+                if parsed_url.scheme == 'socks5':
+                    proxy_handler = SocksiPyHandler(socks.SOCKS5, parsed_url.hostname, parsed_url.port,
+                                                    username=parsed_url.username, password=parsed_url.password)
+                elif parsed_url.scheme == 'socks4':
+                    proxy_handler = SocksiPyHandler(socks.SOCKS4, parsed_url.hostname, parsed_url.port,
+                                                    username=parsed_url.username, password=parsed_url.password)
+                else:
+                    proxy_address = '{0!s}://{1!s}'.format(parsed_url.scheme, parsed_url.netloc)
+                    proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
             else:
                 raise ValueError('Invalid proxy argument: {0!s}'.format(proxy))
         handlers = []

@@ -2,3 +2,4 @@ flake8>=3.3.0
 Sphinx>=1.5.1
 sphinx-rtd-theme>=0.1.9
 pylint
+PySocks==1.6.8
