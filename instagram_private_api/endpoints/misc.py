@@ -82,9 +82,20 @@ class MiscEndpointsMixin(object):
         return self._call_api(
             'news/inbox/', query={'limited_activity': 'true', 'show_su': 'true'})
 
-    def direct_v2_inbox(self):
-        """Get v2 inbox"""
-        return self._call_api('direct_v2/inbox/')
+    def direct_v2_inbox(self, oldest_cursor=None):
+        """
+        Get v2 inbox
+        To retrieve the second page of the inbox, pass the oldest_cursor
+        returned by the previous direct_v2_inbox() call
+        """
+        query = {}
+        if oldest_cursor:
+            query = {
+                '__a': 1,
+                'max_id': oldest_cursor
+            }
+
+        return self._call_api('direct_v2/inbox/', query=query)
 
     def oembed(self, url, **kwargs):
         """
