@@ -207,8 +207,9 @@ class Client(object):
         ).encode('utf-8'))
         return m.hexdigest()
 
+
     def _make_request(self, url, params=None, headers=None, query=None,
-                      return_response=False, get_method=None):
+                      return_response=False, get_method=None, asJson = True):
         """
         Calls the web API.
 
@@ -277,7 +278,10 @@ class Client(object):
             response_content = self._read_response(res)
 
             self.logger.debug('RES BODY: {0!s}'.format(response_content))
-            return json.loads(response_content)
+            if asJson:
+                return json.loads(response_content)
+            else:
+                return response_content
 
         except compat_urllib_error.HTTPError as e:
             msg = 'HTTPError "{0!s}" while opening {1!s}'.format(e.reason, url)
@@ -405,17 +409,19 @@ class Client(object):
         # For authed and unauthed clients, a "fresh" rhx_gis must be used
         endpoint = 'https://www.instagram.com/{username!s}/'.format(**{'username': user_name})
         try:
-            info = self._make_request(endpoint, query={'__a': '1'})
+            info = self._make_request(endpoint, asJson=False)
         except ClientError as ce:
             if ce.code != 403:
                 raise ce
             # reinit to get a fresh rhx_gis
             self.init()
-            info = self._make_request(endpoint, query={'__a': '1'})
+            info = self._make_request(endpoint, asJson=False)
 
+        user_info = info.split('window._sharedData = ')[1].split(';</script>')[0]
+        user_info = json.loads(user_info)
         if self.auto_patch:
             ClientCompatPatch.user(info['graphql']['user'], drop_incompat_keys=self.drop_incompat_keys)
-        return info['graphql']['user']
+        return user_info['entry_data']['ProfilePage'][0]['graphql']['user']
 
     def user_feed(self, user_id, **kwargs):
         """
@@ -457,14 +463,6 @@ class Client(object):
             # private accounts return media with just a count, no nodes
             raise ClientError('Not Found', 404)
 
-        if self.auto_patch:
-            [ClientCompatPatch.media(media['node'], drop_incompat_keys=self.drop_incompat_keys)
-             for media in info.get('data', {}).get('user', {}).get(
-                 'edge_owner_to_timeline_media', {}).get('edges', [])]
-
-        if kwargs.pop('extract', True):
-            return info.get('data', {}).get('user', {}).get(
-                'edge_owner_to_timeline_media', {}).get('edges', [])
         return info
 
     def media_info(self, short_code, **kwargs):     # pragma: no cover
@@ -556,15 +554,7 @@ class Client(object):
             # media without comments will return comments, with counts = 0, nodes = [], etc
             raise ClientError('Not Found', 404)
 
-        if self.auto_patch:
-            [ClientCompatPatch.comment(c['node'], drop_incompat_keys=self.drop_incompat_keys)
-             for c in info.get('data', {}).get('shortcode_media', {}).get(
-                 'edge_media_to_comment', {}).get('edges', [])]
-
-        if kwargs.pop('extract', True):
-            return [c['node'] for c in info.get('data', {}).get('shortcode_media', {}).get(
-                'edge_media_to_comment', {}).get('edges', [])]
-        return info
+        return info['data']['shortcode_media']['edge_media_to_comment']
 
     @login_required
     def media_likers(self, short_code, **kwargs):
