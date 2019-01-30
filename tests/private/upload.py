@@ -76,9 +76,12 @@ class UploadTests(ApiTestBase):
         res = urlopen(sample_url)
         photo_data = res.read()
         size = (1024, 683)
-        results = self.api.post_photo(photo_data, size=size, caption='')
+        caption = 'Feathers'
+        results = self.api.post_photo(photo_data, size=size, caption=caption)
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
+        self.assertIsNotNone(results.get('media', {}).get('caption'))
+        self.assertEqual(results.get('media', {}).get('caption', {}).get('text', ''), caption)
 
     def strip_url_params(self, thumbnail_url):
         o = compat_urllib_parse_urlparse(thumbnail_url)
