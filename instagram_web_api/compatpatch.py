@@ -22,7 +22,7 @@ class ClientCompatPatch(object):
         """
         mobj = re.search(cls.IG_IMAGE_URL_EXPR, url)
         if not mobj:
-            replacement_expr = '\g<eparam>{crop!s}{size!s}x{size!s}/'.format(
+            replacement_expr = r'\g<eparam>{crop!s}{size!s}x{size!s}/'.format(
                 **{'crop': crop, 'size': size})
             return re.sub(r'(?P<eparam>/e[0-9]+/)', replacement_expr, url)
         replacement_expr = '/{crop!s}{size!s}x{size!s}/'.format(
