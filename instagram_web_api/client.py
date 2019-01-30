@@ -93,6 +93,7 @@ class Client(object):
 
         self.init_csrftoken = None
         self.rhx_gis = kwargs.pop('rhx_gis', None) or user_settings.get('rhx_gis')
+        self.rollout_hash = '1'
 
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
@@ -232,7 +233,7 @@ class Client(object):
                 headers.update({
                     'x-csrftoken': self.csrftoken,
                     'x-requested-with': 'XMLHttpRequest',
-                    'x-instagram-ajax': '1',
+                    'x-instagram-ajax': self.rollout_hash,
                     'Referer': 'https://www.instagram.com',
                     'Authority': 'www.instagram.com',
                     'Origin': 'https://www.instagram.com',
@@ -271,11 +272,11 @@ class Client(object):
             self.logger.debug('RES HEADERS: {0!s}'.format(
                 [u'{}: {}'.format(k, v) for k, v in res.info().items()]
             ))
+
             if return_response:
                 return res
 
             response_content = self._read_response(res)
-
             self.logger.debug('RES BODY: {0!s}'.format(response_content))
             return json.loads(response_content)
 
@@ -320,6 +321,21 @@ class Client(object):
             return mobj.group('csrf_token')
         return None
 
+    @staticmethod
+    def _extract_rollout_hash(html):
+        mobj = re.search(
+            r'"rollout_hash":"(?P<rollout_hash>[A-Za-z0-9]+)"', html, re.MULTILINE)
+
+        if mobj:
+            return mobj.group('rollout_hash')
+        return None
+
+    def _init_rollout_hash(self):
+        """Call before any POST call to make sure we get the rollout hash"""
+        if self.rollout_hash == '1':
+            # rollout hash not yet retrieved
+            self.init()
+
     def init(self):
         """Make a GET request to get the first csrf token and rhx_gis"""
 
@@ -337,6 +353,10 @@ class Client(object):
 
         rhx_gis = self._extract_rhx_gis(init_res_content)
         self.rhx_gis = rhx_gis
+
+        rollout_hash = self._extract_rollout_hash(init_res_content)
+        if rollout_hash:
+            self.rollout_hash = rollout_hash
 
         if not self.csrftoken:
             csrftoken = self._extract_csrftoken(init_res_content)
@@ -359,6 +379,7 @@ class Client(object):
         if not self.username or not self.password:
             raise ClientError('username/password is blank')
         params = {'username': self.username, 'password': self.password, 'queryParams': '{}'}
+        self._init_rollout_hash()
         login_res = self._make_request('https://www.instagram.com/accounts/login/ajax/', params=params)
         if not login_res.get('status', '') == 'ok' or not login_res.get('authenticated'):
             raise ClientLoginError('Unable to login')
@@ -704,6 +725,7 @@ class Client(object):
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/likes/{media_id!s}/like/'.format(**{'media_id': media_id})
+        self._init_rollout_hash()
         res = self._make_request(endpoint, params='')
         return res
 
@@ -720,6 +742,7 @@ class Client(object):
         """
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/likes/{media_id!s}/unlike/'.format(**{'media_id': media_id})
+        self._init_rollout_hash()
         return self._make_request(endpoint, params='')
 
     @login_required
@@ -734,6 +757,7 @@ class Client(object):
                 {"status": "ok", "result": "following"}
         """
         endpoint = 'https://www.instagram.com/web/friendships/{user_id!s}/follow/'.format(**{'user_id': user_id})
+        self._init_rollout_hash()
         return self._make_request(endpoint, params='')
 
     @login_required
@@ -748,6 +772,7 @@ class Client(object):
                 {"status": "ok"}
         """
         endpoint = 'https://www.instagram.com/web/friendships/{user_id!s}/unfollow/'.format(**{'user_id': user_id})
+        self._init_rollout_hash()
         return self._make_request(endpoint, params='')
 
     @login_required
@@ -785,6 +810,7 @@ class Client(object):
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/comments/{media_id!s}/add/'.format(**{'media_id': media_id})
         params = {'comment_text': comment_text}
+        self._init_rollout_hash()
         return self._make_request(endpoint, params=params)
 
     @login_required
@@ -802,6 +828,7 @@ class Client(object):
         media_id = self._sanitise_media_id(media_id)
         endpoint = 'https://www.instagram.com/web/comments/{media_id!s}/delete/{comment_id!s}/'.format(**{
             'media_id': media_id, 'comment_id': comment_id})
+        self._init_rollout_hash()
         return self._make_request(endpoint, params='')
 
     def search(self, query_text):
@@ -828,6 +855,8 @@ class Client(object):
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
 
+        self._init_rollout_hash()
+
         upload_id = int(time.time() * 1000)
         boundary = '----WebKitFormBoundary{}'.format(
             ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(16)))
@@ -848,7 +877,7 @@ class Client(object):
             'Connection': 'close',
             'x-csrftoken': self.csrftoken,
             'x-requested-with': 'XMLHttpRequest',
-            'x-instagram-ajax': '1',
+            'x-instagram-ajax': self.rollout_hash,
             'Origin': 'https://www.instagram.com',
             'Referer': 'https://www.instagram.com/create/crop/',
             'Content-Type': content_type,
@@ -874,7 +903,12 @@ class Client(object):
             endpoint = 'https://www.instagram.com/create/configure/'
             res = self._make_request(
                 endpoint, headers=headers,
-                params={'upload_id': upload_id, 'caption': caption},
+                params={
+                    'upload_id': upload_id,
+                    'caption': caption,
+                    'retry_timeout': '',
+                    'custom_accessibility_caption': '',
+                },
                 get_method=lambda: 'POST')
             return res
 
