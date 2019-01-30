@@ -133,7 +133,10 @@ class FeedTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
 
     def test_location_feed(self):
-        results = self.api.feed_location(213012122)
+        rank_token = self.api.generate_uuid()
+        # 213012122 - Yosemite National Park
+        # 218551172247829 - Mount Fuji
+        results = self.api.feed_location(218551172247829, rank_token)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
         self.assertGreater(len(results.get('ranked_items', [])), 0, 'No ranked_items returned.')

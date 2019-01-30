@@ -196,15 +196,23 @@ class FeedEndpointsMixin(object):
              for m in res.get('reel', {}).get('items', [])]
         return res
 
-    def feed_location(self, location_id, **kwargs):
+    def feed_location(self, location_id, rank_token, **kwargs):
         """
         Get a location feed
 
         :param location_id:
+        :param rank_token: Required for paging through a single feed and can be generated with
+            :meth:`generate_uuid`. You should use the same rank_token for paging through a single location.
         :return:
         """
+        raise_if_invalid_rank_token(rank_token)
+
         endpoint = 'feed/location/{location_id!s}/'.format(**{'location_id': location_id})
-        res = self._call_api(endpoint, query=kwargs)
+        query_params = {
+            'rank_token': rank_token,
+        }
+        query_params.update(kwargs)
+        res = self._call_api(endpoint, query=query_params)
         if self.auto_patch:
             if res.get('items'):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
