@@ -819,12 +819,13 @@ class Client(object):
         return res
 
     @login_required
-    def post_photo(self, photo_data, caption=''):
+    def post_photo(self, photo_data, caption='', user_tags=None):
         """
         Post a photo
 
         :param photo_data: byte string of the image
         :param caption: caption text
+        :param user_tags: user's id
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
 
@@ -872,9 +873,25 @@ class Client(object):
             headers['Content-Type'] = 'application/x-www-form-urlencoded'
             del headers['Content-Length']
             endpoint = 'https://www.instagram.com/create/configure/'
+
+            if user_tags:
+                user_tags_ = {"in": []}
+                cryptogen = random.SystemRandom()
+                if isinstance(user_tags, list):
+                    if len(user_tags) > 60:
+                        warnings.warn('Adding more than 60 users will put your account at banned risk', UserWarning)
+                    for user_id in user_tags:
+                        user_tags_["in"].append({"user_id": user_id, "position": [cryptogen.random(), cryptogen.random()]})
+                elif isinstance(user_tags, str):
+                    user_tags_["in"].append({"user_id": user_tags, "position": [cryptogen.random(), cryptogen.random()]})
+                else:
+                    raise ValueError('user_tags must be list of users id or string with one user id')
+
             res = self._make_request(
                 endpoint, headers=headers,
-                params={'upload_id': upload_id, 'caption': caption},
+                params={'upload_id': upload_id, 'caption': caption} \
+                    if not user_tags else \
+                    {'upload_id': upload_id, 'caption': caption, 'usertags': user_tags_},
                 get_method=lambda: 'POST')
             return res
 
