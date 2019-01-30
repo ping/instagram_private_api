@@ -65,3 +65,7 @@ This is the response for detected spam/bot behavior. Stop using the api in whate
 Why are the captions are not posted?
 ------------------------------------
 This is due to your account / access location (IP) being soft-blocked.
+
+What does ``checkpoint_challenge_required``, ``challenge_required`` mean?
+-------------------------------------------------------------------------
+Your access attempt has been flagged. Login manually to pass the required challenge.
