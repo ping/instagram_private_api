@@ -746,6 +746,22 @@ class Client(object):
         return self._make_request(endpoint, params='')
 
     @login_required
+    def delete_media(self, media_id):
+        """
+        Delete an update. Login required.
+
+        :param media_id: Media id
+        :return:
+            .. code-block:: javascript
+
+                {"did_delete": true, "status": "ok"}
+        """
+        media_id = self._sanitise_media_id(media_id)
+        endpoint = 'https://www.instagram.com/create/{media_id!s}/delete/'.format(**{'media_id': media_id})
+        self._init_rollout_hash()
+        return self._make_request(endpoint, params='')
+
+    @login_required
     def friendships_create(self, user_id):
         """
         Follow a user. Login required.
