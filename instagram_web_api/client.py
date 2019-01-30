@@ -452,7 +452,8 @@ class Client(object):
         }
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
 
-        if not info.get('data', {}).get('user'):
+        if not info.get('data', {}).get('user') or \
+                not info.get('data', {}).get('user', {}).get('edge_owner_to_timeline_media', {}).get('count', 0):
             # non-existent accounts do not return media at all
             # private accounts return media with just a count, no nodes
             raise ClientError('Not Found', 404)
