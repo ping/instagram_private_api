@@ -8,14 +8,15 @@ class CompatPatchTests(ApiTestBase):
 
     @staticmethod
     def init_all(api):
+        test_media_id = '1962809196194057623_25025320'
         return [
             {
                 'name': 'test_compat_media',
-                'test': CompatPatchTests('test_compat_media', api, media_id='1206573574980690068_1497851591')
+                'test': CompatPatchTests('test_compat_media', api, media_id=test_media_id)
             },
             {
                 'name': 'test_compat_comment',
-                'test': CompatPatchTests('test_compat_comment', api, media_id='1206573574980690068_1497851591')
+                'test': CompatPatchTests('test_compat_comment', api, media_id=test_media_id)
             },
             {
                 'name': 'test_compat_user',

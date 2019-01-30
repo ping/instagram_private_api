@@ -13,10 +13,11 @@ class MediaTests(ApiTestBase):
 
     @staticmethod
     def init_all(api):
+        test_media_id = '1962809196194057623_25025320'
         return [
             {
                 'name': 'test_media_info',
-                'test': MediaTests('test_media_info', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_media_info', api, media_id=test_media_id)
             },
             {
                 'name': 'test_media_info2',
@@ -24,11 +25,11 @@ class MediaTests(ApiTestBase):
             },
             {
                 'name': 'test_medias_info',
-                'test': MediaTests('test_medias_info', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_medias_info', api, media_id=test_media_id)
             },
             {
                 'name': 'test_media_permalink',
-                'test': MediaTests('test_media_permalink', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_media_permalink', api, media_id=test_media_id)
             },
             {
                 'name': 'test_deleted_media_info',
@@ -36,7 +37,7 @@ class MediaTests(ApiTestBase):
             },
             {
                 'name': 'test_media_comments',
-                'test': MediaTests('test_media_comments', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_media_comments', api, media_id=test_media_id)
             },
             {
                 'name': 'test_deleted_media_comments',
@@ -44,15 +45,15 @@ class MediaTests(ApiTestBase):
             },
             {
                 'name': 'test_media_n_comments',
-                'test': MediaTests('test_media_n_comments', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_media_n_comments', api, media_id=test_media_id)
             },
             {
                 'name': 'test_media_likers',
-                'test': MediaTests('test_media_likers', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_media_likers', api, media_id=test_media_id)
             },
             {
                 'name': 'test_media_likers_chrono',
-                'test': MediaTests('test_media_likers_chrono', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_media_likers_chrono', api, media_id=test_media_id)
             },
             {
                 'name': 'test_comment_like',
@@ -120,19 +121,19 @@ class MediaTests(ApiTestBase):
             },
             {
                 'name': 'test_save_photo',
-                'test': MediaTests('test_save_photo', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_save_photo', api, media_id=test_media_id)
             },
             {
                 'name': 'test_save_photo_mock',
-                'test': MediaTests('test_save_photo_mock', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_save_photo_mock', api, media_id=test_media_id)
             },
             {
                 'name': 'test_unsave_photo',
-                'test': MediaTests('test_unsave_photo', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_unsave_photo', api, media_id=test_media_id)
             },
             {
                 'name': 'test_unsave_photo_mock',
-                'test': MediaTests('test_unsave_photo_mock', api, media_id='1206573574980690068_1497851591')
+                'test': MediaTests('test_unsave_photo_mock', api, media_id=test_media_id)
             },
             {
                 'name': 'test_disable_comments_mock',

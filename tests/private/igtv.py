@@ -23,7 +23,7 @@ class IGTVTests(ApiTestBase):
         ]
 
     def test_tvchannel(self):
-        results = self.api.tvchannel('popular')
+        results = self.api.tvchannel('for_you')
         self.assertGreater(len(results.get('items', [])), 0)
 
     def test_tvguide(self):
