@@ -106,6 +106,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         self.device_id = (
             kwargs.pop('device_id', None) or user_settings.get('device_id') or
             self.generate_deviceid())
+        # application session ID
+        self.session_id = (
+            kwargs.pop('session_id', None) or user_settings.get('session_id') or
+            self.generate_uuid(False))
         self.signature_key = (
             kwargs.pop('signature_key', None) or user_settings.get('signature_key') or
             self.IG_SIG_KEY)
@@ -214,6 +218,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'uuid': self.uuid,
             'device_id': self.device_id,
             'ad_id': self.ad_id,
+            'session_id': self.session_id,
             'cookie': self.cookie_jar.dump(),
             'created_ts': int(time.time())
         }
