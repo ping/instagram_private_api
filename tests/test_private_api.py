@@ -25,7 +25,7 @@ from .common import (
 if __name__ == '__main__':
 
     warnings.simplefilter('ignore', UserWarning)
-    logging.basicConfig(format='%(name)s %(message)s')
+    logging.basicConfig(format='%(name)s %(message)s', stream=sys.stdout)
     logger = logging.getLogger('instagram_private_api')
     logger.setLevel(logging.WARNING)
 
