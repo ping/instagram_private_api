@@ -87,6 +87,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             - **settings**: A dict of settings from a previous session
             - **on_login**: Callback after successful login
             - **proxy**: Specify a proxy ex: 'http://127.0.0.1:8888' (ALPHA)
+            - **proxy_handler**: Specify your own proxy handler
         :return:
         """
         self.username = username
@@ -160,16 +161,17 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             raise ClientCookieExpiredError('Cookie expired at {0!s}'.format(cookie_jar.auth_expires))
         cookie_handler = compat_urllib_request.HTTPCookieProcessor(cookie_jar)
 
-        proxy_handler = None
-        proxy = kwargs.pop('proxy', None)
-        if proxy:
-            warnings.warn('Proxy support is alpha.', UserWarning)
-            parsed_url = compat_urllib_parse_urlparse(proxy)
-            if parsed_url.netloc and parsed_url.scheme:
-                proxy_address = '{0!s}://{1!s}'.format(parsed_url.scheme, parsed_url.netloc)
-                proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
-            else:
-                raise ValueError('Invalid proxy argument: {0!s}'.format(proxy))
+        proxy_handler = kwargs.pop('proxy_handler', None)
+        if not proxy_handler:
+            proxy = kwargs.pop('proxy', None)
+            if proxy:
+                warnings.warn('Proxy support is alpha.', UserWarning)
+                parsed_url = compat_urllib_parse_urlparse(proxy)
+                if parsed_url.netloc and parsed_url.scheme:
+                    proxy_address = '{0!s}://{1!s}'.format(parsed_url.scheme, parsed_url.netloc)
+                    proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
+                else:
+                    raise ValueError('Invalid proxy argument: {0!s}'.format(proxy))
         handlers = []
         if proxy_handler:
             handlers.append(proxy_handler)
@@ -177,14 +179,14 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         # Allow user to override custom ssl context where possible
         custom_ssl_context = kwargs.pop('custom_ssl_context', None)
         try:
-            httpshandler = compat_urllib_request.HTTPSHandler(context=custom_ssl_context)
+            https_handler = compat_urllib_request.HTTPSHandler(context=custom_ssl_context)
         except TypeError:
             # py version < 2.7.9
-            httpshandler = compat_urllib_request.HTTPSHandler()
+            https_handler = compat_urllib_request.HTTPSHandler()
 
         handlers.extend([
             compat_urllib_request.HTTPHandler(),
-            httpshandler,
+            https_handler,
             cookie_handler])
         opener = compat_urllib_request.build_opener(*handlers)
         opener.cookie_jar = cookie_jar
