@@ -1,9 +1,7 @@
-import json
 import warnings
 
 from .common import ClientExperimentalWarning, ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
-from ..utils import raise_if_invalid_rank_token
 
 
 class UsersEndpointsMixin(object):
@@ -71,25 +69,17 @@ class UsersEndpointsMixin(object):
         endpoint = 'maps/user/{user_id!s}/'.format(**{'user_id': user_id})
         return self._call_api(endpoint)
 
-    def search_users(self, query, rank_token, exclude_list=[], **kwargs):
+    def search_users(self, query, **kwargs):
         """
         Search users
 
         :param query: Search string
-        :param rank_token: Required for paging through a single feed. See examples/pagination.py
-        :param exclude_list: List of numerical user IDs to exclude
-        :param kwargs:
-            - **max_id**: For pagination
         :return:
         """
-        raise_if_invalid_rank_token(rank_token)
-
         query_params = {
             'q': query,
             'timezone_offset': self.timezone_offset,
-            'count': 30,
-            'exclude_list': json.dumps(exclude_list, separators=(',', ':')),
-            'rank_token': rank_token,
+            'count': 50,
         }
         query_params.update(kwargs)
         res = self._call_api('users/search/', query=query_params)
