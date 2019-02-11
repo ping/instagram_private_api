@@ -38,6 +38,10 @@ class TagsTests(ApiTestBase):
                 'name': 'test_tag_unfollow_mock',
                 'test': TagsTests('test_tag_unfollow_mock', api)
             },
+            {
+                'name': 'test_tag_section',
+                'test': TagsTests('test_tag_section', api)
+            },
         ]
 
     def test_tag_info(self):
@@ -96,3 +100,9 @@ class TagsTests(ApiTestBase):
             'tags/unfollow/{hashtag!s}/'.format(
                 hashtag=compat_urllib_parse.quote(tag.encode('utf-8'))),
             params=self.api.authenticated_params)
+
+    def test_tag_section(self):
+        results = self.api.tag_section('catsofinstagram')
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIn('sections', results)
+        self.assertGreater(len(results.get('sections', [])), 0, 'No results returned.')

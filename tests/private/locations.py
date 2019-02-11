@@ -24,6 +24,10 @@ class LocationTests(ApiTestBase):
                 'name': 'test_location_fb_search',
                 'test': LocationTests('test_location_fb_search', api)
             },
+            {
+                'name': 'test_location_section',
+                'test': LocationTests('test_location_section', api)
+            },
         ]
 
     def test_location_info(self):
@@ -46,3 +50,9 @@ class LocationTests(ApiTestBase):
         results = self.api.location_fb_search('Paris, France', rank_token)
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('items', [])), 0, 'No items returned.')
+
+    def test_location_section(self):
+        results = self.api.location_section(229573811, self.api.generate_uuid())
+        self.assertEqual(results.get('status'), 'ok')
+        self.assertIn('sections', results)
+        self.assertGreater(len(results.get('sections', [])), 0, 'No results returned.')

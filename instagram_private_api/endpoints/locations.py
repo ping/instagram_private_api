@@ -2,6 +2,7 @@ import json
 import time
 
 from ..utils import raise_if_invalid_rank_token
+from ..compatpatch import ClientCompatPatch
 
 
 class LocationsEndpointsMixin(object):
@@ -90,3 +91,74 @@ class LocationsEndpointsMixin(object):
         }
         query_params.update(kwargs)
         return self._call_api('fbsearch/places/', query=query_params)
+
+    def location_section(self, location_id, rank_token, tab='ranked', **kwargs):
+        """
+        Get a location feed
+
+        :param location_id:
+        :param rank_token: Required for paging through a single feed and can be generated with
+            :meth:`generate_uuid`. You should use the same rank_token for paging through a single location.
+        :param tab: One of 'ranked', 'recent'
+        :kwargs:
+            **extract**: return the array of media items only
+            **page**: for pagination
+            **next_media_ids**: array of media_id (int) for pagination
+            **max_id**: for pagination
+        :return:
+        """
+        raise_if_invalid_rank_token(rank_token)
+        if tab not in ('ranked', 'recent'):
+            raise ValueError('Invalid tab: {}'.format(tab))
+
+        extract_media_only = kwargs.pop('extract', False)
+        endpoint = 'locations/{location_id!s}/sections/'.format(**{'location_id': location_id})
+        params = {
+            'rank_token': rank_token,
+            'tab': tab,
+            'session_id': self.session_id,
+        }
+
+        # explicitly set known paging parameters to avoid triggering server-side errors
+        if kwargs.get('max_id'):
+            params['max_id'] = kwargs.pop('max_id')
+        if kwargs.get('page'):
+            params['page'] = kwargs.pop('page')
+        if kwargs.get('next_media_ids'):
+            params['next_media_ids'] = json.dumps(kwargs.pop('next_media_ids'), separators=(',', ':'))
+        kwargs.pop('max_id', None)
+        kwargs.pop('page', None)
+        kwargs.pop('next_media_ids', None)
+
+        params.update(kwargs)
+        results = self._call_api(endpoint, params=params, unsigned=True)
+        extracted_medias = []
+        if self.auto_patch:
+            for s in results.get('sections', []):
+                for m in s.get('layout_content', {}).get('medias', []):
+                    if m.get('media'):
+                        ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)
+                        if extract_media_only:
+                            extracted_medias.append(m['media'])
+        if extract_media_only:
+            return extracted_medias
+        return results
+
+    def location_stories(self, location_id, **kwargs):
+        """
+        Get a location story feed
+
+        :param location_id:
+        :param rank_token: Required for paging through a single feed and can be generated with
+            :meth:`generate_uuid`. You should use the same rank_token for paging through a single location.
+        :return:
+        """
+        endpoint = 'locations/{location_id!s}/story/'.format(**{'location_id': location_id})
+        # params = {
+        #     'rank_token': rank_token,
+        #     'tab': tab,
+        #     'session_id': self.session_id,
+        # }
+        # params.update(kwargs)
+        # return self._call_api(endpoint, params=params)
+        return self._call_api(endpoint)
