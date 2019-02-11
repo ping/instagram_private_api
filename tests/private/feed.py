@@ -132,6 +132,7 @@ class FeedTests(ApiTestBase):
         results = self.api.user_story_feed(self.test_user_id)
         self.assertEqual(results.get('status'), 'ok')
 
+    @unittest.skip('Deprecated.')
     def test_location_feed(self):
         rank_token = self.api.generate_uuid()
         # 213012122 - Yosemite National Park

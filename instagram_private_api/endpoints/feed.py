@@ -198,13 +198,17 @@ class FeedEndpointsMixin(object):
 
     def feed_location(self, location_id, rank_token, **kwargs):
         """
-        Get a location feed
+        This endpoint is believed to be obsolete. Do not use. Replaced by :meth:`location_section`.
 
         :param location_id:
         :param rank_token: Required for paging through a single feed and can be generated with
             :meth:`generate_uuid`. You should use the same rank_token for paging through a single location.
         :return:
         """
+        warnings.warn(
+            'This endpoint is believed to be obsolete. Do not use.',
+            ClientDeprecationWarning)
+
         raise_if_invalid_rank_token(rank_token)
 
         endpoint = 'feed/location/{location_id!s}/'.format(**{'location_id': location_id})
