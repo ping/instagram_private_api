@@ -5,9 +5,18 @@
     * Add ``highlight_reels()`` and ``highlight_reel_media()``
     * Add ``tagged_user_feed()``
     * Update query hashes
+    * Fix for case sensitivity for tag feed
+    * Add ``delete_media()``
+    * Add ``proxy_handler`` kwarg to support custom proxy handler such as socks
 - App API:
     * __BREAKING CHANGE__: Change in user agent format for the app version
+    * __BREAKING CHANGE__: Change in argument list for ``search_users()``
     * Add IGTV endpoints
+    * Update ``media_n_comments()``, ``search_users()``, ``news()``
+    * ``feed_location()`` deprecated
+    * Add ``kwargs`` to ``news()`` for paging support
+    * Add ``tag_section()`` and ``location_section()`` endpoints
+    * Add ``proxy_handler`` kwarg to support custom proxy handler such as socks
 
 ## 1.5.7
 - Web API:
