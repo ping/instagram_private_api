@@ -4,6 +4,7 @@
 - Web API:
     * Add ``highlight_reels()`` and ``highlight_reel_media()``
     * Add ``tagged_user_feed()``
+    * Add ``tag_story_feed()`` and ``location_story_feed()``
     * Update query hashes
     * Fix for case sensitivity for tag feed
     * Add ``delete_media()``

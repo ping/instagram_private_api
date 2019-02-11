@@ -31,7 +31,15 @@ class UnauthenticatedTests(WebApiTestBase):
             {
                 'name': 'test_unauthenticated_user_info2',
                 'test': UnauthenticatedTests('test_unauthenticated_user_info2', api),
-            }
+            },
+            {
+                'name': 'test_unauthenticated_tag_story_feed',
+                'test': UnauthenticatedTests('test_unauthenticated_tag_story_feed', api),
+            },
+            {
+                'name': 'test_unauthenticated_location_story_feed',
+                'test': UnauthenticatedTests('test_unauthenticated_location_story_feed', api),
+            },
         ]
 
     def test_unauthenticated_tag_feed(self):
@@ -69,3 +77,11 @@ class UnauthenticatedTests(WebApiTestBase):
     def test_unauthenticated_user_info2(self):
         results = self.api.user_info2('instagram')
         self.assertIsNotNone(results.get('id'))
+
+    def test_unauthenticated_tag_story_feed(self):
+        results = self.api.tag_story_feed('catsofinstagram').get('data', {})
+        self.assertTrue('reels_media' in results)
+
+    def test_unauthenticated_location_story_feed(self):
+        results = self.api.location_story_feed('7226110').get('data', {})
+        self.assertTrue('reels_media' in results)

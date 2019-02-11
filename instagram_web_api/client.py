@@ -952,12 +952,13 @@ class Client(object):
 
         variables = {
             'tag_name': tag.lower(),
-            'first': int(count)
+            'first': int(count),
+            'show_ranked': False,
         }
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': 'faa8d9917120f16cec7debbd3f16929d',
+            'query_hash': 'f92f56d47dc7a55b606908374b43a314',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -987,7 +988,7 @@ class Client(object):
             variables['after'] = end_cursor
 
         query = {
-            'query_hash': 'ac38b90f0f3981c42092016a37c59bf7',
+            'query_hash': '1b84447a4d8b6d6d0426fefb34514485',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -1019,7 +1020,7 @@ class Client(object):
         if end_cursor:
             variables['fetch_media_item_cursor'] = end_cursor
         query = {
-            'query_hash': '13ab8e6f3d19ee05e336ea3bd37ef12b',
+            'query_hash': '3f01472fb28fb8aca9ad9dbc9d4578ff',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)
@@ -1035,6 +1036,22 @@ class Client(object):
         }
         return self._make_request(self.GRAPHQL_API_URL, query=query)
 
+    def _story_feed(self, reel_ids=[], tag_names=[], location_ids=[]):
+        variables = {
+            'reel_ids': reel_ids,
+            'tag_names': tag_names,
+            'location_ids': location_ids,
+            'precomposed_overlay': False,
+            'show_story_viewer_list': True,
+            'story_viewer_fetch_count': 50,
+            'story_viewer_cursor': '',
+        }
+        query = {
+            'query_hash': 'eb1918431e946dd39bf8cf8fb870e426',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+        return self._make_request(self.GRAPHQL_API_URL, query=query)
+
     @login_required
     def reels_feed(self, reel_ids, **kwargs):
         """
@@ -1042,17 +1059,9 @@ class Client(object):
 
         :param reel_ids: List of reel user IDs
         """
-        variables = {
-            'reel_ids': reel_ids,
-            'tag_names': kwargs.pop('tag_names', []),
-            'location_ids': kwargs.pop('location_ids', []),
-            'precomposed_overlay': False,
-        }
-        query = {
-            'query_hash': '45246d3fe16ccc6577e0bd297a5db1ab',
-            'variables': json.dumps(variables, separators=(',', ':'))
-        }
-        return self._make_request(self.GRAPHQL_API_URL, query=query)
+        return self._story_feed(
+            reel_ids=reel_ids, tag_names=kwargs.pop('tag_names', []),
+            location_ids=kwargs.pop('location_ids', []))
 
     @login_required
     def highlight_reels(self, user_id):
@@ -1112,7 +1121,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': 'e31a871f7301132ceaab56507a66bbb7',
+            'query_hash': 'ff260833edf142911047af6024eb634a',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
@@ -1128,3 +1137,19 @@ class Client(object):
                  'edge_user_to_photos_of_you', {}).get('edges', [])]
 
         return info
+
+    def tag_story_feed(self, tag, **kwargs):
+        """
+        Get the stories feed for the specified tag
+
+        :param location_id:
+        """
+        return self._story_feed(tag_names=[tag])
+
+    def location_story_feed(self, location_id, **kwargs):
+        """
+        Get the stories feed for the specified location ID
+
+        :param location_id:
+        """
+        return self._story_feed(location_ids=[location_id])

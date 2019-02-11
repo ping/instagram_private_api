@@ -35,6 +35,14 @@ class FeedTests(WebApiTestBase):
             {
                 'name': 'test_tagged_user_feed',
                 'test': FeedTests('test_tagged_user_feed', api),
+            },
+            {
+                'name': 'test_tag_story_feed',
+                'test': FeedTests('test_tag_story_feed', api),
+            },
+            {
+                'name': 'test_location_story_feed',
+                'test': FeedTests('test_location_story_feed', api),
             }
         ]
 
@@ -78,3 +86,11 @@ class FeedTests(WebApiTestBase):
     def test_tagged_user_feed(self):
         results = self.api.tagged_user_feed('25025320').get('data', {}).get('user', {})
         self.assertTrue('edge_user_to_photos_of_you' in results)
+
+    def test_tag_story_feed(self):
+        results = self.api.tag_story_feed('catsofinstagram').get('data', {})
+        self.assertTrue('reels_media' in results)
+
+    def test_location_story_feed(self):
+        results = self.api.location_story_feed('7226110').get('data', {})
+        self.assertTrue('reels_media' in results)
