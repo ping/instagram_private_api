@@ -52,3 +52,4 @@ Error/Debug Log:
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 ZeroDivisionError: integer division or modulo by zero
+```
