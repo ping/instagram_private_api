@@ -85,8 +85,7 @@ class UsersTests(ApiTestBase):
         self.assertIsNotNone(results.get('geo_media'))
 
     def test_search_users(self):
-        rank_token = self.api.generate_uuid()
-        results = self.api.search_users('maruhanamogu', rank_token)
+        results = self.api.search_users('maruhanamogu')
         self.assertEqual(results.get('status'), 'ok')
 
     def test_check_username(self):
