@@ -50,7 +50,11 @@ class UploadTests(WebApiTestBase):
             opener.return_value = MockResponse()
             time_mock.return_value = ts_now
             rand_choice.return_value = 'x'
-            read_response.return_value = json.dumps({'status': 'ok', 'upload_id': '123456789'})
+            # add rhx_gis so that we can reuse the same response for init and uploading
+            read_response.return_value = json.dumps(
+                {'status': 'ok', 'upload_id': '123456789', 'rhx_gis': '22aea71b163e335a0ad4479549b530d7'},
+                separators=(',', ':')
+            )
             self.api.post_photo('...'.encode('ascii'), caption='Test')
 
             headers = {
