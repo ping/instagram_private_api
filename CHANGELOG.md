@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.6.0 (pending)
+## 1.6.0
 - Web API:
     * Add ``highlight_reels()`` and ``highlight_reel_media()``
     * Add ``tagged_user_feed()``
@@ -10,8 +10,8 @@
     * Add ``delete_media()``
     * Add ``proxy_handler`` kwarg to support custom proxy handler such as socks
 - App API:
-    * __BREAKING CHANGE__: Change in user agent format for the app version
-    * __BREAKING CHANGE__: Change in argument list for ``search_users()``
+    * :fire: __BREAKING CHANGE__: Change in user agent format for the app version
+    * :fire: __BREAKING CHANGE__: Change in argument list for ``search_users()``
     * Add IGTV endpoints
     * Update ``media_n_comments()``, ``search_users()``, ``news()``
     * ``feed_location()`` deprecated

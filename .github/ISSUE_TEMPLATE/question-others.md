@@ -17,7 +17,7 @@ about: Not an error or feature request
 ---
 
 ### Before submitting an issue, make sure you have:
-- [ ] Updated to the lastest version v1.5.7
+- [ ] Updated to the lastest version v1.6.0
 - [ ] Read the [README](https://github.com/ping/instagram_private_api/blob/master/README.md) and [docs](https://instagram-private-api.readthedocs.io/en/latest/)
 - [ ] [Searched](https://github.com/ping/instagram_private_api/search?type=Issues) the bugtracker for similar issues including **closed** ones
 - [ ] Reviewed the sample code in [tests](https://github.com/ping/instagram_private_api/tree/master/tests) and [examples](https://github.com/ping/instagram_private_api/tree/master/examples)
