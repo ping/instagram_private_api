@@ -62,8 +62,8 @@ What does ``sentry_block`` error mean?
 --------------------------------------
 This is the response for detected spam/bot behavior. Stop using the api in whatever way that triggered this reponse.
 
-Why are the captions are not posted?
-------------------------------------
+Why are the captions not posted?
+--------------------------------
 This is due to your account / access location (IP) being soft-blocked.
 
 What does ``checkpoint_challenge_required``, ``challenge_required`` mean?
