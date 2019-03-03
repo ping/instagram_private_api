@@ -739,7 +739,7 @@ class UploadEndpointsMixin(object):
                 if not media.get('thumbnail'):
                     raise ValueError('Thumbnail not specified.')
             aspect_ratio = (media['size'][0] * 1.0) / (media['size'][1] * 1.0)
-            if aspect_ratio > 1.0 or aspect_ratio < 1.0:
+            if not self.compatible_aspect_ratio(aspect_ratio):
                 raise ValueError('Invalid media aspect ratio.')
 
             if media['type'] == 'video':
