@@ -39,6 +39,7 @@ from .http import ClientCookieJar, MultipartFormDataEncoder
 from .common import ClientDeprecationWarning
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 warnings.simplefilter('always', ClientDeprecationWarning)
 
 
