@@ -1064,7 +1064,6 @@ class Client(object):
             reel_ids=reel_ids, tag_names=kwargs.pop('tag_names', []),
             location_ids=kwargs.pop('location_ids', []))
 
-    @login_required
     def highlight_reels(self, user_id):
         """
         Get the highlights for the specified user ID
