@@ -1,15 +1,10 @@
-import warnings
-
-from .common import ClientDeprecationWarning
-from ..compatpatch import ClientCompatPatch
-from ..compat import compat_urllib_parse
-from ..utils import raise_if_invalid_rank_token
 import json
+
 
 class AddressBookEndpointMixin(object):
     """For endpoints in ``/address_book/``."""
 
-    def link(self,contacts, kwargs):
+    def link(self, contacts, kwargs):
         """
         Sync contacts with instagram app
 
@@ -24,7 +19,7 @@ class AddressBookEndpointMixin(object):
             - list of user accounts created based on contacts
         """
 
-        endpoint ='address_book/link/'
+        endpoint = 'address_book/link/'
         params = {
             'contacts': json.dumps(contacts),
             '_uuid': self.uuid,
@@ -43,8 +38,8 @@ class AddressBookEndpointMixin(object):
         """
         endpoint = 'address_book/unlink/'
         params = {
-                    '_uid': self.authenticated_user_id,
-                    '_uuid': self.uuid,
-                    '_csrftoken': self.csrftoken
-                }
+            '_uid': self.authenticated_user_id,
+            '_uuid': self.uuid,
+            '_csrftoken': self.csrftoken
+        }
         return self._call_api(endpoint, params=params, unsigned=True)
