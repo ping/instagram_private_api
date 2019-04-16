@@ -4,17 +4,16 @@ from .common import ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
 from ..compat import compat_urllib_parse
 from ..utils import raise_if_invalid_rank_token
-
+import json
 
 class AddressBookEndpointMixin(object):
     """For endpoints in ``/address_book/``."""
 
-    def link(self, kwargs):
+    def link(self,contacts, kwargs):
         """
-        Sync contacts with instagram for khatam perpose
+        Sync contacts with instagram app
 
-        :param kwargs:
-           - **contacts**: list of contact entities. Examples:
+        :param contacts: list of contact entities. Examples:
             {
                 'first_name': 'khatam_testing',
                 'phone_numbers': ['+989395405909'],
@@ -22,7 +21,7 @@ class AddressBookEndpointMixin(object):
             },
 
         :return:
-            - list of users created based on contacts
+            - list of user accounts created based on contacts
         """
 
         endpoint ='address_book/link/'
@@ -31,7 +30,9 @@ class AddressBookEndpointMixin(object):
             '_uuid': self.uuid,
             '_csrftoken': self.csrftoken
         }
-        return api._call_api('address_book/link/', params=data, unsigned=True)
+        if kwargs:
+            params.update(kwargs)
+        return self._call_api(endpoint, params=params, unsigned=True)
 
     def unlink(self):
         """
@@ -46,4 +47,4 @@ class AddressBookEndpointMixin(object):
                     '_uuid': self.uuid,
                     '_csrftoken': self.csrftoken
                 }
-        return api._call_api('address_book/link/', params=data, unsigned=True)
+        return self._call_api(endpoint, params=params, unsigned=True)
