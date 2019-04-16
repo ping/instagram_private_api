@@ -4,7 +4,7 @@ import json
 class AddressBookEndpointMixin(object):
     """For endpoints in ``/address_book/``."""
 
-    def link(self, contacts, kwargs):
+    def link(self, contacts, **kwargs):
         """
         Sync contacts with instagram app
 
