@@ -28,9 +28,10 @@ from .errors import (
     ClientLoginRequiredError, ClientCookieExpiredError,
     ClientConnectionError
 )
+
 try:  # Python 3:
     # Not a no-op, we're adding this to the namespace so it can be imported.
-    ConnectionError = ConnectionError       # pylint: disable=redefined-builtin
+    ConnectionError = ConnectionError  # pylint: disable=redefined-builtin
 except NameError:  # Python 2:
     class ConnectionError(Exception):
         pass
@@ -43,7 +44,7 @@ from .endpoints import (
     MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
     UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
     CollectionsEndpointsMixin, HighlightsEndpointsMixin,
-    IGTVEndpointsMixin,AddressBookEndpointMixin,
+    IGTVEndpointsMixin, AddressBookEndpointMixin,
     ClientDeprecationWarning, ClientPendingDeprecationWarning,
     ClientExperimentalWarning
 )
@@ -60,7 +61,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
              MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
              UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
              CollectionsEndpointsMixin, HighlightsEndpointsMixin,
-             IGTVEndpointsMixin,AddressBookEndpointMixin, object):
+             IGTVEndpointsMixin, AddressBookEndpointMixin, object):
     """Main API client class for the private app api."""
 
     API_URL = 'https://i.instagram.com/api/{version!s}/'
@@ -101,27 +102,27 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
 
         user_settings = kwargs.pop('settings', None) or {}
         self.uuid = (
-            kwargs.pop('guid', None) or kwargs.pop('uuid', None) or
-            user_settings.get('uuid') or self.generate_uuid(False))
+                kwargs.pop('guid', None) or kwargs.pop('uuid', None) or
+                user_settings.get('uuid') or self.generate_uuid(False))
         self.device_id = (
-            kwargs.pop('device_id', None) or user_settings.get('device_id') or
-            self.generate_deviceid())
+                kwargs.pop('device_id', None) or user_settings.get('device_id') or
+                self.generate_deviceid())
         # application session ID
         self.session_id = (
-            kwargs.pop('session_id', None) or user_settings.get('session_id') or
-            self.generate_uuid(False))
+                kwargs.pop('session_id', None) or user_settings.get('session_id') or
+                self.generate_uuid(False))
         self.signature_key = (
-            kwargs.pop('signature_key', None) or user_settings.get('signature_key') or
-            self.IG_SIG_KEY)
+                kwargs.pop('signature_key', None) or user_settings.get('signature_key') or
+                self.IG_SIG_KEY)
         self.key_version = (
-            kwargs.pop('key_version', None) or user_settings.get('key_version') or
-            self.SIG_KEY_VERSION)
+                kwargs.pop('key_version', None) or user_settings.get('key_version') or
+                self.SIG_KEY_VERSION)
         self.ig_capabilities = (
-            kwargs.pop('ig_capabilities', None) or user_settings.get('ig_capabilities') or
-            self.IG_CAPABILITIES)
+                kwargs.pop('ig_capabilities', None) or user_settings.get('ig_capabilities') or
+                self.IG_CAPABILITIES)
         self.application_id = (
-            kwargs.pop('application_id', None) or user_settings.get('application_id') or
-            self.APPLICATION_ID)
+                kwargs.pop('application_id', None) or user_settings.get('application_id') or
+                self.APPLICATION_ID)
 
         # to maintain backward compat for user_agent kwarg
         custom_ua = kwargs.pop('user_agent', '') or user_settings.get('user_agent')
@@ -129,35 +130,35 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             self.user_agent = custom_ua
         else:
             self.app_version = (
-                kwargs.pop('app_version', None) or user_settings.get('app_version') or
-                Constants.APP_VERSION)
+                    kwargs.pop('app_version', None) or user_settings.get('app_version') or
+                    Constants.APP_VERSION)
             self.android_release = (
-                kwargs.pop('android_release', None) or user_settings.get('android_release') or
-                Constants.ANDROID_RELEASE)
+                    kwargs.pop('android_release', None) or user_settings.get('android_release') or
+                    Constants.ANDROID_RELEASE)
             self.android_version = int(
                 kwargs.pop('android_version', None) or user_settings.get('android_version') or
                 Constants.ANDROID_VERSION)
             self.phone_manufacturer = (
-                kwargs.pop('phone_manufacturer', None) or user_settings.get('phone_manufacturer') or
-                Constants.PHONE_MANUFACTURER)
+                    kwargs.pop('phone_manufacturer', None) or user_settings.get('phone_manufacturer') or
+                    Constants.PHONE_MANUFACTURER)
             self.phone_device = (
-                kwargs.pop('phone_device', None) or user_settings.get('phone_device') or
-                Constants.PHONE_DEVICE)
+                    kwargs.pop('phone_device', None) or user_settings.get('phone_device') or
+                    Constants.PHONE_DEVICE)
             self.phone_model = (
-                kwargs.pop('phone_model', None) or user_settings.get('phone_model') or
-                Constants.PHONE_MODEL)
+                    kwargs.pop('phone_model', None) or user_settings.get('phone_model') or
+                    Constants.PHONE_MODEL)
             self.phone_dpi = (
-                kwargs.pop('phone_dpi', None) or user_settings.get('phone_dpi') or
-                Constants.PHONE_DPI)
+                    kwargs.pop('phone_dpi', None) or user_settings.get('phone_dpi') or
+                    Constants.PHONE_DPI)
             self.phone_resolution = (
-                kwargs.pop('phone_resolution', None) or user_settings.get('phone_resolution') or
-                Constants.PHONE_RESOLUTION)
+                    kwargs.pop('phone_resolution', None) or user_settings.get('phone_resolution') or
+                    Constants.PHONE_RESOLUTION)
             self.phone_chipset = (
-                kwargs.pop('phone_chipset', None) or user_settings.get('phone_chipset') or
-                Constants.PHONE_CHIPSET)
+                    kwargs.pop('phone_chipset', None) or user_settings.get('phone_chipset') or
+                    Constants.PHONE_CHIPSET)
             self.version_code = (
-                kwargs.pop('version_code', None) or user_settings.get('version_code') or
-                Constants.VERSION_CODE)
+                    kwargs.pop('version_code', None) or user_settings.get('version_code') or
+                    Constants.VERSION_CODE)
 
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
@@ -199,10 +200,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         # ad_id must be initialised after cookie_jar/opener because
         # it relies on self.authenticated_user_name
         self.ad_id = (
-            kwargs.pop('ad_id', None) or user_settings.get('ad_id') or
-            self.generate_adid())
+                kwargs.pop('ad_id', None) or user_settings.get('ad_id') or
+                self.generate_adid())
 
-        if not cookie_string:   # [TODO] There's probably a better way than to depend on cookie_string
+        if not cookie_string:  # [TODO] There's probably a better way than to depend on cookie_string
             if not self.username or not self.password:
                 raise ClientLoginRequiredError('login_required', code=400)
             self.login()
@@ -317,7 +318,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
 
     def get_cookie_value(self, key, domain=''):
         now = int(time.time())
-        eternity = now + 100 * 365 * 24 * 60 * 60   # future date for non-expiring cookies
+        eternity = now + 100 * 365 * 24 * 60 * 60  # future date for non-expiring cookies
         if not domain:
             domain = compat_urllib_parse_urlparse(self.API_URL).netloc
 
@@ -501,7 +502,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         data = None
         if params or params == '':
             headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-            if params == '':    # force post if empty string
+            if params == '':  # force post if empty string
                 data = ''.encode('ascii')
             else:
                 if not unsigned:
@@ -527,7 +528,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             ErrorHandler.process(e, error_response)
 
         except (SSLError, timeout, SocketError,
-                compat_urllib_error.URLError,   # URLError is base of HTTPError
+                compat_urllib_error.URLError,  # URLError is base of HTTPError
                 compat_http_client.HTTPException,
                 ConnectionError) as connection_error:
             raise ClientConnectionError('{} {}'.format(
