@@ -1,3 +1,5 @@
+from os import path
+from io import open
 try:
     from setuptools import setup
 except ImportError:
@@ -19,6 +21,12 @@ packages = [
 ]
 test_reqs = [] if has_mock else ['mock']
 
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
     name='instagram_private_api',
     version=__version__,
@@ -30,6 +38,7 @@ setup(
     test_requires=test_reqs,
     keywords='instagram private api',
     description='A client interface for the private Instagram API.',
+    long_description=long_description,
     packages=packages,
     classifiers=[
         'Development Status :: 4 - Beta',
