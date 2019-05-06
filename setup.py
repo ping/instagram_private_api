@@ -12,7 +12,7 @@ except ImportError:
     has_mock = False
 
 __author__ = 'ping <lastmodified@gmail.com>'
-__version__ = '1.6.0'
+__version__ = '1.6.0.0'
 
 packages = [
     'instagram_private_api',
@@ -31,7 +31,7 @@ setup(
     name='instagram_private_api',
     version=__version__,
     author='ping',
-    author_email='lastmodified@gmail.com>',
+    author_email='lastmodified@gmail.com',
     license='MIT',
     url='https://github.com/ping/instagram_private_api/tree/master',
     install_requires=[],
@@ -39,6 +39,7 @@ setup(
     keywords='instagram private api',
     description='A client interface for the private Instagram API.',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     packages=packages,
     classifiers=[
         'Development Status :: 4 - Beta',
