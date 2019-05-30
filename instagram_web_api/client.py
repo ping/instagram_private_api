@@ -591,8 +591,7 @@ class Client(object):
             return [c['node'] for c in info.get('data', {}).get('shortcode_media', {}).get(
                 'edge_media_to_comment', {}).get('edges', [])]
         return info
-
-    @login_required
+   
     def media_likers(self, short_code, **kwargs):
         """
         Get media likers
