@@ -513,16 +513,16 @@ class UploadEndpointsMixin(object):
         # # NOTES: Logging traffic doesn't seem to indicate any additional "configure" after upload
         # # BUT not doing a "configure" causes a video post to fail with a
         # # "Other media configure error: b'yEmZkUpAj4'" error
-        # if for_video:
-        #     logger.debug('Skip photo configure.')
-        #     return json_response
-        if not for_video:
-            if to_reel:
-                return self.configure_to_reel(upload_id, size)
-            else:
-                return self.configure(
-                    upload_id, size, caption=caption, location=location,
-                    disable_comments=disable_comments, is_sidecar=is_sidecar)
+        if for_video:
+            self.logger.debug('Skip photo configure.')
+            return json_response
+
+        if to_reel:
+            return self.configure_to_reel(upload_id, size)
+        else:
+            return self.configure(
+                upload_id, size, caption=caption, location=location,
+                disable_comments=disable_comments, is_sidecar=is_sidecar)
 
     def post_video(self, video_data, size, duration, thumbnail_data, caption='',
                    title=None, to_reel=False, to_tv=False, **kwargs):
@@ -624,10 +624,10 @@ class UploadEndpointsMixin(object):
             try:
                 # Prevent excessively small chunks
                 if video_file_len > 1 * 1024 * 1000:
-                    # max num of chunks = 4
+                    # max chunk size = 350,000 so that we'll always have
                     chunk_generator = max_chunk_size_generator(350000, video_data)
                 else:
-                    # max chunk size = 350,000 so that we'll always have
+                    # max num of chunks = 4
                     # <4 chunks when it's <1mb
                     chunk_generator = max_chunk_count_generator(4, video_data)
                 for chunk, data in chunk_generator:
