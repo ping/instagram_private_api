@@ -240,7 +240,7 @@ class MediaTests(ApiTestBase):
         results = self.api.edit_media(items[0]['id'], 'Hello')
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_edit_media_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok',
@@ -270,7 +270,7 @@ class MediaTests(ApiTestBase):
         results = self.api.delete_media(items[0]['id'])
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_delete_media_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         media_id = '123_123'
@@ -281,7 +281,7 @@ class MediaTests(ApiTestBase):
             'media/{media_id!s}/delete/'.format(**{'media_id': media_id}),
             params=params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_post_comment_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok',
@@ -291,9 +291,9 @@ class MediaTests(ApiTestBase):
         comment_text = '<3 #heart https://google.com'
         breadcrumb = gen_user_breadcrumb(len(comment_text))
         generated_uuid = self.api.generate_uuid()
-        with compat_mock.patch('instagram_private_api.endpoints.media.gen_user_breadcrumb') \
+        with compat_mock.patch('instapi.endpoints.media.gen_user_breadcrumb') \
                 as gen_user_breadcrumb_mock, \
-                compat_mock.patch('instagram_private_api.Client.generate_uuid')\
+                compat_mock.patch('instapi.Client.generate_uuid')\
                 as generate_uuid_mock:
             gen_user_breadcrumb_mock.return_value = breadcrumb
             generate_uuid_mock.return_value = generated_uuid
@@ -320,7 +320,7 @@ class MediaTests(ApiTestBase):
             with self.assertRaises(ValueError):
                 self.api.post_comment(media_id, t)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_delete_comment_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         media_id = '123_123'
@@ -346,7 +346,7 @@ class MediaTests(ApiTestBase):
         results = self.api.post_like('1486470123929723160_25025320')
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_post_like_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         media_id = '123_123'
@@ -367,7 +367,7 @@ class MediaTests(ApiTestBase):
         results = self.api.delete_like('1486470123929723160_25025320')
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_delete_like_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         media_id = '123_123'
@@ -387,7 +387,7 @@ class MediaTests(ApiTestBase):
         results = self.api.comment_like('17852927593096945')
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_comment_like_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         comment_id = '1785000000000'
@@ -401,7 +401,7 @@ class MediaTests(ApiTestBase):
         results = self.api.comment_unlike('17852927593096945')
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_comment_unlike_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         comment_id = '1785000000000'
@@ -420,7 +420,7 @@ class MediaTests(ApiTestBase):
         results = self.api.save_photo(self.test_media_id)
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_save_photo_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         added_collection_ids = ['1234567890']
@@ -439,7 +439,7 @@ class MediaTests(ApiTestBase):
         results = self.api.unsave_photo(self.test_media_id)
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_unsave_photo_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         removed_collection_ids = ['1234567890']
@@ -453,7 +453,7 @@ class MediaTests(ApiTestBase):
             'media/{media_id!s}/unsave/'.format(**{'media_id': self.test_media_id}),
             params=params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_disable_comments_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         params = {
@@ -465,7 +465,7 @@ class MediaTests(ApiTestBase):
             'media/{media_id!s}/disable_comments/'.format(**{'media_id': self.test_media_id}),
             params=params, unsigned=True)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_enable_comments_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         params = {
@@ -486,7 +486,7 @@ class MediaTests(ApiTestBase):
         results = self.api.media_seen(reels_media)
         self.assertEqual(results['status'], 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_media_seen_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         params = {
@@ -499,13 +499,13 @@ class MediaTests(ApiTestBase):
         call_api.assert_called_with(
             'media/seen/', params=params, version='v2')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_media_seen2_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         ts_now = 1493789777
 
-        with compat_mock.patch('instagram_private_api.endpoints.media.randint') as randint_mock, \
-                compat_mock.patch('instagram_private_api.endpoints.media.time.time') as time_mock:
+        with compat_mock.patch('instapi.endpoints.media.randint') as randint_mock, \
+                compat_mock.patch('instapi.endpoints.media.time.time') as time_mock:
 
             time_mock.return_value = ts_now
             randint_mock.return_value = 0
@@ -523,7 +523,7 @@ class MediaTests(ApiTestBase):
             call_api.assert_called_with(
                 'media/seen/', params=params, version='v2')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_bulk_delete_comments_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         media_id = '123_123'
@@ -551,7 +551,7 @@ class MediaTests(ApiTestBase):
             first_media['id'], first_media['media_type'], undo=True)
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_media_only_me_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         media_id = '123_123'
@@ -569,7 +569,7 @@ class MediaTests(ApiTestBase):
             'media/{media_id!s}/undo_only_me/'.format(**{'media_id': media_id}),
             params=params, query={'media_type': 2})
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_story_viewers_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         story_pk = '170000000'

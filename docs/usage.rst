@@ -10,19 +10,19 @@ Install via pip
 
 .. code-block:: bash
 
-    $ pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0
+    $ pip install git+https://git@github.com/breuerfelix/instapi.git@1.6.0
 
 Update your install with the latest release
 
 .. code-block:: bash
 
-    $ pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0 --upgrade
+    $ pip install git+https://git@github.com/breuerfelix/instapi.git@1.6.0 --upgrade
 
 Force an update from source
 
 .. code-block:: bash
 
-    $ pip install git+https://git@github.com/ping/instagram_private_api.git --upgrade --force-reinstall
+    $ pip install git+https://git@github.com/breuerfelix/instapi.git --upgrade --force-reinstall
 
 
 Source Code
@@ -32,7 +32,7 @@ The library is maintained on GitHub. Feel free to clone the repository.
 
 .. code-block:: bash
 
-    git clone git://github.com/ping/instagram_private_api.git
+    git clone git://github.com/breuerfelix/instapi.git
 
 
 Usage
@@ -48,7 +48,7 @@ App API
 
 .. code-block:: python
 
-    from instagram_private_api import Client, ClientCompatPatch
+    from instapi import Client, ClientCompatPatch
 
     user_name = 'YOUR_LOGIN_USER_NAME'
     password = 'YOUR_PASSWORD'
@@ -98,4 +98,4 @@ The saved auth cookie can be reused for up to 90 days.
 
 An example of how to save and reuse the auth setting can be found in the examples_.
 
-.. _examples: https://github.com/ping/instagram_private_api/blob/master/examples/savesettings_logincallback.py
+.. _examples: https://github.com/breuerfelix/instapi/blob/master/examples/savesettings_logincallback.py

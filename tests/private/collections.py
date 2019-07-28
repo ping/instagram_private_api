@@ -60,7 +60,7 @@ class CollectionsTests(ApiTestBase):
         self.assertIsNotNone(results.get('collection_id'))
         self.assertEqual(results.get('collection_name'), name)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_create_collection_mock(self, call_api):
         name = 'A Collection'
         call_api.return_value = {
@@ -89,7 +89,7 @@ class CollectionsTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('collection_id'))
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_edit_collection_mock(self, call_api):
         collection_id = 123
         call_api.return_value = {
@@ -118,7 +118,7 @@ class CollectionsTests(ApiTestBase):
         results = self.api.delete_collection(first_collection_id)
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_delete_collection_mock(self, call_api):
         collection_id = 123
         call_api.return_value = {'status': 'ok'}

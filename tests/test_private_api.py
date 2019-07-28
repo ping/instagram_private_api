@@ -26,13 +26,13 @@ if __name__ == '__main__':
 
     warnings.simplefilter('ignore', UserWarning)
     logging.basicConfig(format='%(name)s %(message)s', stream=sys.stdout)
-    logger = logging.getLogger('instagram_private_api')
+    logger = logging.getLogger('instapi')
     logger.setLevel(logging.WARNING)
 
     # Example command:
     #   python test_private_api.py -u "xxx" -p "xxx" -settings "saved_auth.json" -save
 
-    parser = argparse.ArgumentParser(description='Test instagram_private_api.py')
+    parser = argparse.ArgumentParser(description='Test instapi.py')
     parser.add_argument('-settings', '--settings', dest='settings_file_path', type=str, required=True)
     parser.add_argument('-u', '--username', dest='username', type=str, required=True)
     parser.add_argument('-p', '--password', dest='password', type=str, required=True)

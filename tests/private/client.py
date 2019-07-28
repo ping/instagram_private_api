@@ -207,7 +207,7 @@ class ClientTests(ApiTestBase):
         with self.assertRaises(ClientLoginRequiredError):
             Client('', '')
 
-    @compat_mock.patch('instagram_private_api.client.compat_urllib_request.OpenerDirector.open')
+    @compat_mock.patch('instapi.client.compat_urllib_request.OpenerDirector.open')
     def test_client_requests(self, open_mock):
         self.sleep_interval = 0
         open_mock.side_effect = [

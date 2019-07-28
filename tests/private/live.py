@@ -77,7 +77,7 @@ class LiveTests(ApiTestBase):
             self.assertIsNotNone(results.get('likes'))
             break
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_broadcast_like_mock(self, call_api):
         broadcast_id = 123
         call_api.return_value = {'status': 'ok'}
@@ -137,7 +137,7 @@ class LiveTests(ApiTestBase):
             self.assertIsNotNone(results.get('comment'))
             break
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_broadcast_comment_mock(self, call_api):
         broadcast_id = 123
         call_api.return_value = {'status': 'ok'}
@@ -145,9 +145,9 @@ class LiveTests(ApiTestBase):
         comment_text = '<3'
         breadcrumb = gen_user_breadcrumb(len(comment_text))
         generated_uuid = self.api.generate_uuid()
-        with compat_mock.patch('instagram_private_api.endpoints.live.gen_user_breadcrumb') \
+        with compat_mock.patch('instapi.endpoints.live.gen_user_breadcrumb') \
                 as gen_user_breadcrumb_mock, \
-                compat_mock.patch('instagram_private_api.Client.generate_uuid') \
+                compat_mock.patch('instapi.Client.generate_uuid') \
                 as generate_uuid_mock:
             gen_user_breadcrumb_mock.return_value = breadcrumb
             generate_uuid_mock.return_value = generated_uuid
@@ -183,7 +183,7 @@ class LiveTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('broadcasts', [])), 0, 'No broadcasts returned.')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_replay_broadcast_comments_mock(self, call_api):
         broadcast_id = 123
         query = {
@@ -195,7 +195,7 @@ class LiveTests(ApiTestBase):
             'live/{broadcast_id!s}/get_post_live_comments/'.format(**{'broadcast_id': broadcast_id}),
             query=query)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_replay_broadcast_likes_mock(self, call_api):
         broadcast_id = 123
         query = {

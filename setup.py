@@ -1,42 +1,41 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
+from os import path
 
-try:
-    import unittest.mock
-    has_mock = True
-except ImportError:
-    has_mock = False
+here = path.abspath(path.dirname(__file__))
 
-__author__ = 'ping <lastmodified@gmail.com>'
-__version__ = '1.6.0'
+def readall(*args):
+    with open(path.join(here, *args), encoding='utf-8') as fp:
+        return fp.read()
 
-packages = [
-    'instagram_private_api',
-    'instagram_private_api.endpoints',
-    'instagram_web_api'
-]
-test_reqs = [] if has_mock else ['mock']
+with open('requirements.test.txt') as f:
+    test_deps = f.read().splitlines()
+
+documentation = readall('README.md')
+version = readall('instapi', 'version.txt')
 
 setup(
-    name='instagram_private_api',
-    version=__version__,
-    author='ping',
-    author_email='lastmodified@gmail.com>',
+    name='instapi',
+    version=version,
+    author='felixbreuer',
+    author_email='hi@felixbreuer.me',
     license='MIT',
-    url='https://github.com/ping/instagram_private_api/tree/master',
+    url='https://github.com/breuerfelix/instapi',
     install_requires=[],
-    test_requires=test_reqs,
+    test_requires=test_deps,
     keywords='instagram private api',
     description='A client interface for the private Instagram API.',
-    packages=packages,
+    long_description=documentation,
+    long_description_content_type='text/markdown',
+    packages=find_packages(),
+    python_requires=">=3.*.*",
+    package_data={
+        'instapi': ["version.txt"]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3',
     ]
 )

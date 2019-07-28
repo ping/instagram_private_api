@@ -203,15 +203,15 @@ class UploadTests(ApiTestBase):
                              disable_comments=False, is_reel=False, is_sidecar=False, **kwargs):
         ts_now = time.time()
         with compat_mock.patch(
-                'instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open') as opener, \
-                compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
-                compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
+                'instapi.endpoints.accounts.compat_urllib_request.OpenerDirector.open') as opener, \
+                compat_mock.patch('instapi.Client._read_response') as read_response, \
+                compat_mock.patch('instapi.Client.default_headers') as default_headers, \
                 compat_mock.patch(
-                    'instagram_private_api.endpoints.accounts.compat_urllib_request.Request') as request, \
-                compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
-                compat_mock.patch('instagram_private_api.endpoints.upload.time.time') as time_mock, \
-                compat_mock.patch('instagram_private_api.endpoints.upload.randint') as randint_mock, \
-                compat_mock.patch('instagram_private_api.http.random.choice') as randchoice_mock:
+                    'instapi.endpoints.accounts.compat_urllib_request.Request') as request, \
+                compat_mock.patch('instapi.Client._call_api') as call_api, \
+                compat_mock.patch('instapi.endpoints.upload.time.time') as time_mock, \
+                compat_mock.patch('instapi.endpoints.upload.randint') as randint_mock, \
+                compat_mock.patch('instapi.http.random.choice') as randchoice_mock:
             time_mock.return_value = ts_now
             randint_mock.return_value = 0
             randchoice_mock.return_value = 'x'
@@ -405,15 +405,15 @@ class UploadTests(ApiTestBase):
                              video_data=None, thumbnail_data=None,
                              **kwargs):
         ts_now = time.time()
-        with compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
+        with compat_mock.patch('instapi.Client._call_api') as call_api, \
                 compat_mock.patch(
-                    'instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open') as opener, \
-                compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
-                compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
+                    'instapi.endpoints.accounts.compat_urllib_request.OpenerDirector.open') as opener, \
+                compat_mock.patch('instapi.Client._read_response') as read_response, \
+                compat_mock.patch('instapi.Client.default_headers') as default_headers, \
                 compat_mock.patch(
-                    'instagram_private_api.endpoints.accounts.compat_urllib_request.Request') as request, \
-                compat_mock.patch('instagram_private_api.endpoints.upload.time.time') as time_mock, \
-                compat_mock.patch('instagram_private_api.endpoints.upload.randint') as randint_mock:
+                    'instapi.endpoints.accounts.compat_urllib_request.Request') as request, \
+                compat_mock.patch('instapi.endpoints.upload.time.time') as time_mock, \
+                compat_mock.patch('instapi.endpoints.upload.randint') as randint_mock:
 
             time_mock.return_value = ts_now
             randint_mock.return_value = 0
@@ -704,10 +704,10 @@ class UploadTests(ApiTestBase):
 
     def test_post_album_mock(self):
         ts_now = time.time()
-        with compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
-                compat_mock.patch('instagram_private_api.Client.post_photo') as post_photo, \
-                compat_mock.patch('instagram_private_api.Client.post_video') as post_video, \
-                compat_mock.patch('instagram_private_api.endpoints.upload.time.time') as time_mock:
+        with compat_mock.patch('instapi.Client._call_api') as call_api, \
+                compat_mock.patch('instapi.Client.post_photo') as post_photo, \
+                compat_mock.patch('instapi.Client.post_video') as post_video, \
+                compat_mock.patch('instapi.endpoints.upload.time.time') as time_mock:
 
             time_mock.return_value = ts_now
             post_photo.side_effect = [{'status': 'ok'}, {'status': 'ok'}]

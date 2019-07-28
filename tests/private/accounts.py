@@ -107,14 +107,14 @@ class AccountTests(ApiTestBase):
         new_client = Client(self.api.username, self.api.password)
         self.assertEqual(new_client.authenticated_user_name, self.api.username)
 
-    @compat_mock.patch('instagram_private_api.Client.csrftoken',
+    @compat_mock.patch('instapi.Client.csrftoken',
                        new_callable=compat_mock.PropertyMock, return_value='abcde')
     def test_login_mock(self, csrftoken):
         generated_uuid = Client.generate_uuid(True)
         query = {'challenge_type': 'signup', 'guid': generated_uuid}
-        with compat_mock.patch('instagram_private_api.Client.generate_uuid') as generate_uuid_mock, \
-                compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
-                compat_mock.patch('instagram_private_api.Client._read_response') as read_response:
+        with compat_mock.patch('instapi.Client.generate_uuid') as generate_uuid_mock, \
+                compat_mock.patch('instapi.Client._call_api') as call_api, \
+                compat_mock.patch('instapi.Client._read_response') as read_response:
             generate_uuid_mock.return_value = generated_uuid
             call_api.return_value = ''
             read_response.return_value = json.dumps({'status': 'ok', 'logged_in_user': {'pk': 123}})
@@ -138,13 +138,13 @@ class AccountTests(ApiTestBase):
             call_api.assert_called_with(
                 'accounts/login/', params=login_params, return_response=True)
 
-    @compat_mock.patch('instagram_private_api.Client.csrftoken',
+    @compat_mock.patch('instapi.Client.csrftoken',
                        new_callable=compat_mock.PropertyMock, return_value=None)
     def test_login_failcsrf_mock(self, csrftoken):
         generated_uuid = Client.generate_uuid(True)
-        with compat_mock.patch('instagram_private_api.Client.generate_uuid') as generate_uuid_mock, \
-                compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
-                compat_mock.patch('instagram_private_api.Client._read_response') as read_response:
+        with compat_mock.patch('instapi.Client.generate_uuid') as generate_uuid_mock, \
+                compat_mock.patch('instapi.Client._call_api') as call_api, \
+                compat_mock.patch('instapi.Client._read_response') as read_response:
             generate_uuid_mock.return_value = generated_uuid
             call_api.return_value = ''
             read_response.return_value = ''
@@ -152,13 +152,13 @@ class AccountTests(ApiTestBase):
                 self.api.login()
             self.assertEqual(tc.exception.msg, 'Unable to get csrf from prelogin.')
 
-    @compat_mock.patch('instagram_private_api.Client.csrftoken',
+    @compat_mock.patch('instapi.Client.csrftoken',
                        new_callable=compat_mock.PropertyMock, return_value='abcde')
     def test_login_fail_mock(self, csrftoken):
         generated_uuid = Client.generate_uuid(True)
-        with compat_mock.patch('instagram_private_api.Client.generate_uuid') as generate_uuid_mock, \
-                compat_mock.patch('instagram_private_api.Client._call_api') as call_api, \
-                compat_mock.patch('instagram_private_api.Client._read_response') as read_response:
+        with compat_mock.patch('instapi.Client.generate_uuid') as generate_uuid_mock, \
+                compat_mock.patch('instapi.Client._call_api') as call_api, \
+                compat_mock.patch('instapi.Client._read_response') as read_response:
             generate_uuid_mock.return_value = generated_uuid
             call_api.side_effect = [
                 '',     # Test 1
@@ -214,7 +214,7 @@ class AccountTests(ApiTestBase):
         self.assertEqual(returned_user['phone_number'], user['phone_number'])
         self.assertEqual(returned_user['gender'], user['gender'])
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_edit_profile_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok',
@@ -267,7 +267,7 @@ class AccountTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('user'))
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_remove_profile_picture_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok',
@@ -292,7 +292,7 @@ class AccountTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('user'))
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_set_account_public_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok',
@@ -308,7 +308,7 @@ class AccountTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('user'))
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_set_account_private_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok',
@@ -323,7 +323,7 @@ class AccountTests(ApiTestBase):
         results = self.api.logout()
         self.assertEqual(results.get('status'), 'ok')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_logout_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         self.api.logout()
@@ -338,7 +338,7 @@ class AccountTests(ApiTestBase):
             },
             unsigned=True)
 
-    @compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open')
+    @compat_mock.patch('instapi.endpoints.accounts.compat_urllib_request.OpenerDirector.open')
     def test_change_profile_picture_mock(self, opener):
         opener.side_effect = [
             MockResponse(),
@@ -346,11 +346,11 @@ class AccountTests(ApiTestBase):
                 self.api.api_url, 500, 'Internal Server Error', {},
                 BytesIO('Internal Server Error'.encode('utf-8')))
         ]
-        with compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
-                compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
-                compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.Request') \
+        with compat_mock.patch('instapi.Client._read_response') as read_response, \
+                compat_mock.patch('instapi.Client.default_headers') as default_headers, \
+                compat_mock.patch('instapi.endpoints.accounts.compat_urllib_request.Request') \
                 as request, \
-                compat_mock.patch('instagram_private_api.http.random.choice') as randchoice_mock:
+                compat_mock.patch('instapi.http.random.choice') as randchoice_mock:
             default_headers.return_value = {'Header': 'X'}
             randchoice_mock.return_value = 'x'
             read_response.return_value = json.dumps(
@@ -395,7 +395,7 @@ class AccountTests(ApiTestBase):
         results = self.api.presence_status()
         self.assertIn('disabled', results)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_enable_presence_status_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         self.api.enable_presence_status()
@@ -408,7 +408,7 @@ class AccountTests(ApiTestBase):
                 'disabled': '0',
             })
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_disable_presence_status_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         self.api.disable_presence_status()

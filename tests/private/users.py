@@ -106,7 +106,7 @@ class UsersTests(ApiTestBase):
         self.assertIsNotNone(results.get('message_prefs'))
         self.assertTrue('blocked_reels' in results)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_set_reel_settings_mock(self, call_api):
         call_api.return_value = {'status': 'ok', 'message_prefs': 'anyone'}
         params = {'message_prefs': call_api.return_value['message_prefs']}
