@@ -14,6 +14,7 @@ from .usertags import UsertagsEndpointsMixin
 from .collections import CollectionsEndpointsMixin
 from .highlights import HighlightsEndpointsMixin
 from .igtv import IGTVEndpointsMixin
+from .addressbook import AddressBookEndpointMixin
 
 from .common import (
     ClientDeprecationWarning,
