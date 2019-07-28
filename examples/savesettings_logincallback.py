@@ -5,14 +5,14 @@ import os.path
 import logging
 import argparse
 try:
-    from instagram_private_api import (
+    from instapi import (
         Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientLoginRequiredError,
         __version__ as client_version)
 except ImportError:
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from instagram_private_api import (
+    from instapi import (
         Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientLoginRequiredError,
         __version__ as client_version)
@@ -41,7 +41,7 @@ def onlogin_callback(api, new_settings_file):
 if __name__ == '__main__':
 
     logging.basicConfig()
-    logger = logging.getLogger('instagram_private_api')
+    logger = logging.getLogger('instapi')
     logger.setLevel(logging.WARNING)
 
     # Example command:

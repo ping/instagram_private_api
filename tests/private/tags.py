@@ -77,7 +77,7 @@ class TagsTests(ApiTestBase):
         self.assertIn('tags', results)
         self.assertGreater(len(results.get('tags', [])), 0, 'No results returned.')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_tag_follow_mock(self, call_api):
         tag = 'catsofinstagram'
         call_api.return_value = {
@@ -89,7 +89,7 @@ class TagsTests(ApiTestBase):
                 hashtag=compat_urllib_parse.quote(tag.encode('utf-8'))),
             params=self.api.authenticated_params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_tag_unfollow_mock(self, call_api):
         tag = 'catsofinstagram'
         call_api.return_value = {

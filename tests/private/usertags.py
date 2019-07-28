@@ -34,7 +34,7 @@ class UsertagsTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIsNotNone(results.get('media'))
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_usertag_self_remove_mock(self, call_api):
         media_id = '123'
         call_api.return_value = {

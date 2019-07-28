@@ -8,20 +8,20 @@ This page of the documentation will cover all methods and classes available to t
 The api currently has two main interfaces:
 
 - `App API`_
-    - :class:`instagram_private_api.Client`
-    - :class:`instagram_private_api.ClientCompatPatch`
-    - :class:`instagram_private_api.ClientError`
-    - :class:`instagram_private_api.ClientLoginError`
-    - :class:`instagram_private_api.ClientLoginRequiredError`
-    - :class:`instagram_private_api.ClientCookieExpiredError`
-    - :class:`instagram_private_api.ClientThrottledError`
-    - :class:`instagram_private_api.ClientReqHeadersTooLargeError`
-    - :class:`instagram_private_api.ClientConnectionError`
-    - :class:`instagram_private_api.ClientCheckpointRequiredError`
-    - :class:`instagram_private_api.ClientChallengeRequiredError`
-    - :class:`instagram_private_api.ClientSentryBlockError`
-    - :class:`instagram_private_api.MediaRatios`
-    - :class:`instagram_private_api.MediaTypes`
+    - :class:`instapi.Client`
+    - :class:`instapi.ClientCompatPatch`
+    - :class:`instapi.ClientError`
+    - :class:`instapi.ClientLoginError`
+    - :class:`instapi.ClientLoginRequiredError`
+    - :class:`instapi.ClientCookieExpiredError`
+    - :class:`instapi.ClientThrottledError`
+    - :class:`instapi.ClientReqHeadersTooLargeError`
+    - :class:`instapi.ClientConnectionError`
+    - :class:`instapi.ClientCheckpointRequiredError`
+    - :class:`instapi.ClientChallengeRequiredError`
+    - :class:`instapi.ClientSentryBlockError`
+    - :class:`instapi.MediaRatios`
+    - :class:`instapi.MediaTypes`
 
 - `Web API`_
     - :class:`instagram_web_api.Client`
@@ -37,7 +37,7 @@ The api currently has two main interfaces:
 App API
 -----------
 
-.. automodule:: instagram_private_api
+.. automodule:: instapi
 
 .. autoclass:: Client
    :special-members: __init__

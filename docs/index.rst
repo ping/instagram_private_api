@@ -1,9 +1,9 @@
-.. instagram_private_api documentation master file, created by
+.. instapi documentation master file, created by
    sphinx-quickstart on Fri Jan 13 15:42:33 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-instagram_private_api
+instapi
 ======================
 
 A Python wrapper for the Instagram private API with no 3rd party dependencies. Supports both the app and web APIs.
@@ -32,8 +32,8 @@ Features
 .. toctree::
    :caption: Links
 
-   Repository <https://github.com/ping/instagram_private_api>
-   Bug Tracker <https://github.com/ping/instagram_private_api/issues>
-   Examples <https://github.com/ping/instagram_private_api/tree/master/examples>
-   Tests <https://github.com/ping/instagram_private_api/tree/master/tests>
-   Public API Compatibility <https://github.com/ping/instagram_private_api/blob/master/COMPAT.md>
+   Repository <https://github.com/breuerfelix/instapi>
+   Bug Tracker <https://github.com/breuerfelix/instapi/issues>
+   Examples <https://github.com/breuerfelix/instapi/tree/master/examples>
+   Tests <https://github.com/breuerfelix/instapi/tree/master/tests>
+   Public API Compatibility <https://github.com/breuerfelix/instapi/blob/master/COMPAT.md>

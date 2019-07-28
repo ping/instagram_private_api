@@ -111,7 +111,7 @@ class FriendshipTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(len(results.get('users', [])), 0, 'No users returned.')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_autocomplete_user_list_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok', 'users': [
@@ -155,7 +155,7 @@ class FriendshipTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertEqual(results.get('friendship_status', {}).get('following'), True)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_friendships_create_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok',
@@ -174,7 +174,7 @@ class FriendshipTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertEqual(results.get('friendship_status', {}).get('following'), False)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_friendships_destroy_mock(self, call_api):
         call_api.return_value = {'status': 'ok', 'following': False}
         user_id = '2958144170'
@@ -191,7 +191,7 @@ class FriendshipTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertTrue(results.get('blocking'))
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_friendships_block_mock(self, call_api):
         call_api.return_value = {'status': 'ok', 'blocking': True}
         user_id = '2958144170'
@@ -202,7 +202,7 @@ class FriendshipTests(ApiTestBase):
             'friendships/block/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_friendships_unblock_mock(self, call_api):
         call_api.return_value = {'status': 'ok', 'blocking': False}
         user_id = '2958144170'
@@ -218,7 +218,7 @@ class FriendshipTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertTrue('users' in results)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_block_friend_reel_mock(self, call_api):
         call_api.return_value = {'status': 'ok', 'blocking': True}
         user_id = '2958144170'
@@ -229,7 +229,7 @@ class FriendshipTests(ApiTestBase):
             'friendships/block_friend_reel/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_unblock_friend_reel_mock(self, call_api):
         call_api.return_value = {'status': 'ok', 'blocking': False}
         user_id = '2958144170'
@@ -238,7 +238,7 @@ class FriendshipTests(ApiTestBase):
             'friendships/unblock_friend_reel/{user_id!s}/'.format(**{'user_id': user_id}),
             params=self.api.authenticated_params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_set_reel_block_status_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         user_id = '2958144170'
@@ -250,7 +250,7 @@ class FriendshipTests(ApiTestBase):
         call_api.assert_called_with(
             'friendships/set_reel_block_status/', params=params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_enable_post_notifications_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         user_id = '123456789'
@@ -259,7 +259,7 @@ class FriendshipTests(ApiTestBase):
             'friendships/favorite/{user_id!s}/'.format(**{'user_id': user_id}),
             params=self.api.authenticated_params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_disable_post_notifications_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         user_id = '123456789'
@@ -268,7 +268,7 @@ class FriendshipTests(ApiTestBase):
             'friendships/unfavorite/{user_id!s}/'.format(**{'user_id': user_id}),
             params=self.api.authenticated_params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_ignore_user_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         user_id = '123456789'
@@ -279,7 +279,7 @@ class FriendshipTests(ApiTestBase):
             'friendships/ignore/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_remove_follower_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
         user_id = '123456789'

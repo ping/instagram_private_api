@@ -1,4 +1,4 @@
-# Copyright (c) 2017 https://github.com/ping
+# Copyright (c) 2017 https://github.com/breuerfelix
 #
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT

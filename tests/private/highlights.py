@@ -43,7 +43,7 @@ class HighlightsTests(ApiTestBase):
         self.assertEqual(results.get('status'), 'ok')
         self.assertIn('tray', results)
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_highlight_create_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok', 'reel': {
@@ -79,7 +79,7 @@ class HighlightsTests(ApiTestBase):
         with self.assertRaises(ValueError):
             self.api.highlight_create('x')
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_highlight_edit_mock(self, call_api):
         call_api.return_value = {
             'status': 'ok', 'reel': {
@@ -130,7 +130,7 @@ class HighlightsTests(ApiTestBase):
                 highlight_id, removed_media_ids='x'
             )
 
-    @compat_mock.patch('instagram_private_api.Client._call_api')
+    @compat_mock.patch('instapi.Client._call_api')
     def test_highlight_delete_mock(self, call_api):
         call_api.return_value = {'status': 'ok'}
 
