@@ -27,7 +27,7 @@ setup(
     long_description=documentation,
     long_description_content_type='text/markdown',
     packages=find_packages(),
-    python_requires=">=3.*.*",
+    python_requires=">=3",
     package_data={
         'instapi': ["version.txt"]
     },
