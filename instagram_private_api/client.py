@@ -44,7 +44,7 @@ from .endpoints import (
     MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
     UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
     CollectionsEndpointsMixin, HighlightsEndpointsMixin,
-    IGTVEndpointsMixin, AddressBookEndpointMixin,
+    IGTVEndpointsMixin, InsightsEndpointsMixin, AddressBookEndpointMixin,
     ClientDeprecationWarning, ClientPendingDeprecationWarning,
     ClientExperimentalWarning
 )
@@ -61,7 +61,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
              MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
              UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
              CollectionsEndpointsMixin, HighlightsEndpointsMixin,
-             IGTVEndpointsMixin, AddressBookEndpointMixin, object):
+             IGTVEndpointsMixin, InsightsEndpointsMixin, AddressBookEndpointMixin,
+             object):
     """Main API client class for the private app api."""
 
     API_URL = 'https://i.instagram.com/api/{version!s}/'
@@ -547,7 +548,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 error_response=json.dumps(json_response))
 
         # not from oembed or an ok response
-        if not json_response.get('provider_url') and json_response.get('status', '') != 'ok':
+        if not json_response.get('provider_url') and json_response.get('status', '') != 'ok' and not json_response.get('data', ''):
             raise ClientError(
                 json_response.get('message', 'Unknown error'), code=response.code,
                 error_response=json.dumps(json_response))
