@@ -16,7 +16,7 @@ version = readall('instapi', 'version.txt')
 setup(
     name='instapi',
     version=version,
-    author='felixbreuer',
+    author='Felix Breuer',
     author_email='hi@felixbreuer.me',
     license='MIT',
     url='https://github.com/breuerfelix/instapi',
