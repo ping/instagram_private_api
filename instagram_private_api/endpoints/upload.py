@@ -38,7 +38,7 @@ class MediaRatios(object):
     __device_ratios = [(3, 4), (2, 3), (5, 8), (3, 5), (9, 16), (10, 16), (40, 71)]
     __aspect_ratios = [1.0 * x[0] / x[1] for x in __device_ratios]
 
-    #: Acceptable min, max values of with/height ratios for a story upload
+    #: Acceptable min, max values of with/height ratios for a story or a IGTV upload
     reel = min(__aspect_ratios), max(__aspect_ratios)
 
 
@@ -377,6 +377,53 @@ class UploadEndpointsMixin(object):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
+    def configure_video_to_tv(self, upload_id, size, duration, thumbnail_data, title, caption):
+        """
+        Finalises a video IGTV upload. This should not be called directly.
+        Use :meth:`post_video_tv` instead.
+
+        :param upload_id:
+        :param size: tuple of (width, height)
+        :param duration: in seconds
+        :param thumbnail_data: byte string of thumbnail photo
+        :param title:
+        :param caption:
+        :return:
+        """
+        if not self.reel_compatible_aspect_ratio(size):
+            raise ValueError('Incompatible aspect ratio.')
+
+        res = self.post_photo(thumbnail_data, size, upload_id=upload_id, to_reel=True)
+        width, height = size
+        params = {
+            'media_type': '2',
+            'source_type': '4',
+            'upload_id': upload_id,
+            'poster_frame_index': 0,
+            'length': duration * 1.0,
+            'audio_muted': False,
+            'filter_type': '0',
+            'video_result': 'deprecated',
+            'title': title,
+            'caption': caption,
+            'device': {
+                'manufacturer': self.phone_manufacturer,
+                'model': self.phone_device,
+                'android_version': self.android_version,
+                'android_release': self.android_release
+            },
+            'extra': {
+                'source_width': width,
+                'source_height': height,
+            },
+        }
+
+        params.update(self.authenticated_params)
+        res = self._call_api('media/configure_to_igtv/', params=params, query={'video': '1'})
+        if self.auto_patch and res.get('media'):
+            ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
+        return res
+
     def post_photo(self, photo_data, size, caption='', upload_id=None, to_reel=False, **kwargs):
         """
         Upload a photo.
@@ -466,16 +513,19 @@ class UploadEndpointsMixin(object):
         # # NOTES: Logging traffic doesn't seem to indicate any additional "configure" after upload
         # # BUT not doing a "configure" causes a video post to fail with a
         # # "Other media configure error: b'yEmZkUpAj4'" error
-        # if for_video:
-        #     logger.debug('Skip photo configure.')
-        #     return json_response
+        if for_video:
+            self.logger.debug('Skip photo configure.')
+            return json_response
+
         if to_reel:
             return self.configure_to_reel(upload_id, size)
         else:
-            return self.configure(upload_id, size, caption=caption, location=location,
-                                  disable_comments=disable_comments, is_sidecar=is_sidecar)
+            return self.configure(
+                upload_id, size, caption=caption, location=location,
+                disable_comments=disable_comments, is_sidecar=is_sidecar)
 
-    def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False, **kwargs):
+    def post_video(self, video_data, size, duration, thumbnail_data, caption='',
+                   title=None, to_reel=False, to_tv=False, **kwargs):
         """
         Upload a video
 
@@ -486,7 +536,9 @@ class UploadEndpointsMixin(object):
         :param duration: in seconds
         :param thumbnail_data: byte string of the video thumbnail content
         :param caption:
+        :param title: to IGTV upload
         :param to_reel: post to reel as Story
+        :param to_reel: post to IGTV
         :param kwargs:
              - **location**: a dict of venue/location information, from :meth:`location_search`
                or :meth:`location_fb_search`
@@ -496,11 +548,14 @@ class UploadEndpointsMixin(object):
         """
         warnings.warn('This endpoint has not been fully tested.', UserWarning)
 
-        if not to_reel and not self.compatible_aspect_ratio(size):
-            raise ValueError('Incompatible aspect ratio.')
+        if to_tv and not title:
+            raise ValueError('You must provide a title for the IGTV media.')
 
-        if to_reel and not self.reel_compatible_aspect_ratio(size):
+        if (to_reel or to_tv) and not self.reel_compatible_aspect_ratio(size):
             raise ValueError('Incompatible reel aspect ratio.')
+
+        if not (to_reel or to_tv) and self.compatible_aspect_ratio(size):
+            raise ValueError('Incompatible aspect ratio.')
 
         if not 612 <= size[0] <= 1080:
             # range was determined through sampling of video uploads
@@ -509,18 +564,21 @@ class UploadEndpointsMixin(object):
         if duration < 3.0:
             raise ValueError('Duration is less than 3s.')
 
-        if not to_reel and duration > 60.0:
-            raise ValueError('Duration is more than 60s.')
-
         if to_reel and duration > 15.0:
             raise ValueError('Duration is more than 15s.')
+
+        if to_tv and duration > 3600.0:
+            raise ValueError('Duration is more than 1h.')
+
+        if not (to_reel or to_tv) and duration > 60.0:
+            raise ValueError('Duration is more than 60s.')
 
         max_file_len = 50 * 1024 * 1000
         try:
             video_file_len = len(video_data)
         except TypeError:
             video_file_len = get_file_size(video_data)
-        if video_file_len > max_file_len:
+        if not to_tv and video_file_len > max_file_len:
             raise ValueError('Video file is too big.')
 
         location = kwargs.pop('location', None)
@@ -530,7 +588,6 @@ class UploadEndpointsMixin(object):
 
         endpoint = 'upload/video/'
         upload_id = str(int(time.time() * 1000))
-
         width, height = size
         params = {
             '_csrftoken': self.csrftoken,
@@ -548,6 +605,11 @@ class UploadEndpointsMixin(object):
                 'upload_media_height': height
             })
 
+            if to_tv:
+                params.update({
+                    'is_igtv_video': 1,
+                })
+
         res = self._call_api(endpoint, params=params, unsigned=True)
         upload_url = res['video_upload_urls'][-1]['url']
         upload_job = res['video_upload_urls'][-1]['job']
@@ -562,13 +624,12 @@ class UploadEndpointsMixin(object):
             try:
                 # Prevent excessively small chunks
                 if video_file_len > 1 * 1024 * 1000:
-                    # max num of chunks = 4
-                    chunk_generator = max_chunk_count_generator(4, video_data)
-                else:
                     # max chunk size = 350,000 so that we'll always have
-                    # <4 chunks when it's <1mb
                     chunk_generator = max_chunk_size_generator(350000, video_data)
-
+                else:
+                    # max num of chunks = 4
+                    # <4 chunks when it's <1mb
+                    chunk_generator = max_chunk_count_generator(4, video_data)
                 for chunk, data in chunk_generator:
                     skip_chunk = False
                     for received_chunk in successful_chunk_ranges:
@@ -604,6 +665,7 @@ class UploadEndpointsMixin(object):
                             # last chunk
                             upload_res = json.loads(post_response)
                             configure_delay = int(upload_res.get('configure_delay_ms', 0)) / 1000.0
+                            time.sleep(10)
                             all_done = True
                             break
                         else:
@@ -652,13 +714,16 @@ class UploadEndpointsMixin(object):
 
         for i in range(1, configure_retry_max + 1):
             try:
-                if not to_reel:
+                if to_reel:
+                    result = self.configure_video_to_reel(
+                        upload_id, size, duration, thumbnail_data)
+                elif to_tv:
+                    result = self.configure_video_to_tv(
+                        upload_id, size, duration, thumbnail_data, title, caption)
+                else:
                     result = self.configure_video(
                         upload_id, size, duration, thumbnail_data, caption=caption, location=location,
                         disable_comments=disable_comments, is_sidecar=is_sidecar)
-                else:
-                    result = self.configure_video_to_reel(
-                        upload_id, size, duration, thumbnail_data)
                 return result
             except ClientConnectionError as cce:
                 if i < configure_retry_max:
@@ -700,6 +765,23 @@ class UploadEndpointsMixin(object):
             video_data=video_data, size=size, duration=duration,
             thumbnail_data=thumbnail_data, to_reel=True)
 
+    def post_video_igtv(self, video_data, size, duration, thumbnail_data, title, caption):
+        """
+        Upload a video IGTV
+
+        :param video_data: byte string or a file-like object of the video content
+        :param size: tuple of (width, height)
+        :param duration: in seconds
+        :param thumbnail_data: byte string of the video thumbnail content
+        :param title:
+        :param caption:
+        :return:
+        """
+        return self.post_video(
+            video_data=video_data, size=size, duration=duration,
+            thumbnail_data=thumbnail_data, title=title,
+            caption=caption, to_tv=True)
+
     def post_album(self, medias, caption='', location=None, **kwargs):
         """
         Post an album of up to 10 photos/videos.
@@ -738,8 +820,7 @@ class UploadEndpointsMixin(object):
                     raise ValueError('Duration not specified.')
                 if not media.get('thumbnail'):
                     raise ValueError('Thumbnail not specified.')
-            aspect_ratio = (media['size'][0] * 1.0) / (media['size'][1] * 1.0)
-            if aspect_ratio > 1.0 or aspect_ratio < 1.0:
+            if not self.compatible_aspect_ratio(media['size']):
                 raise ValueError('Invalid media aspect ratio.')
 
             if media['type'] == 'video':

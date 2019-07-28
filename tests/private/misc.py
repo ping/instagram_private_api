@@ -34,6 +34,10 @@ class MiscTests(ApiTestBase):
                 'test': MiscTests('test_direct_v2_inbox', api)
             },
             {
+                'name': 'test_direct_v2_thread',
+                'test': MiscTests('test_direct_v2_thread', api)
+            },
+            {
                 'name': 'test_oembed',
                 'test': MiscTests('test_oembed', api)
             },
@@ -98,6 +102,11 @@ class MiscTests(ApiTestBase):
 
     def test_direct_v2_inbox(self):
         results = self.api.direct_v2_inbox()
+        self.assertEqual(results.get('status'), 'ok')
+
+    def test_direct_v2_thread(self):
+        results = self.api.direct_v2_thread()
+        self.assertIsNotNone(results.get('thread'))
         self.assertEqual(results.get('status'), 'ok')
 
     def test_oembed(self):
