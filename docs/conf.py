@@ -156,3 +156,5 @@ texinfo_documents = [
      author, 'instapi', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+html_theme = 'alabaster'
