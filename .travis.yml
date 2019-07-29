@@ -16,7 +16,7 @@ stages:
     - name: static analysis
     - name: test
     - name: version
-      if: type = push AND fork = false AND branch = master AND repo = breuerfelix/instapi AND commit_message !=~ /^skip version$/
+      if: type = push AND fork = false AND branch = master AND repo = breuerfelix/instapi AND commit_message =~ /^((?!skip version).)*$/
     - name: pypi
       if: type = push AND fork = false AND tag =~ ^\d+\.\d+\.\d+
 
