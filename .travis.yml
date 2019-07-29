@@ -16,7 +16,7 @@ stages:
     - name: static analysis
     - name: test
     - name: version
-      if: type = push AND fork = false AND branch = travis AND repo = breuerfelix/instapi
+      if: type = push AND fork = false AND branch = master AND repo = breuerfelix/instapi
     - name: pypi
       if: type = push AND fork = false AND tag =~ ^\d+\.\d+\.\d+ AND repo = breuerfelix/instapi
 
@@ -46,7 +46,6 @@ jobs:
     - stage: version
       script:
         - python3 .travis/bump_version.py
-      after_success:
         - bash .travis/push.sh
 
     - stage: pypi
