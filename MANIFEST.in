@@ -1,0 +1,6 @@
+include README.md
+include COMPAT.md
+include CONTRIBUTING.md
+include LICENSE
+include requirements.test.txt
+include instapi/version.txt
