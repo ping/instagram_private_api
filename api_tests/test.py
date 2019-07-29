@@ -31,7 +31,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
 
     # Example command:
-    #   python test_private_api.py -u "xxx" -p "xxx" -settings "saved_auth.json" -save
+    #   python test.py -u "xxx" -p "xxx" -settings "saved_auth.json" -save
 
     parser = argparse.ArgumentParser(description='Test instapi.py')
     parser.add_argument('-settings', '--settings', dest='settings_file_path', type=str, required=True)

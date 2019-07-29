@@ -18,7 +18,7 @@ about: Not an error or feature request
 
 ### Before submitting an issue, make sure you have:
 - [ ] Updated to the lastest version v1.6.0
-- [ ] Read the [README](https://github.com/breuerfelix/instapi/blob/master/README.md) and [docs](https://instagram-private-api.readthedocs.io/en/latest/)
+- [ ] Read the [README](https://github.com/breuerfelix/instapi/blob/master/README.md) and [docs](https://instapi.readthedocs.io/en/latest/)
 - [ ] [Searched](https://github.com/breuerfelix/instapi/search?type=Issues) the bugtracker for similar issues including **closed** ones
 - [ ] Reviewed the sample code in [tests](https://github.com/breuerfelix/instapi/tree/master/tests) and [examples](https://github.com/breuerfelix/instapi/tree/master/examples)
 

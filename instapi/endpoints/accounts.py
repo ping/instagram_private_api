@@ -63,15 +63,20 @@ class AccountsEndpointsMixin(object):
             on_login_callback = self.on_login
             on_login_callback(self)
 
-        # # Post-login calls in client
-        # self.sync()
-        # self.autocomplete_user_list()
-        # self.feed_timeline()
-        # self.ranked_recipients()
-        # self.recent_recipients()
-        # self.direct_v2_inbox()
-        # self.news_inbox()
-        # self.explore()
+        # self.post_login()
+
+    
+    def post_login(self):
+        # Post-login calls in client
+        self.sync()
+        self.autocomplete_user_list()
+        self.feed_timeline()
+        self.ranked_recipients()
+        self.recent_recipients()
+        self.direct_v2_inbox()
+        self.news_inbox()
+        self.explore()
+
 
     def current_user(self):
         """Get current user info"""

@@ -23,16 +23,6 @@ The api currently has two main interfaces:
     - :class:`instapi.MediaRatios`
     - :class:`instapi.MediaTypes`
 
-- `Web API`_
-    - :class:`instagram_web_api.Client`
-    - :class:`instagram_web_api.ClientCompatPatch`
-    - :class:`instagram_web_api.ClientError`
-    - :class:`instagram_web_api.ClientCookieExpiredError`
-    - :class:`instagram_web_api.ClientConnectionError`
-    - :class:`instagram_web_api.ClientBadRequestError`
-    - :class:`instagram_web_api.ClientForbiddenError`
-    - :class:`instagram_web_api.ClientThrottledError`
-
 
 App API
 -----------
@@ -57,20 +47,3 @@ App API
 
 .. autoclass:: MediaTypes
    :members:
-
-Web API
--------------------
-
-.. automodule:: instagram_web_api
-
-.. autoclass:: Client
-   :special-members: __init__
-   :inherited-members:
-
-.. autoclass:: ClientCompatPatch
-   :special-members: __init__
-   :inherited-members:
-
-.. autoexception:: ClientError
-.. autoexception:: ClientLoginError
-.. autoexception:: ClientCookieExpiredError

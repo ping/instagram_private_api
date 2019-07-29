@@ -27,21 +27,21 @@ jobs:
       #env: TOXENV=black
       #python: "3.7"
 
-    #- stage: test
-    #  env: TOXENV=py34
-    #  python: "3.4"
+    - stage: test
+      env: TOXENV=py34
+      python: "3.4"
 
-    #- stage: test
-    #  env: TOXENV=py35
-    #  python: "3.5"
+    - stage: test
+      env: TOXENV=py35
+      python: "3.5"
 
-    #- stage: test
-    #  env: TOXENV=py36
-    #  python: "3.6"
+    - stage: test
+      env: TOXENV=py36
+      python: "3.6"
 
-    #- stage: test
-    #  env: TOXENV=py37
-    #  python: "3.7"
+    - stage: test
+      env: TOXENV=py37
+      python: "3.7"
 
     - stage: version
       script:

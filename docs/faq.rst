@@ -14,7 +14,7 @@ No. This library will not support account creation because of abuse by spammers.
 Can I _____ with this library?
 ---------------------------------
 
-This library is limited to what the mobile app/web interface can do. If you can't do it on those platforms, you can't do it through the library.
+This library is limited to what the mobile app interface can do. If you can't do it on those platforms, you can't do it through the library.
 
 What does error code XXX mean?
 ------------------------------

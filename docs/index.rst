@@ -12,7 +12,6 @@ A Python wrapper for the Instagram private API with no 3rd party dependencies. S
 Features
 --------
 - Supports many functions that are only available through the official app
-- The web api client supports a subset of functions that do not require login
 - Compatibility patch available to match the public API methods
 - Beta Python 3 support.
 
@@ -35,5 +34,5 @@ Features
    Repository <https://github.com/breuerfelix/instapi>
    Bug Tracker <https://github.com/breuerfelix/instapi/issues>
    Examples <https://github.com/breuerfelix/instapi/tree/master/examples>
-   Tests <https://github.com/breuerfelix/instapi/tree/master/tests>
+   Tests <https://github.com/breuerfelix/instapi/tree/master/api_tests>
    Public API Compatibility <https://github.com/breuerfelix/instapi/blob/master/COMPAT.md>
