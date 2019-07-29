@@ -16,7 +16,7 @@ Problems? Please check the [docs](https://instapi.readthedocs.io/en/latest/) bef
 ## Features
 
 - Supports many functions that are only available through the official app, such as:
-    * Multiple feeds, such as [user feed](https://instapi.readthedocs.io/en/latest/api.html#instapi.Client.user_feed), [location feed](https://instapi.readthedocs.io/en/latest/api.html#instapi.Client.feed_location), [tag feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instapi.Client.feed_tag), [popular feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instapi.Client.feed_popular)
+    * Multiple feeds, such as [user feed](https://instapi.readthedocs.io/en/latest/api.html#instapi.Client.user_feed), [location feed](https://instapi.readthedocs.io/en/latest/api.html#instapi.Client.feed_location), [tag feed](https://instapi.readthedocs.io/en/latest/api.html#instapi.Client.feed_tag), [popular feed](https://instagram-private-api.readthedocs.io/en/latest/api.html#instapi.Client.feed_popular)
     * Post a [photo](https://instagram-private-api.readthedocs.io/en/latest/api.html#instapi.Client.post_photo) or [video](https://instagram-private-api.readthedocs.io/en/latest/api.html#instapi.Client.post_video) to your feed or stories
     * [Like](https://instagram-private-api.readthedocs.io/en/latest/api.html#instapi.Client.post_like)/[unlike](https://instagram-private-api.readthedocs.io/en/latest/api.html#instapi.Client.delete_like) posts
     * Get [post comments](https://instagram-private-api.readthedocs.io/en/latest/api.html#instapi.Client.media_comments)
