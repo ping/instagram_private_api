@@ -1,14 +1,9 @@
 import unittest
 import json
-try:
-    # python 2.x
-    from urllib2 import urlopen
-except ImportError:
-    # python 3.x
-    from urllib.request import urlopen
+from urllib.request import urlopen
 from io import BytesIO
 
-from ..common import (
+from .common import (
     Client, ClientError, ClientLoginError,
     ApiTestBase, compat_mock, compat_urllib_error, MockResponse
 )

@@ -2,7 +2,7 @@ import unittest
 import json
 import time
 
-from ..common import (
+from .common import (
     ClientError,
     ApiTestBase, compat_mock, gen_user_breadcrumb
 )

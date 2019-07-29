@@ -1,6 +1,6 @@
 import unittest
 
-from ..common import ApiTestBase
+from .common import ApiTestBase
 
 
 class MiscTests(ApiTestBase):
@@ -104,6 +104,7 @@ class MiscTests(ApiTestBase):
         results = self.api.direct_v2_inbox()
         self.assertEqual(results.get('status'), 'ok')
 
+    @unittest.skip('TODO needs a thread argument')
     def test_direct_v2_thread(self):
         results = self.api.direct_v2_thread()
         self.assertIsNotNone(results.get('thread'))

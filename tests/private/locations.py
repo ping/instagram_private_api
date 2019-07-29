@@ -1,5 +1,5 @@
 
-from ..common import ApiTestBase
+from .common import ApiTestBase
 
 
 class LocationTests(ApiTestBase):

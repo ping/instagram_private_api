@@ -1,4 +1,3 @@
-# flake8: noqa
 from .accounts import AccountTests
 from .collections import CollectionsTests
 from .discover import DiscoverTests
@@ -18,3 +17,8 @@ from .igtv import IGTVTests
 from .apiutils import ApiUtilsTests
 from .client import ClientTests
 from .compatpatch import CompatPatchTests
+
+from .common import (
+    Client, ClientError, ClientLoginError, ClientCookieExpiredError,
+    __version__, to_json, from_json
+)

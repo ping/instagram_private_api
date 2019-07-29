@@ -1,7 +1,7 @@
 from io import BytesIO
 import json
 
-from ..common import (
+from .common import (
     ApiTestBase, Client, ClientThrottledError,
     ClientError, ClientLoginRequiredError,
     ClientSentryBlockError, ClientCheckpointRequiredError,

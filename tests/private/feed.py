@@ -1,6 +1,6 @@
 import unittest
 
-from ..common import ApiTestBase, ClientError
+from .common import ApiTestBase, ClientError
 
 
 class FeedTests(ApiTestBase):

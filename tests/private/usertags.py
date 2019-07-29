@@ -1,6 +1,6 @@
 import unittest
 
-from ..common import ApiTestBase, compat_mock
+from .common import ApiTestBase, compat_mock
 
 
 class UsertagsTests(ApiTestBase):

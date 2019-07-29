@@ -2,10 +2,7 @@
 import unittest
 import time
 import codecs
-try:
-    import unittest.mock as compat_mock
-except ImportError:
-    import mock as compat_mock
+import unittest.mock as compat_mock
 import sys
 import os
 try:
@@ -24,7 +21,7 @@ try:
     from instapi.compat import compat_urllib_parse
     from instapi.compat import compat_urllib_error
 except ImportError:
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
     from instapi import (
         __version__, Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientThrottledError, ClientCompatPatch,

@@ -7,7 +7,7 @@ import logging
 import re
 import warnings
 
-from .private import (
+from private import (
     AccountTests, CollectionsTests, DiscoverTests,
     FeedTests, FriendshipTests, LiveTests,
     LocationTests, MediaTests, MiscTests,
@@ -16,7 +16,8 @@ from .private import (
     ClientTests, ApiUtilsTests, CompatPatchTests,
     IGTVTests,
 )
-from .common import (
+
+from private import (
     Client, ClientError, ClientLoginError, ClientCookieExpiredError,
     __version__, to_json, from_json
 )

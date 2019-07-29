@@ -1,6 +1,6 @@
 import unittest
 
-from ..common import (
+from .common import (
     InstagramID, MediaTypes, ig_chunk_generator,
     max_chunk_size_generator, max_chunk_count_generator,
 )

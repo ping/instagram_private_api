@@ -16,7 +16,7 @@ try:
 except ImportError:  # Python 2
     from urlparse import urlparse as compat_urllib_parse_urlparse
 
-from ..common import (
+from .common import (
     ClientError, ApiTestBase, compat_mock, compat_urllib_error, MockResponse,
     get_file_size
 )

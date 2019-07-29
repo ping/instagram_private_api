@@ -1,6 +1,6 @@
 import copy
 
-from ..common import ApiTestBase, ClientCompatPatch
+from .common import ApiTestBase, ClientCompatPatch
 
 
 class CompatPatchTests(ApiTestBase):

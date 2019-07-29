@@ -1,6 +1,6 @@
 import json
 
-from ..common import (
+from .common import (
     ApiTestBase, compat_mock
 )
 

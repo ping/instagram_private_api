@@ -86,18 +86,17 @@ class MiscEndpointsMixin(object):
         """Get v2 inbox"""
         return self._call_api('direct_v2/inbox/')
 
-    def direct_v2_thread(self, thread, **kwargs):
+    def direct_v2_thread(self, thread_id, **kwargs):
         """
         Get v2 thread
 
-        :param thread:
+        :param thread_id:
         :param kwargs:
             - **cursor**: For pagination
         :return:
         """
-        endpoint = 'direct_v2/threads/{thread!s}/'.format(**{'thread': thread})
-        res = self._call_api(endpoint, query=kwargs)
-        return res
+        endpoint = 'direct_v2/threads/{thread_id!s}/'.format(**{'thread_id': thread_id})
+        return self._call_api(endpoint, query=kwargs)
 
     def oembed(self, url, **kwargs):
         """

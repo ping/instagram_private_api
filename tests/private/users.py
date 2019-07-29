@@ -1,6 +1,6 @@
 import unittest
 
-from ..common import (
+from .common import (
     ApiTestBase, compat_mock, ClientError
 )
 
