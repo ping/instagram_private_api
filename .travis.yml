@@ -1,7 +1,7 @@
 dist: xenial
 sudo: false
 language: python
-python: "3.6"
+python: "3.7"
 cache: pip
 
 branches:
@@ -16,7 +16,7 @@ stages:
     - name: static analysis
     - name: test
     - name: version
-      if: type = push AND fork = false AND branch = master AND repo = breuerfelix/instapi
+      if: type = push AND fork = false AND branch = travis AND repo = breuerfelix/instapi
     - name: pypi
       if: type = push AND fork = false AND tag =~ ^\d+\.\d+\.\d+ AND repo = breuerfelix/instapi
 
@@ -45,7 +45,9 @@ jobs:
 
     - stage: version
       script:
-        - python3 bump_version.py
+        - python3 .travis/bump_version.py
+      after_success:
+        - bash .travis/push.sh
 
     - stage: pypi
       install: true
