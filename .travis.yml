@@ -45,7 +45,6 @@ jobs:
 
     - stage: version
       script:
-        - git checkout origin master
         - python3 .travis/bump_version.py
         - bash .travis/push.sh
 
