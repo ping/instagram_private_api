@@ -11,7 +11,7 @@ A Python wrapper for the Instagram private API with no 3rd party dependencies. S
 
 I wrote this to access Instagram's API when they clamped down on developer access. Because this is meant to achieve [parity](COMPAT.md) with the [official public API](https://www.instagram.com/developer/endpoints/), methods not available in the public API will generally have lower priority.
 
-Problems? Please check the [docs](https://instagram-private-api.readthedocs.io/en/latest/) before submitting an issue.
+Problems? Please check the [docs](https://instapi.readthedocs.io/en/latest/) before submitting an issue.
 
 ## Features
 
