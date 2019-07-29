@@ -4,7 +4,7 @@ A Python wrapper for the Instagram private API with no 3rd party dependencies. S
 
 ![3](https://img.shields.io/badge/Python-3.svg)
 [![Release](https://img.shields.io/github/release/breuerfelix/instapi.svg?colorB=ff7043)](https://github.com/breuerfelix/instapi/releases)
-[![Docs](https://img.shields.io/badge/docs-readthedocs.io-ff4980.svg?maxAge=2592000)](https://instagram-private-api.readthedocs.io/en/latest/)
+[![Docs](https://img.shields.io/badge/docs-readthedocs.io-ff4980.svg?maxAge=2592000)](https://instapi.readthedocs.io/en/latest/)
 [![Build](https://img.shields.io/travis/breuerfelix/instapi.svg)](https://travis-ci.org/breuerfelix/instapi)
 
 [![Build](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/breuerfelix)
