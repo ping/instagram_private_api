@@ -5,7 +5,7 @@ git add instapi/version.txt
 git commit -m "Bump Version (Build $TRAVIS_BUILD_NUMBER)" -m "[skip ci]"
 git remote rm origin
 git remote add origin https://breuerfelix:${GH_TOKEN}@github.com/breuerfelix/instapi.git > /dev/null 2>&1
-git push origin master --quiet
+git push origin master
 
 cat instapi/version.txt | xargs git tag
 git push --tags

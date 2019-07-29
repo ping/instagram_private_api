@@ -18,7 +18,7 @@ stages:
     - name: version
       if: type = push AND fork = false AND branch = master AND repo = breuerfelix/instapi
     - name: pypi
-      if: type = push AND fork = false AND tag =~ ^\d+\.\d+\.\d+ AND repo = breuerfelix/instapi
+      if: type = push AND fork = false AND tag =~ ^\d+\.\d+\.\d+
 
 jobs:
   fast_finish: true
