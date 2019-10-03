@@ -429,7 +429,7 @@ class ClientCompatPatch(object):
         :meth:`Client.user_following`, :meth:`Client.user_followers`, :meth:`Client.search_users`
         """
         user['id'] = str(user['pk'])
-        user['profile_picture'] = user['profile_pic_url']
+        user['profile_picture'] = user.get('profile_pic_url','')
         if drop_incompat_keys:
             cls._drop_keys(
                 user,
