@@ -107,12 +107,14 @@ class UsersEndpointsMixin(object):
         params = {'username': username}
         return self._call_api('users/check_username/', params=params)
 
-    def blocked_user_list(self):
+    def blocked_user_list(self, **kwargs):
         """
         Get list of blocked users
 
+        :param kwargs:
+            - **max_id**: For pagination
         """
-        return self._call_api('users/blocked_list/')
+        return self._call_api('users/blocked_list/', query=kwargs)
 
     def user_reel_settings(self):
         """
