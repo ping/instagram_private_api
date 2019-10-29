@@ -34,21 +34,21 @@ if __name__ == '__main__':
 
     # ---------- Pagination with max_id ----------
     user_id = '2958144170'
-    followers = []
-    results = api.user_followers(user_id)
-    followers.extend(results.get('users', []))
+    updates = []
+    results = api.user_feed(user_id)
+    updates.extend(results.get('items', []))
 
     next_max_id = results.get('next_max_id')
     while next_max_id:
-        results = api.user_followers(user_id, max_id=next_max_id)
-        followers.extend(results.get('users', []))
-        if len(followers) >= 600:       # get only first 600 or so
+        results = api.user_feed(user_id, max_id=next_max_id)
+        updates.extend(results.get('items', []))
+        if len(updates) >= 30:       # get only first 30 or so
             break
         next_max_id = results.get('next_max_id')
 
-    followers.sort(key=lambda x: x['pk'])
-    # print list of user IDs
-    print(json.dumps([u['pk'] for u in followers], indent=2))
+    updates.sort(key=lambda x: x['pk'])
+    # print list of IDs
+    print(json.dumps([u['pk'] for u in updates], indent=2))
 
     # ---------- Pagination with rank_token and exclusion list ----------
     rank_token = Client.generate_uuid()

@@ -106,7 +106,7 @@ if __name__ == '__main__':
     print('Cookie Expiry: {0!s}'.format(datetime.datetime.fromtimestamp(cookie_expiry).strftime('%Y-%m-%dT%H:%M:%SZ')))
 
     # Call the api
-    results = api.tag_search('cats')
-    assert len(results.get('results', [])) > 0
+    results = api.user_feed('2958144170')
+    assert len(results.get('items', [])) > 0
 
     print('All ok')
