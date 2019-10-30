@@ -43,6 +43,7 @@ class TagsEndpointsMixin(object):
         :param rank_token: Required for paging through a single feed. See examples/pagination.py
         :param exclude_list: List of numerical tag IDs to exclude
         :param kwargs:
+            - **max_id**: For pagination
         :return:
         """
         raise_if_invalid_rank_token(rank_token)

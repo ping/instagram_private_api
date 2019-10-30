@@ -29,6 +29,9 @@ class FeedEndpointsMixin(object):
         Get timeline feed. To get a new timeline feed, you can mark a set of media
         as seen by setting seen_posts = comma-separated list of media IDs. Example:
         ``api.feed_timeline(seen_posts='123456789_12345,987654321_54321')``
+
+        :param kwargs:
+            - **max_id**: For pagination. Taken from ``next_max_id`` in the previous page.
         """
         params = {
             '_uuid': self.uuid,
@@ -159,6 +162,7 @@ class FeedEndpointsMixin(object):
         :param rank_token: Required for paging through a single feed and can be generated with
             :meth:`generate_uuid`. You should use the same rank_token for paging through a single tag feed.
         :param kwargs:
+            - **max_id**: For pagination
         :return:
         """
         raise_if_invalid_rank_token(rank_token)
@@ -203,6 +207,8 @@ class FeedEndpointsMixin(object):
         :param location_id:
         :param rank_token: Required for paging through a single feed and can be generated with
             :meth:`generate_uuid`. You should use the same rank_token for paging through a single location.
+        :param kwargs:
+            - **max_id**: For pagination
         :return:
         """
         warnings.warn(
