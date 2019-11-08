@@ -1143,7 +1143,7 @@ class Client(object):
         """
         Get the stories feed for the specified tag
 
-        :param location_id:
+        :param tag:
         """
         return self._story_feed(tag_names=[tag])
 
