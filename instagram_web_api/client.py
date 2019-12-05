@@ -307,13 +307,18 @@ class Client(object):
             media_id = media_id.split('_')[0]
         return media_id
 
+    # @staticmethod
+    # def _extract_rhx_gis(html):
+    #     mobj = re.search(
+    #         r'"rhx_gis":"(?P<rhx_gis>[a-f0-9]{32})"', html, re.MULTILINE)
+    #     if mobj:
+    #         return mobj.group('rhx_gis')
+    #     return None
+
     @staticmethod
     def _extract_rhx_gis(html):
-        mobj = re.search(
-            r'"rhx_gis":"(?P<rhx_gis>[a-f0-9]{32})"', html, re.MULTILINE)
-        if mobj:
-            return mobj.group('rhx_gis')
-        return None
+        tmp_str = ':{"id":"'+f'{random.randint(10000000,99999999)}'+'"}'
+        return hashlib.md5(b'tmp_str')
 
     @staticmethod
     def _extract_csrftoken(html):
@@ -592,7 +597,6 @@ class Client(object):
                 'edge_media_to_comment', {}).get('edges', [])]
         return info
 
-    @login_required
     def media_likers(self, short_code, **kwargs):
         """
         Get media likers
