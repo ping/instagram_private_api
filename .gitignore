@@ -83,3 +83,6 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# ADD ENVIRONMENTAL VARIABLES
+.env
