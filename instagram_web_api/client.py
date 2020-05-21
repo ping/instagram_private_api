@@ -456,7 +456,7 @@ class Client(object):
                     info.get('data', {}).get('user', {}).get(
                         'edge_owner_to_timeline_media', {}).get(
                         'page_info', {}).get('end_cursor')
-            - **extract**: bool. Return a simple list of media
+            - **extract**: bool. Return a simple list of media. Default: True
         :return:
         """
         count = kwargs.pop('count', 12)
@@ -556,7 +556,7 @@ class Client(object):
         :param kwargs:
             - **count**: Number of comments to return. Default: 16. Maximum: 50
             - **end_cursor**: For pagination
-            - **extract**: bool. Return a simple list of comments
+            - **extract**: bool. Return a simple list of comments. Default: True
         :return:
         """
         count = kwargs.pop('count', 16)
@@ -601,7 +601,7 @@ class Client(object):
         :param kwargs:
             - **count**: Number of likers to return. Default: 24. Maximum: 50
             - **end_cursor**: For pagination
-            - **extract**: bool. Return a simple list of likers
+            - **extract**: bool. Return a simple list of likers. Default: True
         :return:
         """
         end_cursor = kwargs.pop('end_cursor', None)
@@ -645,7 +645,7 @@ class Client(object):
         :param kwargs:
             - **count**: Number of followings. Default: 10
             - **end_cursor**: For pagination
-            - **extract**: bool. Return a simple list of users
+            - **extract**: bool. Return a simple list of users. Default: True
         :return:
         """
         count = kwargs.pop('count', 10)
@@ -685,7 +685,7 @@ class Client(object):
         :param kwargs:
             - **count**: Number of followers. Default: 10
             - **end_cursor**: For pagination
-            - **extract**: bool. Return a simple list of users
+            - **extract**: bool. Return a simple list of users. Default: True
         :return:
         """
         count = kwargs.pop('count', 10)
