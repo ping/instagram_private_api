@@ -5,19 +5,20 @@
 
 # -*- coding: utf-8 -*-
 
-import logging
+import gzip
 import hashlib
 import json
+import logging
+import random
 import re
-import gzip
-from io import BytesIO
+import string
 import time
 import warnings
 from functools import wraps
-import string
-import random
+from io import BytesIO
 from socket import timeout, error as SocketError
 from ssl import SSLError
+
 from .compat import (
     compat_urllib_request, compat_urllib_parse,
     compat_urllib_parse_urlparse, compat_urllib_error,
@@ -29,6 +30,7 @@ from .errors import (
     ClientConnectionError, ClientBadRequestError,
     ClientForbiddenError, ClientThrottledError,
 )
+
 try:  # Python 3:
     # Not a no-op, we're adding this to the namespace so it can be imported.
     ConnectionError = ConnectionError       # pylint: disable=redefined-builtin
@@ -309,11 +311,9 @@ class Client(object):
 
     @staticmethod
     def _extract_rhx_gis(html):
-        mobj = re.search(
-            r'"rhx_gis":"(?P<rhx_gis>[a-f0-9]{32})"', html, re.MULTILINE)
-        if mobj:
-            return mobj.group('rhx_gis')
-        return None
+        options = string.ascii_lowercase + string.digits
+        text = ''.join([random.choice(options) for _ in range(8)])
+        return hashlib.md5(text.encode())
 
     @staticmethod
     def _extract_csrftoken(html):
