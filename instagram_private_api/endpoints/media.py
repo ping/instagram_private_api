@@ -97,9 +97,13 @@ class MediaEndpointsMixin(object):
         """
 
         endpoint = 'media/{media_id!s}/comments/'.format(**{'media_id': media_id})
-
+        query = {
+            'can_support_threading': 'true'
+        }
+        if kwargs:
+            query.update(kwargs)
         comments = []
-        results = self._call_api(endpoint, query=kwargs)
+        results = self._call_api(endpoint, query=query)
         comments.extend(results.get('comments', []))
 
         while (((results.get('has_more_comments') and results.get('next_max_id'))
