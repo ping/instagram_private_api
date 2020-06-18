@@ -102,6 +102,7 @@ class MediaEndpointsMixin(object):
         }
         if kwargs:
             query.update(kwargs)
+
         comments = []
         results = self._call_api(endpoint, query=query)
         comments.extend(results.get('comments', []))
@@ -111,11 +112,11 @@ class MediaEndpointsMixin(object):
                 and len(comments) < n):
 
             if results.get('has_more_comments'):
-                kwargs.update({'max_id': results.get('next_max_id')})
+                query.update({'max_id': results.get('next_max_id')})
             else:
-                kwargs.update({'min_id': results.get('next_min_id')})
+                query.update({'min_id': results.get('next_min_id')})
 
-            results = self._call_api(endpoint, query=kwargs)
+            results = self._call_api(endpoint, query=query)
             comments.extend(results.get('comments', []))
             if not (results.get('next_max_id') or results.get('next_min_id') or results.get('comments')):
                 # bail out if no max_id/min_id or comments returned
