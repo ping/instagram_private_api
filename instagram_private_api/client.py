@@ -223,6 +223,19 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'created_ts': int(time.time())
         }
 
+    def get_settings(self, protocol=None):
+        """Getter function that extracts the settings. The difference to the helper settings property above 
+        is that this getter can take a protocol argument to dump the cookie jar pickles in order to fix the
+        conversion errors of the default protocol (4, in contrast to 0 in Python 2.7) in Python 3.x."""
+        return {
+            'uuid': self.uuid,
+            'device_id': self.device_id,
+            'ad_id': self.ad_id,
+            'session_id': self.session_id,
+            'cookie': self.cookie_jar.dump(protocol=protocol),
+            'created_ts': int(time.time())
+        }
+
     @property
     def user_agent(self):
         """Returns the useragent string that the client is currently using."""

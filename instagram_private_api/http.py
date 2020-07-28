@@ -30,8 +30,8 @@ class ClientCookieJar(compat_cookiejar.CookieJar):
         """For backward compatibility"""
         return self.auth_expires
 
-    def dump(self):
-        return compat_pickle.dumps(self._cookies)
+    def dump(self, protocol=None):
+        return compat_pickle.dumps(self._cookies, protocol=protocol)
 
 
 class MultipartFormDataEncoder(object):
