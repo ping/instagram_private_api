@@ -5,7 +5,7 @@ class Constants(object):
     IG_SIG_KEY = '19ce5f445dbfd9d29c59dc2a78c616a7fc090a8e018b9267bc4240a30244c53b'
     IG_CAPABILITIES = '3brTvwM='
     SIG_KEY_VERSION = '4'
-    APP_VERSION = '138.0.0.28.117'
+    APP_VERSION = '137.0.0.34.123'
     APPLICATION_ID = '567067343352427'
     FB_HTTP_ENGINE = 'Liger'
 
@@ -17,7 +17,7 @@ class Constants(object):
     PHONE_DPI = '440dpi'
     PHONE_RESOLUTION = '1080x2134'
     PHONE_CHIPSET = 'mt6785'
-    VERSION_CODE = '210180522'
+    VERSION_CODE = '209143963'
 
     USER_AGENT_FORMAT = \
         'Instagram {app_version} Android ({android_version:d}/{android_release}; ' \
