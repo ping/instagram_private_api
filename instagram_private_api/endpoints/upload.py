@@ -387,7 +387,7 @@ class UploadEndpointsMixin(object):
         if ext in image_formats:
             return ext
         return False
-    
+
     def upload_image(self, img, size, quality=80, caption='', location=None, disable_comments=False, is_sidecar=False, **kwargs) -> bool:
         """
         Upload an image and post it.
@@ -467,7 +467,7 @@ class UploadEndpointsMixin(object):
                 )
 
                 res = self.opener.open(req, timeout=self.timeout)
-                post_response = self._read_response(res)
+                self._read_response(res)
 
                 self.configure(image_props['upload_id'], size, caption=caption)
 
