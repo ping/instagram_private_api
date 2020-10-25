@@ -1,6 +1,6 @@
 import json
 import time
-from random import randint
+from secrets import choice
 import re
 import warnings
 from urllib.parse import urlparse
@@ -302,8 +302,8 @@ class UploadEndpointsMixin(object):
         params = {
             'source_type': '4',
             'upload_id': upload_id,
-            'story_media_creation_date': str(int(time.time()) - randint(11, 20)),
-            'client_shared_at': str(int(time.time()) - randint(3, 10)),
+            'story_media_creation_date': str(int(time.time()) - choice(range(11, 20))),
+            'client_shared_at': str(int(time.time()) - choice(range(3, 10))),
             'client_timestamp': str(int(time.time())),
             'configure_mode': 1,      # 1 - REEL_SHARE, 2 - DIRECT_STORY_SHARE
             'device': {
@@ -348,8 +348,8 @@ class UploadEndpointsMixin(object):
         params = {
             'source_type': '4',
             'upload_id': upload_id,
-            'story_media_creation_date': str(int(time.time()) - randint(11, 20)),
-            'client_shared_at': str(int(time.time()) - randint(3, 10)),
+            'story_media_creation_date': str(int(time.time()) - choice(range(11, 20))),
+            'client_shared_at': str(int(time.time()) - choice(range(3, 10))),
             'client_timestamp': str(int(time.time())),
             'configure_mode': 1,      # 1 - REEL_SHARE, 2 - DIRECT_STORY_SHARE
             'poster_frame_index': 0,
@@ -383,7 +383,7 @@ class UploadEndpointsMixin(object):
     def is_image(self, url):
         image_formats = [".jpeg", ".jpg"]
         parsed = urlparse(url)
-        root, ext = splitext(parsed.path)
+        ext = splitext(parsed.path)[1]
         if ext in image_formats:
             return ext
         return False
@@ -408,7 +408,7 @@ class UploadEndpointsMixin(object):
 
         if is_img:
             image_props = {
-                'caption': '',
+                'caption': caption,
                 'edits': {
                     'crop_center': [0.0, 0.0],
                     'crop_original_size': size,
@@ -429,7 +429,7 @@ class UploadEndpointsMixin(object):
                 'x_fb_waterfall_id': str(uuid.uuid4())
             }
 
-            image_props['entity_name'] = f'{image_props["upload_id"]}_0_{randint(1000000000, 9999999999)}'
+            image_props['entity_name'] = f'{image_props["upload_id"]}_0_{choice(range(1000000000, 9999999999))}'
 
             with open(img.name, 'rb') as f:
                 f.seek(0, 2)
@@ -476,7 +476,8 @@ class UploadEndpointsMixin(object):
                 if story:
                     self.configure_to_reel(image_props['upload_id'], size)
                 else:
-                    self.configure(image_props['upload_id'], size, caption=caption)
+                    self.configure(image_props['upload_id'], size, caption=caption,
+                                   location=location, disable_comments=disable_comments)
 
                 return True
 
