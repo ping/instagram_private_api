@@ -1,8 +1,9 @@
 import json
 import time
-from random import randint
+from secrets import choice
 import re
 import warnings
+import uuid
 
 from ..compat import (
     compat_urllib_error, compat_urllib_request,
@@ -12,7 +13,7 @@ from ..errors import ErrorHandler, ClientError, ClientConnectionError
 from ..http import MultipartFormDataEncoder
 from ..utils import (
     max_chunk_count_generator, max_chunk_size_generator,
-    get_file_size
+    get_file_size, is_image_jpg
 )
 from ..compatpatch import ClientCompatPatch
 from .common import ClientDeprecationWarning
@@ -299,8 +300,8 @@ class UploadEndpointsMixin(object):
         params = {
             'source_type': '4',
             'upload_id': upload_id,
-            'story_media_creation_date': str(int(time.time()) - randint(11, 20)),
-            'client_shared_at': str(int(time.time()) - randint(3, 10)),
+            'story_media_creation_date': str(int(time.time()) - choice(range(11, 20))),
+            'client_shared_at': str(int(time.time()) - choice(range(3, 10))),
             'client_timestamp': str(int(time.time())),
             'configure_mode': 1,      # 1 - REEL_SHARE, 2 - DIRECT_STORY_SHARE
             'device': {
@@ -345,8 +346,8 @@ class UploadEndpointsMixin(object):
         params = {
             'source_type': '4',
             'upload_id': upload_id,
-            'story_media_creation_date': str(int(time.time()) - randint(11, 20)),
-            'client_shared_at': str(int(time.time()) - randint(3, 10)),
+            'story_media_creation_date': str(int(time.time()) - choice(range(11, 20))),
+            'client_shared_at': str(int(time.time()) - choice(range(3, 10))),
             'client_timestamp': str(int(time.time())),
             'configure_mode': 1,      # 1 - REEL_SHARE, 2 - DIRECT_STORY_SHARE
             'poster_frame_index': 0,
@@ -376,6 +377,103 @@ class UploadEndpointsMixin(object):
         if self.auto_patch and res.get('media'):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
+
+    def upload_image(self, img, size, quality=80, caption='',
+                     location=None,
+                     disable_comments=False,
+                     story=False,
+                     **kwargs) -> bool:
+        """
+        Upload an image and post it.
+        :param img: io.BufferedReader
+        :param size: tuple of (width, height)
+        :param caption:
+        :param location: a dict of venue/location information, from :meth:`location_search`
+        or :meth:`location_fb_search`
+        :param disable_comments: bool to disable comments
+        :param story: bool to upload a story instead of a post
+        :return bool:
+        """
+        is_img = is_image_jpg(img.name)
+
+        if is_img:
+            image_props = {
+                'caption': caption,
+                'edits': {
+                    'crop_center': [0.0, 0.0],
+                    'crop_original_size': size,
+                    'crop_zoom': 1.0
+                },
+                'entity_type': f'image/{is_img[1:]}',
+                'extra': {'source_height': size[1], 'source_width': size[0]},
+                'image_path': img.name,
+                'location': None,
+                'media_folder': 'Pictures',
+                'multi_sharing': '-1',
+                'scene_capture_type': '',
+                'size': size,
+                'source_type': 3,
+                'suggested_venue_position': -1,
+                'timezone_offset': str(time.localtime().tm_gmtoff),
+                'upload_id': str(time.time()).split('.')[0],
+                'x_fb_waterfall_id': str(uuid.uuid4())
+            }
+
+            image_props['entity_name'] = f'{image_props["upload_id"]}_0_{choice(range(1000000000, 9999999999))}'
+
+            with open(img.name, 'rb') as f:
+                f.seek(0, 2)
+                image_props['entity_length'] = f.tell()
+
+            image_props.pop('image_path')
+
+            headers = {
+                'x-fb-photo-waterfall-id': str(image_props['x_fb_waterfall_id']),
+                'x-entity-length': str(image_props['entity_length']),
+                'x-entity-name': image_props['entity_name'],
+                'x-instagram-rupload-params': json.dumps({
+                    "upload_id": image_props['upload_id'],
+                    "media_type": 1,
+                    "retry_context": json.dumps({
+                        "num_reupload": 0,
+                        "num_step_auto_retry": 0,
+                        "num_step_manual_retry": 0
+                    }),
+                    "xsharing_user_ids": "[]",
+                    "image_compression": json.dumps({
+                        "lib_name": "moz",
+                        "lib_version": "3.1.m",
+                        "quality": "80"
+                    }),
+                }),
+                'x-entity-type': image_props['entity_type'],
+                'offset': '0',
+                'scene_capture_type': 'standard',
+                'creation_logger_session_id': str(uuid.uuid4())
+            }
+
+            endpoint = f'https://i.instagram.com/rupload_igphoto/{headers["x-entity-name"]}'
+
+            with open(img.name, 'rb') as f:
+
+                req = compat_urllib_request.Request(
+                    endpoint, data=f.read(), headers=headers
+                )
+
+                res = self.opener.open(req, timeout=self.timeout)
+                self._read_response(res)
+
+                if story:
+                    self.configure_to_reel(image_props['upload_id'], size)
+                else:
+                    self.configure(image_props['upload_id'], size, caption=caption,
+                                   location=location, disable_comments=disable_comments)
+
+                return True
+
+            return False
+        else:
+            raise ValueError('Incompatible image format.')
 
     def post_photo(self, photo_data, size, caption='', upload_id=None, to_reel=False, **kwargs):
         """
