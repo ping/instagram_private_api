@@ -3,8 +3,6 @@ import time
 from secrets import choice
 import re
 import warnings
-from urllib.parse import urlparse
-from os.path import splitext
 import uuid
 
 from ..compat import (
@@ -15,7 +13,7 @@ from ..errors import ErrorHandler, ClientError, ClientConnectionError
 from ..http import MultipartFormDataEncoder
 from ..utils import (
     max_chunk_count_generator, max_chunk_size_generator,
-    get_file_size
+    get_file_size, is_image_jpg
 )
 from ..compatpatch import ClientCompatPatch
 from .common import ClientDeprecationWarning
@@ -380,14 +378,6 @@ class UploadEndpointsMixin(object):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def is_image(self, url):
-        image_formats = [".jpeg", ".jpg"]
-        parsed = urlparse(url)
-        ext = splitext(parsed.path)[1]
-        if ext in image_formats:
-            return ext
-        return False
-
     def upload_image(self, img, size, quality=80, caption='',
                      location=None,
                      disable_comments=False,
@@ -404,7 +394,7 @@ class UploadEndpointsMixin(object):
         :param story: bool to upload a story instead of a post
         :return bool:
         """
-        is_img = self.is_image(img.name)
+        is_img = is_image_jpg(img.name)
 
         if is_img:
             image_props = {

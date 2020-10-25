@@ -6,7 +6,7 @@ from random import randint
 import os
 from datetime import datetime
 import re
-
+from .compat import compat_urllib_parse_urlparse
 
 VALID_UUID_RE = r'^[a-f\d]{8}\-[a-f\d]{4}\-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$'
 
@@ -263,3 +263,18 @@ class InstagramID(object):
         :return:
         """
         return cls._decode(short_code)
+
+
+def is_image_jpg(url):
+    """
+    Check if an image has JPG extension
+
+    :param url: URL or filename
+    :return: str or bool
+    """
+    image_formats = [".jpeg", ".jpg"]
+    parsed = compat_urllib_parse_urlparse(url)
+    ext = os.path.splitext(parsed.path)[1]
+    if ext in image_formats:
+        return ext
+    return False
