@@ -392,3 +392,11 @@ class FriendshipsEndpointsMixin(object):
             'friendships/remove_follower/{user_id!s}/'.format(**{'user_id': user_id}),
             params=params)
         return res
+    def get_presence(self):
+        """
+        Get presence of people from direct messages
+
+        :return:
+        """
+        res = self._call_api('direct_v2/get_presence/')
+        return res
