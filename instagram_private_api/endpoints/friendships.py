@@ -379,6 +379,20 @@ class FriendshipsEndpointsMixin(object):
             params=params)
         return res
 
+    def approve_user(self, user_id):
+        """
+        Approve a user's follow request.
+
+        :param user_id:
+        :return:
+        """
+        params = {'user_id': user_id, 'radio_type': self.radio_type}
+        params.update(self.authenticated_params)
+        res = self._call_api(
+            'friendships/approve/{user_id!s}/'.format(**{'user_id': user_id}),
+            params=params)
+        return res
+
     def remove_follower(self, user_id):
         """
         Remove a follower.
