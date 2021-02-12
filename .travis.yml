@@ -11,6 +11,3 @@ script:
 - flake8 --max-line-length=120 --exclude=./setup.py,./instagram_private_api/compat.py,./instagram_web_api/compat.py,./instagram_private_api/endpoints/__init__.py
 - pylint -E instagram_private_api instagram_web_api
 
-branches:
-  only:
-    - master
