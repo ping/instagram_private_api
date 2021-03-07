@@ -537,7 +537,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             return response
 
         response_content = self._read_response(response)
-        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, response_content))
+        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, response_content.encode('utf-8')))
         json_response = json.loads(response_content)
 
         if json_response.get('message', '') == 'login_required':
