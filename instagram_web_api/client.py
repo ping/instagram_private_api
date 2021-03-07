@@ -280,7 +280,7 @@ class Client(object):
                 return res
 
             response_content = self._read_response(res)
-            self.logger.debug('RES BODY: {0!s}'.format(response_content))
+            self.logger.debug('RES BODY: {0!s}'.format(response_content.encode('utf-8')))
             return json.loads(response_content)
 
         except compat_urllib_error.HTTPError as e:
@@ -353,7 +353,7 @@ class Client(object):
         init_res = self._make_request(
             'https://www.instagram.com/', return_response=True, get_method=lambda: 'GET')
         init_res_content = self._read_response(init_res)
-        self.logger.debug('RES BODY: {0!s}'.format(init_res_content))
+        self.logger.debug('RES BODY: {0!s}'.format(init_res_content.encode('utf-8')))
 
         rhx_gis = self._extract_rhx_gis(init_res_content)
         self.rhx_gis = rhx_gis
@@ -911,7 +911,7 @@ class Client(object):
             res = self.opener.open(req, timeout=self.timeout)
             response_content = self._read_response(res)
 
-            self.logger.debug('RESPONSE: {0!s}'.format(response_content))
+            self.logger.debug('RESPONSE: {0!s}'.format(response_content.encode('utf-8')))
             upload_res = json.loads(response_content)
             if upload_res.get('status', '') != 'ok':
                 raise ClientError('Upload status: {}'.format(upload_res.get('status', '')))
