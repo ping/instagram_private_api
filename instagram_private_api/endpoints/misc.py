@@ -82,9 +82,17 @@ class MiscEndpointsMixin(object):
         return self._call_api(
             'news/inbox/', query={'limited_activity': 'true', 'show_su': 'true'})
 
-    def direct_v2_inbox(self):
+    def direct_v2_inbox(self, **kwargs):
         """Get v2 inbox"""
-        return self._call_api('direct_v2/inbox/')
+        return self._call_api('direct_v2/inbox/', query=kwargs)
+
+    def pending_inbox(self, **kwargs):
+        """Get message requests"""
+        return self._call_api('direct_v2/pending_inbox/', query=kwargs)
+
+    def thread_items(self, thread_id, **kwargs):
+        """Get direct thread items"""
+        return self._call_api('direct_v2/threads/%s/'%thread_id, query=kwargs)
 
     def oembed(self, url, **kwargs):
         """
