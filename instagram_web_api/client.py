@@ -124,10 +124,18 @@ class Client(object):
             # py version < 2.7.9
             https_handler = compat_urllib_request.HTTPSHandler()
 
+        class RedirectFilter(compat_urllib_request.HTTPRedirectHandler):
+            def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+                if "/login/" in newurl:
+                    return None
+                return compat_urllib_request.HTTPRedirectHandler.redirect_request(self, req, fp, code, msg, hdrs, newurl)
+
         handlers.extend([
             compat_urllib_request.HTTPHandler(),
             https_handler,
-            cookie_handler])
+            cookie_handler,
+            RedirectFilter])
+
         opener = compat_urllib_request.build_opener(*handlers)
         opener.cookie_jar = cookie_jar
         self.opener = opener
