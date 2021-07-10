@@ -404,7 +404,7 @@ class Client(object):
     def user_info(self, user_id, headers):     # pragma: no cover
         url = "https://i.instagram.com/api/v1/users/%s/info/" % user_id
 
-        return client._make_request(url, headers=headers)
+        return self._make_request(url, headers=headers)
 
     def user_info2(self, user_name, **kwargs):
         """
