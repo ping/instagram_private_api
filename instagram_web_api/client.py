@@ -106,7 +106,7 @@ class Client(object):
         if not proxy_handler:
             proxy = kwargs.pop('proxy', None)
             if proxy:
-                warnings.warn('Proxy support is alpha.', UserWarning)
+                # warnings.warn('Proxy support is alpha.', UserWarning)
                 parsed_url = compat_urllib_parse_urlparse(proxy)
                 if parsed_url.netloc and parsed_url.scheme:
                     proxy_address = '{0!s}://{1!s}'.format(parsed_url.scheme, parsed_url.netloc)
@@ -401,31 +401,10 @@ class Client(object):
             on_login_callback(self)
         return login_res
 
-    def user_info(self, user_id, **kwargs):     # pragma: no cover
-        """
-        OBSOLETE. Get user info.
+    def user_info(self, user_id, headers):     # pragma: no cover
+        url = "https://i.instagram.com/api/v1/users/%s/info/" % user_id
 
-        :param user_id: User id
-        :param kwargs:
-        :return:
-        """
-        warnings.warn(
-            'This endpoint is obsolete. Do not use.', ClientDeprecationWarning)
-
-        params = {
-            'q': 'ig_user({user_id}) {{id, username, full_name, profile_pic_url, '
-                 'biography, external_url, is_private, is_verified, '
-                 'media {{count}}, followed_by {{count}}, '
-                 'follows {{count}} }}'.format(**{'user_id': user_id}),
-        }
-        user = self._make_request(self.API_URL, params=params)
-
-        if not user.get('id'):
-            raise ClientError('Not Found', 404)
-
-        if self.auto_patch:
-            user = ClientCompatPatch.user(user, drop_incompat_keys=self.drop_incompat_keys)
-        return user
+        return client._make_request(url, headers=headers)
 
     def user_info2(self, user_name, **kwargs):
         """
