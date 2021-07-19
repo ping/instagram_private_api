@@ -265,7 +265,16 @@ class Client(object):
             if params == '':    # force post if empty string
                 data = ''.encode('ascii')
             else:
-                data = compat_urllib_parse.urlencode(params).encode('ascii')
+                if "include_persistent" in params and "next_media_ids" in params:
+                    next_media_ids = params.pop("next_media_ids")
+                    data = compat_urllib_parse.urlencode(params)
+                    for media_id in next_media_ids:
+                        encoded_media_id = "&next_media_ids%5B%5D=" + str(media_id)
+                        data = "%s%s" % (data, encoded_media_id)
+
+                    data = data.encode('ascii')
+                else:
+                    data = compat_urllib_parse.urlencode(params).encode('ascii')
         try:
             self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
             self.logger.debug('REQ HEADERS: {0!s}'.format(
@@ -275,9 +284,13 @@ class Client(object):
                 ['{}: {}'.format(c.name, c.value) for c in self.cookie_jar]
             ))
             self.logger.debug('REQ DATA: {0!s}'.format(data))
+            print('REQ DATA: {0!s}'.format(data))
             res = self.opener.open(req, data=data, timeout=self.timeout)
 
             self.logger.debug('RESPONSE: {0:d} {1!s}'.format(
+                res.code, res.geturl()
+            ))
+            print('RESPONSE: {0:d} {1!s}'.format(
                 res.code, res.geturl()
             ))
             self.logger.debug('RES HEADERS: {0!s}'.format(
@@ -289,6 +302,7 @@ class Client(object):
 
             response_content = self._read_response(res)
             self.logger.debug('RES BODY: {0!s}'.format(response_content))
+            # print('RES BODY: {0!s}'.format(response_content))
             return json.loads(response_content)
 
         except compat_urllib_error.HTTPError as e:
@@ -951,6 +965,18 @@ class Client(object):
         }
 
         return self._make_request(self.GRAPHQL_API_URL, query=query)
+
+    @login_required
+    def tag_feed2(self, tag, post_data, headers):
+        """
+        Get a tag feed.
+
+        """
+
+        # self._init_rollout_hash()
+        url = "https://i.instagram.com/api/v1/tags/%s/sections/" % tag
+
+        return self._make_request(url, params=post_data, headers=headers)
 
     def location_feed(self, location_id, **kwargs):
         """
