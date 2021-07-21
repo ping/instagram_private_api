@@ -269,7 +269,7 @@ class Client(object):
                     next_media_ids = params.pop("next_media_ids")
                     data = compat_urllib_parse.urlencode(params)
                     for media_id in next_media_ids:
-                        encoded_media_id = "&next_media_ids%5B%5D=" + str(media_id)
+                        encoded_media_id = "&next_media_ids=" + str(media_id)
                         data = "%s%s" % (data, encoded_media_id)
 
                     data = data.encode('ascii')
@@ -277,14 +277,25 @@ class Client(object):
                     data = compat_urllib_parse.urlencode(params).encode('ascii')
         try:
             self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
+            print('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
+
             self.logger.debug('REQ HEADERS: {0!s}'.format(
                 ['{}: {}'.format(k, v) for k, v in headers.items()]
             ))
+            print('REQ HEADERS: {0!s}'.format(
+                ['{}: {}'.format(k, v) for k, v in headers.items()]
+            ))
+
             self.logger.debug('REQ COOKIES: {0!s}'.format(
                 ['{}: {}'.format(c.name, c.value) for c in self.cookie_jar]
             ))
+            # print('REQ COOKIES: {0!s}'.format(
+            #     ['{}: {}'.format(c.name, c.value) for c in self.cookie_jar]
+            # ))
+
             self.logger.debug('REQ DATA: {0!s}'.format(data))
             print('REQ DATA: {0!s}'.format(data))
+
             res = self.opener.open(req, data=data, timeout=self.timeout)
 
             self.logger.debug('RESPONSE: {0:d} {1!s}'.format(
@@ -296,6 +307,9 @@ class Client(object):
             self.logger.debug('RES HEADERS: {0!s}'.format(
                 [u'{}: {}'.format(k, v) for k, v in res.info().items()]
             ))
+            # print('RES HEADERS: {0!s}'.format(
+            #     [u'{}: {}'.format(k, v) for k, v in res.info().items()]
+            # ))
 
             if return_response:
                 return res
@@ -971,12 +985,18 @@ class Client(object):
         """
         Get a tag feed.
 
+        :param tag:
+        :param kwargs:
+            - **count**: Number of records to return
+            - **end_cursor**: For pagination
+        :return:
         """
 
-        # self._init_rollout_hash()
-        url = "https://i.instagram.com/api/v1/tags/%s/sections/" % tag
+        self._init_rollout_hash()
 
-        return self._make_request(url, params=post_data, headers=headers)
+        url = "https://i.instagram.com/api/v1/tags/%s/sections/" % compat_urllib_parse.quote(tag)
+
+        return self._make_request(url, params=post_data, headers=headers, get_method=lambda: 'POST')
 
     def location_feed(self, location_id, **kwargs):
         """
