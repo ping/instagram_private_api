@@ -282,9 +282,9 @@ class Client(object):
             self.logger.debug('REQ HEADERS: {0!s}'.format(
                 ['{}: {}'.format(k, v) for k, v in headers.items()]
             ))
-            print('REQ HEADERS: {0!s}'.format(
-                ['{}: {}'.format(k, v) for k, v in headers.items()]
-            ))
+            # print('REQ HEADERS: {0!s}'.format(
+            #     ['{}: {}'.format(k, v) for k, v in headers.items()]
+            # ))
 
             self.logger.debug('REQ COOKIES: {0!s}'.format(
                 ['{}: {}'.format(c.name, c.value) for c in self.cookie_jar]
@@ -294,7 +294,7 @@ class Client(object):
             # ))
 
             self.logger.debug('REQ DATA: {0!s}'.format(data))
-            print('REQ DATA: {0!s}'.format(data))
+            # print('REQ DATA: {0!s}'.format(data))
 
             res = self.opener.open(req, data=data, timeout=self.timeout)
 
@@ -452,6 +452,9 @@ class Client(object):
             # reinit to get a fresh rhx_gis
             self.init()
             info = self._make_request(endpoint, query={'__a': '1'})
+
+        if not "graphql" in info:
+            return info
 
         if self.auto_patch:
             ClientCompatPatch.user(info['graphql']['user'], drop_incompat_keys=self.drop_incompat_keys)
