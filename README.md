@@ -115,6 +115,8 @@ You are advised to persist/cache the auth cookie details to avoid logging in eve
 
 The saved auth cookie can be reused for up to **90 days**.
 
+An example of how to save and reuse the auth settings can be found in the [examples](examples/savesettings_logincallback.py).
+
 ## Donate
 
 Want to keep this project going? Please donate generously [https://www.buymeacoffee.com/ping](https://www.buymeacoffee.com/ping)
