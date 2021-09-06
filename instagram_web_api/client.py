@@ -277,7 +277,7 @@ class Client(object):
                     data = compat_urllib_parse.urlencode(params).encode('ascii')
         try:
             self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
-            print('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
+            # print('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
 
             self.logger.debug('REQ HEADERS: {0!s}'.format(
                 ['{}: {}'.format(k, v) for k, v in headers.items()]
@@ -301,9 +301,9 @@ class Client(object):
             self.logger.debug('RESPONSE: {0:d} {1!s}'.format(
                 res.code, res.geturl()
             ))
-            print('RESPONSE: {0:d} {1!s}'.format(
-                res.code, res.geturl()
-            ))
+            # print('RESPONSE: {0:d} {1!s}'.format(
+            #     res.code, res.geturl()
+            # ))
             self.logger.debug('RES HEADERS: {0!s}'.format(
                 [u'{}: {}'.format(k, v) for k, v in res.info().items()]
             ))
@@ -490,7 +490,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': 'e7e2f4da4b02303f74f0841279e52d76',
+            'query_hash': '97b41c52301f77ce508f55e66d17620e',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
