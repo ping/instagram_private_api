@@ -81,7 +81,7 @@ class Client(object):
         """
         self.auto_patch = kwargs.pop('auto_patch', False)
         self.drop_incompat_keys = kwargs.pop('drop_incompat_keys', False)
-        self.timeout = kwargs.pop('timeout', 10)
+        self.timeout = kwargs.pop('timeout', 40)
         self.username = kwargs.pop('username', None)
         self.password = kwargs.pop('password', None)
         self.authenticate = kwargs.pop('authenticate', False)
