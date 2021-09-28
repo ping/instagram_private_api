@@ -460,7 +460,11 @@ class Client(object):
             ClientCompatPatch.user(info['graphql']['user'], drop_incompat_keys=self.drop_incompat_keys)
         return info['graphql']['user']
 
-    def user_feed(self, user_id, **kwargs):
+    def user_feed2(self, user_id, **kwargs):
+        query_hash = "d4d88dc1500312af6f937f7b804c68c3"
+        return self.user_feed(user_id, query_hash=query_hash, **kwargs)
+
+    def user_feed(self, user_id, query_hash="e7e2f4da4b02303f74f0841279e52d76", **kwargs):
         """
         Get user feed
 
@@ -490,7 +494,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': 'e7e2f4da4b02303f74f0841279e52d76',
+            'query_hash': query_hash,
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
