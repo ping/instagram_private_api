@@ -490,7 +490,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': '97b41c52301f77ce508f55e66d17620e',
+            'query_hash': 'e7e2f4da4b02303f74f0841279e52d76',
             'variables': json.dumps(variables, separators=(',', ':'))
         }
         info = self._make_request(self.GRAPHQL_API_URL, query=query)
