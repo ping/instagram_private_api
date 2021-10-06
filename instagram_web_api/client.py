@@ -570,7 +570,7 @@ class Client(object):
             media = ClientCompatPatch.media(media, drop_incompat_keys=self.drop_incompat_keys)
         return media
 
-    def media_comments(self, short_code, query_hash="2efa04f61586458cef44441f474eee7c", **kwargs):
+    def media_comments(self, short_code, **kwargs):
         """
         Get media comments
 
@@ -593,7 +593,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': query_hash,
+            'query_hash': "2efa04f61586458cef44441f474eee7c",
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
