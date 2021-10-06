@@ -570,7 +570,7 @@ class Client(object):
             media = ClientCompatPatch.media(media, drop_incompat_keys=self.drop_incompat_keys)
         return media
 
-    def media_comments(self, short_code, **kwargs):
+    def media_comments(self, short_code, query_hash="2efa04f61586458cef44441f474eee7c", **kwargs):
         """
         Get media comments
 
@@ -593,7 +593,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': 'f0986789a5c5d17c2400faebf16efd0d',
+            'query_hash': query_hash,
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
@@ -957,7 +957,7 @@ class Client(object):
         except compat_urllib_error.HTTPError as e:
             raise ClientError('HTTPError "{0!s}" while opening {1!s}'.format(e.reason, endpoint), e.code)
 
-    def tag_feed(self, tag, **kwargs):
+    def tag_feed(self, tag, query_hash="f92f56d47dc7a55b606908374b43a314", **kwargs):
         """
         Get a tag feed.
 
@@ -981,7 +981,7 @@ class Client(object):
         if end_cursor:
             variables['after'] = end_cursor
         query = {
-            'query_hash': 'f92f56d47dc7a55b606908374b43a314',
+            'query_hash': self.query_hash,
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
