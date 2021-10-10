@@ -980,8 +980,9 @@ class Client(object):
         }
         if end_cursor:
             variables['after'] = end_cursor
+
         query = {
-            'query_hash': self.query_hash,
+            'query_hash': query_hash,
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
