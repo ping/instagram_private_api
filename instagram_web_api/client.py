@@ -268,9 +268,12 @@ class Client(object):
                 if "include_persistent" in params and "next_media_ids" in params:
                     next_media_ids = params.pop("next_media_ids")
                     data = compat_urllib_parse.urlencode(params)
+
                     for media_id in next_media_ids:
-                        encoded_media_id = "&next_media_ids=" + str(media_id)
-                        data = "%s%s" % (data, encoded_media_id)
+                        split_text = "&page="
+                        splits = data.split(split_text)
+                        encoded_media_id = "&next_media_ids%5B%5D=" + str(media_id)
+                        data = splits[0] + encoded_media_id + split_text + splits[1]
 
                     data = data.encode('ascii')
                 else:
