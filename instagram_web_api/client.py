@@ -589,14 +589,17 @@ class Client(object):
             raise ValueError('count cannot be greater than 50')
         end_cursor = kwargs.pop('end_cursor', None)
 
+        query_hash = "2efa04f61586458cef44441f474eee7c"
         variables = {
             'shortcode': short_code,
             'first': int(count)
         }
         if end_cursor:
             variables['after'] = end_cursor
+            query_hash = "bc3296d1ce80a24b1b6e40b1e72903f5"
+
         query = {
-            'query_hash': "2efa04f61586458cef44441f474eee7c",
+            'query_hash': query_hash,
             'variables': json.dumps(variables, separators=(',', ':'))
         }
 
