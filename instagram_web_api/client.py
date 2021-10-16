@@ -589,14 +589,20 @@ class Client(object):
             raise ValueError('count cannot be greater than 50')
         end_cursor = kwargs.pop('end_cursor', None)
 
-        query_hash = "2efa04f61586458cef44441f474eee7c"
         variables = {
             'shortcode': short_code,
-            'first': int(count)
         }
+
         if end_cursor:
             variables['after'] = end_cursor
+            variables['first'] = int(count)
             query_hash = "bc3296d1ce80a24b1b6e40b1e72903f5"
+        else:
+            variables['child_comment_count'] = 3
+            variables['fetch_comment_count'] = 40
+            variables['parent_comment_count'] = 24
+            variables['has_threaded_comments'] = "true"
+            query_hash = "2efa04f61586458cef44441f474eee7c"
 
         query = {
             'query_hash': query_hash,
