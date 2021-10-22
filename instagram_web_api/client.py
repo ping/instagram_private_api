@@ -584,7 +584,7 @@ class Client(object):
             - **extract**: bool. Return a simple list of comments
         :return:
         """
-        count = kwargs.pop('count', 16)
+        count = kwargs.pop('count', 12)
         if count > 50:
             raise ValueError('count cannot be greater than 50')
         end_cursor = kwargs.pop('end_cursor', None)
