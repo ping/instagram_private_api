@@ -573,6 +573,51 @@ class Client(object):
             media = ClientCompatPatch.media(media, drop_incompat_keys=self.drop_incompat_keys)
         return media
 
+    def media_comments_logged_in(self, short_code, **kwargs):
+        """
+        Get media comments
+
+        :param short_code:
+        :param kwargs:
+            - **count**: Number of comments to return. Default: 16. Maximum: 50
+            - **end_cursor**: For pagination
+            - **extract**: bool. Return a simple list of comments
+        :return:
+        """
+        count = kwargs.pop('count', 16)
+        if count > 50:
+            raise ValueError('count cannot be greater than 50')
+        end_cursor = kwargs.pop('end_cursor', None)
+
+        variables = {
+            'shortcode': short_code,
+            'first': int(count)
+        }
+        if end_cursor:
+            variables['after'] = end_cursor
+        query = {
+            'query_hash': 'f0986789a5c5d17c2400faebf16efd0d',
+            'variables': json.dumps(variables, separators=(',', ':'))
+        }
+
+        info = self._make_request(self.GRAPHQL_API_URL, query=query)
+
+        if not info.get('data', {}).get('shortcode_media'):
+            # deleted media does not return 'comments' at all
+            # media without comments will return comments, with counts = 0, nodes = [], etc
+            raise ClientError('Not Found', 404)
+
+        if self.auto_patch:
+            [ClientCompatPatch.comment(c['node'], drop_incompat_keys=self.drop_incompat_keys)
+             for c in info.get('data', {}).get('shortcode_media', {}).get(
+                 'edge_media_to_comment', {}).get('edges', [])]
+
+        if kwargs.pop('extract', True):
+            return [c['node'] for c in info.get('data', {}).get('shortcode_media', {}).get(
+                'edge_media_to_comment', {}).get('edges', [])]
+        return info
+
+
     def media_comments(self, short_code, **kwargs):
         """
         Get media comments
