@@ -75,8 +75,7 @@ class AccountsEndpointsMixin(object):
 
     def current_user(self):
         """Get current user info"""
-        params = self.authenticated_params
-        res = self._call_api('accounts/current_user/', params=params, query={'edit': 'true'})
+        res = self._call_api('accounts/current_user/', query={'edit': 'true'})
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
