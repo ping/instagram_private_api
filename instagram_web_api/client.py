@@ -329,7 +329,7 @@ class Client(object):
             elif e.code == 403:
                 raise ClientForbiddenError(msg, e.code)
             elif e.code == 429:
-                raise ClientThrottledError(msg, e.code)
+                return True
             raise ClientError(msg, e.code)
 
         except (SSLError, timeout, SocketError,
